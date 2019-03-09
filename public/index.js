@@ -23,16 +23,16 @@ initApp = function() {
       var providerData = user.providerData;
       user.getIdToken().then(function(accessToken) {
         document.getElementById('if_logged_out').style.display = "none";
-        document.getElementById('if_logged_in').style.display = "block";
-        document.getElementById('account-details').innerHTML =
-          displayName + " "
-          + "<img src='"+ photoURL + "'>";
+        document.getElementById('if_logged_in').style.display = "flex";
+        document.getElementById('user_display_name').textContent = displayName;
+        document.getElementById('user_photo').src = photoURL;
       });
     } else {
       // User is signed out.
-      document.getElementById('if_logged_out').style.display = "block";
+      document.getElementById('if_logged_out').style.display = "flex";
       document.getElementById('if_logged_in').style.display = "none";
-      document.getElementById('account-details').textContent = 'null';
+      document.getElementById('user_display_name').textContent = "anonymous";
+      document.getElementById('user_photo').src = "";
     }
   }, function(error) {
     console.log(error);

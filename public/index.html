@@ -17,18 +17,26 @@
     </script>
     <script src="https://cdn.firebase.com/libs/firebaseui/3.5.2/firebaseui.js"></script>
     <link type="text/css" rel="stylesheet" href="https://cdn.firebase.com/libs/firebaseui/3.5.2/firebaseui.css" />
+    <link type="text/css" rel="stylesheet" href="index.css">
     <script src="index.js"></script>
+
+    <title>MatB.it</title>
   </head>
   <body>
-    <h1>MatB.it</h1>
-    <div id="firebaseui-auth-container"></div>
-    <pre id="account-details"></pre>
-
+    <div id="upper_band">
+      <div id="banner"><h1>MatB.it</h1></div>
+      <div id="user_div">
+        <div id="if_logged_out"><a href="login.html">[login]</a></div>
+        <div id="if_logged_in">
+          <b id="user_display_name"></b>
+          <img id="user_photo" src="">
+          <a id="logout_a" href="#">[logout]</a>
+        </div>
+      </div>
+    </div>
+    <div id="page_content">
     Hello there!
     <span id="number_span">??</span>
-    <p>
-    <div id="if_logged_out"><a href="login.html">login</a></div>
-    <div id="if_logged_in"><a id="logout_a" href="#">logut</a></div>
-    </p>
+    </div>
   </body>
 </html>
