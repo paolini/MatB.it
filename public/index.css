@@ -1,10 +1,21 @@
-.color-primary-0 { color: #AA7939 }	/* Main Primary color */
-.color-primary-1 { color: #FF9200 }
-.color-primary-2 { color: #F3910F }
-.color-primary-3 { color: #61513B }
-.color-primary-4 { color: #191715 }
+html,body,h1,h2,h3,h4,h5,h6 {font-family: "Roboto", sans-serif;}
+.w3-sidebar {
+  z-index: 3;
+  width: 250px;
+  top: 43px;
+  bottom: 0;
+  height: inherit;
+}
 
+#user_photo {
+    max-width: 60px;
+    max-height: 40px;
+}
 
+#user_div {
+  float: right;
+}
+/*
 div {
   display: flex;
 }
@@ -13,11 +24,6 @@ body {
   margin: 0;
   background-color: #F3910F;
   color: #191715;
-}
-
-#user_photo {
-    max-width: 40;
-    max-height: 40;
 }
 
 
@@ -35,3 +41,4 @@ body {
   padding: 8px;
   background-color: ;
 }
+*/
