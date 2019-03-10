@@ -17,7 +17,11 @@
       "firebase.json",
       "**/.*",
       "**/node_modules/**"
-    ]
+    ],
+    "rewrites": [ {
+      "source": "/api/bigben",
+      "function": "bigben"
+    } ]
   },
   "storage": {
     "rules": "storage.rules"
