@@ -6,6 +6,20 @@ function main() {
       data = r.data();
       number_span.textContent = "" + data.counter;
     });
+
+    var app = new Vue({
+      el: '#app',
+      data: {
+        notes: []
+      },
+      created() {
+        fetch("api/noteList")
+        .then(response => response.json())
+        .then(json => {
+          this.notes = json.notes;
+        });
+      }
+    })
 }
 
 initApp = function() {
