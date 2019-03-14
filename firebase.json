@@ -30,6 +30,10 @@
       {
         "source": "/api/noteList",
         "function": "noteList"
+      },
+      {
+        "source": "**",
+        "function": "app"
       }
     ]
   },
