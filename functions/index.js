@@ -33,7 +33,7 @@ app.get('/', (req, res) => {
 // with value `Bearer <Firebase ID Token>`.
 exports.app = functions.https.onRequest(app);
 
-exports.noteList = functions.region('europe-west1')
+exports.noteList = functions
     .https.onRequest((req, res) => {
   db = admin.firestore();
   db.collection("notes").get().then(
@@ -50,7 +50,7 @@ exports.noteList = functions.region('europe-west1')
     });
 });
 
-exports.noteAdd = functions.region('europe-west1')
+exports.noteAdd = functions
     .https.onRequest((req, res) => {
   db = functions.firestore;
   res.json({
