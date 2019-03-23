@@ -5,7 +5,6 @@ admin.initializeApp();
 const express = require('express');
 const exphbs = require('express-handlebars');
 const app = express();
-// const firebaseUser = require('./firebaseUser');
 
 var hbs = exphbs.create({
     defaultLayout: 'main',

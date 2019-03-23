@@ -15,30 +15,7 @@ html,body,h1,h2,h3,h4,h5,h6 {font-family: "Roboto", sans-serif;}
 #user_div {
   float: right;
 }
-/*
-div {
-  display: flex;
-}
 
-body {
-  margin: 0;
-  background-color: #F3910F;
-  color: #191715;
+.editing {
+  background-color: pink;
 }
-
-
-#upper_band {
-  padding: 8px;
-  background-color: #AA7939;
-  justify-content: space-between!important;
-}
-
-#user_div {
-  float: right;
-}
-
-#page_content {
-  padding: 8px;
-  background-color: ;
-}
-*/

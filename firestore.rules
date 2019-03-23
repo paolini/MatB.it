@@ -3,6 +3,9 @@ service cloud.firestore {
     match /global/public {
     	allow read;
     }
+    match /notes/{note} {
+      allow write;
+    }
     match /{document=**} {
       allow read, write: if false;
     }
