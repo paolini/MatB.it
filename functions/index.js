@@ -41,6 +41,12 @@ app.get('/note/:id', (req, res) => {
              },
         script: 'note.js',
       });
+    }).catch(error => {
+      return res.render('note', {
+        data: {
+            error: "cannot read note with id " + req.params.id
+        }
+      });
     });
 });
 
