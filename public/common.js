@@ -8,10 +8,17 @@ window.addEventListener('load', function() {
       };
     },
     created() {
-      fetch("api/noteList")
-      .then(response => response.json())
-      .then(json => {
-        this.notes = json.notes;
+      var that=this;
+      db.collection('notes').get().then(function (querySnapshot){
+        that.notes = [];
+        querySnapshot.forEach(function (documentSnapshot){
+          that.notes.push({
+            id: documentSnapshot.id,
+            data: documentSnapshot.data()
+          });
+        });
+      }).catch(function(error){
+        console.log("loading notes error: "+error);
       });
     },
     template:

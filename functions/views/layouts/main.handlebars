@@ -9,6 +9,7 @@
 
 <!-- development version, includes helpful console warnings -->
 <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/vue-router/dist/vue-router.js"></script>
 <!-- production version, optimized for size and speed -->
 <!--script src="https://cdn.jsdelivr.net/npm/vue"></script-->
 
@@ -32,16 +33,7 @@
 <link type="text/css" rel="stylesheet" href="https://cdn.firebase.com/libs/firebaseui/3.5.2/firebaseui.css" />
 <link type="text/css" rel="stylesheet" href="/index.css">
 
-{{#if data}}
-<script>
-data = {{{ json data }}};
-</script>
-{{/if}}
-
 <script src="/common.js"></script>
-{{#if script }}<script src="/{{ script }}"></script>{{/if }}
-
-{{{ head }}}
 
 <title>MatB.it</title>
 
@@ -50,7 +42,7 @@ data = {{{ json data }}};
 <!-- Navbar -->
 <div class="w3-top">
   <div class="w3-bar w3-theme w3-top w3-left-align w3-large">
-    <a class="w3-bar-item w3-button w3-right w3-hide-large w3-hover-white w3-large w3-theme-l1" href="javascript:void(0)" onclick="w3_open()"><i class="fa fa-bars"></i></a>
+    <a class="w3-bar-item w3-button w3-hide-large w3-hover-white w3-large w3-theme-l1" href="javascript:void(0)" onclick="w3_open()"><i class="fa fa-bars"></i></a>
     <a href="/" class="w3-bar-item w3-button w3-theme-l1">MathB.it</a>
     <!--a href="#" class="w3-bar-item w3-button w3-hide-small w3-hover-white">About</a>
     <a href="#" class="w3-bar-item w3-button w3-hide-small w3-hover-white">Values</a>
@@ -58,13 +50,11 @@ data = {{{ json data }}};
     <a href="#" class="w3-bar-item w3-button w3-hide-small w3-hover-white">Contact</a>
     <a href="#" class="w3-bar-item w3-button w3-hide-small w3-hide-medium w3-hover-white">Clients</a>
     <a href="#" class="w3-bar-item w3-button w3-hide-small w3-hide-medium w3-hover-white">Partners</a-->
-    <div id="user_div">
-      <div id="if_logged_out"><a href="/login.html">[login]</a></div>
-      <div id="if_logged_in">
-        <b id="user_display_name"></b>
-        <img id="user_photo" src="">
-        <a id="logout_a" href="#">[logout]</a>
-      </div>
+    <div id="if_logged_out" class="w3-bar-item w3-right w3-hover-white"><a href="/login.html">[login]</a></div>
+    <div id="if_logged_in" class="w3-bar-item w3-right">
+      <b id="user_display_name"></b>
+      <img id="user_photo" src="">
+      <a id="logout_a" href="#">[logout]</a>
     </div>
   </div>
 </div>

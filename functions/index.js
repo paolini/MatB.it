@@ -29,27 +29,3 @@ app.get('/note/:id', (req, res) => {
 });
 
 exports.app = functions.https.onRequest(app);
-
-exports.noteList = functions
-    .https.onRequest((req, res) => {
-  db = admin.firestore();
-  db.collection("notes").get().then(
-    querySnapshot => {
-      list = [];
-      querySnapshot.forEach(documentSnapshot => {
-          list.push({id: documentSnapshot.id,
-                     data: documentSnapshot.data()});
-        });
-      res.json({notes: list});
-      return null; // added to satisfy eslint: Each then() should return a value or throw  promise/always-return
-    }).catch(error => {
-      res.json({error: error});
-    });
-});
-
-// Create and Deploy Your First Cloud Functions
-// https://firebase.google.com/docs/functions/write-firebase-functions
-//
-exports.helloWorld = functions.https.onRequest((request, response) => {
-  response.send("Testing MatB.it");
-});

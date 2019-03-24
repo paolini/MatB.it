@@ -20,18 +20,6 @@
     ],
     "rewrites": [
       {
-      "source": "/api/bigben",
-      "function": "bigben"
-      },
-      {
-        "source": "/api/noteAdd",
-        "function": "noteAdd"
-      },
-      {
-        "source": "/api/noteList",
-        "function": "noteList"
-      },
-      {
         "source": "**",
         "function": "app"
       }
