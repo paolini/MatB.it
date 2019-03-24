@@ -60,9 +60,14 @@ window.addEventListener('load', function() {
       });
     },
     methods: {
+      render(event) {
+        this.note.text = document.getElementById('note_text').innerText;
+      },
       edit_note(event) {
         this.edit = true;
-        document.getElementById('note_text').focus();
+        el = document.getElementById('note_text');
+        el.innerText = this.note.text;
+        el.focus();
       },
       keydown_note_title(event) {
         if(event.keyCode == 13)
@@ -89,7 +94,7 @@ window.addEventListener('load', function() {
     template:
       '<div v-if="note">' +
       '<h1 id="note_title" v-bind:class="{editing: edit}" v-bind:contenteditable="edit" v-on:keydown="keydown_note_title">{{ note.title }}</h1>' +
-      '<p id="note_text" v-show="edit" class=editing contenteditable="true" v-text="note.text"></p>' +
+      '<p id="note_text" v-show="edit" class=editing contenteditable="true" @input="render" ></p>' +
       '<p v-html="text_rendered"></p>' +
       '<button v-if="!edit" v-on:click="edit_note"><i class="fa fa-edit">edit</i></button>' +
       '<button class="editing" id="note_title_save" v-if="edit" v-on:click="save_note"><i class="fa fa-save">save</i></button>' +
