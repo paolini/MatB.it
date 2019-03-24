@@ -21,32 +21,11 @@ app.set('view engine', 'handlebars');
 
 app.get('/', (req, res) => {
 //  console.log('Signed-in user:', req.user);
-  return res.render('home', {
-    script: 'home.js'
-  //  user: req.user,
-  });
+  return res.render('home', {});
 });
 
 app.get('/note/:id', (req, res) => {
-  db = admin.firestore();
-  db.collection("notes").doc(req.params.id).get().then(
-    doc => {
-      return res.render('note', {
-        data: {
-               note: {
-                 id: req.params.id,
-                 data: doc.data()
-               }
-             },
-        script: 'note.js',
-      });
-    }).catch(error => {
-      return res.render('note', {
-        data: {
-            error: "cannot read note with id " + req.params.id
-        }
-      });
-    });
+  return res.render('note', {});
 });
 
 exports.app = functions.https.onRequest(app);
@@ -66,16 +45,6 @@ exports.noteList = functions
     }).catch(error => {
       res.json({error: error});
     });
-});
-
-exports.noteAdd = functions
-    .https.onRequest((req, res) => {
-  db = functions.firestore;
-  res.json({
-    method: req.method,
-    query: req.query,
-    body: req.body
-  });
 });
 
 // Create and Deploy Your First Cloud Functions

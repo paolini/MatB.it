@@ -4,10 +4,8 @@ service cloud.firestore {
     	allow read;
     }
     match /notes/{note} {
-      allow write;
-    }
-    match /{document=**} {
-      allow read, write: if false;
+      allow read;
+      allow write: if resource.data.author_uid == null || resource.data.author_uid == request.auth.uid;
     }
   }
 }
