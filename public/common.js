@@ -1,5 +1,6 @@
 window.addEventListener('load', function() {
   var db = firebase.firestore();
+  var md = window.markdownit();
 
   Vue.component("note-list", {
     data: function(){
@@ -34,21 +35,28 @@ window.addEventListener('load', function() {
     data: function(){
       return {
         debug: "this is a note-item",
+        id: null,
         note: null,
         can_edit: false,
         edit: false
       };
     },
+    computed: {
+      text_rendered: function() {
+        return this.note ? md.render(this.note.text) : " ... ";
+      }
+    },
     created: function() {
-      var note_id = window.location.pathname.match(/^.*\/([^\/]*)$/)[1];
+      var id = window.location.pathname.match(/^.*\/([^\/]*)$/)[1];
       var that = this;
-      db.collection("notes").doc(note_id).get().then(function(doc) {
+      db.collection("notes").doc(id).get().then(function(doc) {
+        that.id = id;
         that.note = doc.data();
         var user = that.$parent.user;
         that.can_edit = (that.note.author_uid == null) ||
           (user && that.note.author_uid == user.uid);
       }).catch(function(error){
-        console.log("loading notes/" + note_id + " error: " + error);
+        console.log("loading notes/" + id + " error: " + error);
       });
     },
     methods: {
@@ -64,17 +72,16 @@ window.addEventListener('load', function() {
       },
       save_note(event) {
         this.edit = false;
-        note = this.note;
-        note.data.title = document.getElementById('note_title').innerText;
-        note.data.text = document.getElementById('note_text').innerText;
-        db.collection("notes").doc(note.id).set({
-          title: note.data.title,
-          text: note.data.text,
-          author_uid: user ? user.uid : null
-        }).then(function () {
-          console.log("document " + note.id + " successfully written!");
+        var user = this.$parent.user;
+        var note = this.note;
+        note.title = document.getElementById('note_title').innerText;
+        note.text = document.getElementById('note_text').innerText;
+        note.author_uid = user ? user.uid : null;
+        var id = this.id;
+        db.collection("notes").doc(id).set(note).then(function () {
+          console.log("document " + id + " successfully written!");
         }).catch(function (err) {
-          console.log("error writing " + note.id + ": " + err);
+          console.log("error writing " + id + ": " + err);
           alert("error: " + err);
         });
       }
@@ -82,10 +89,15 @@ window.addEventListener('load', function() {
     template:
       '<div v-if="note">' +
       '<h1 id="note_title" v-bind:class="{editing: edit}" v-bind:contenteditable="edit" v-on:keydown="keydown_note_title">{{ note.title }}</h1>' +
-      '<p id="note_text" v-bind:class="{editing: edit}" v-bind:contenteditable="edit">{{ note.text }}</p>' +
-      '<button id="note_title_edit" v-if="!edit" v-on:click="edit_note"><i class="fa fa-edit">edit</i></button>' +
+      '<p id="note_text" v-show="edit" class=editing contenteditable="true" v-text="note.text"></p>' +
+      '<p v-html="text_rendered"></p>' +
+      '<button v-if="!edit" v-on:click="edit_note"><i class="fa fa-edit">edit</i></button>' +
       '<button class="editing" id="note_title_save" v-if="edit" v-on:click="save_note"><i class="fa fa-save">save</i></button>' +
       '</div>'
+  });
+
+  Vue.filter('matify', function(value){
+    return md.render(value);
   });
 
   var app = new Vue({
