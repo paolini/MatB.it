@@ -1,6 +1,6 @@
 var db = firebase.firestore();
 var md = window.markdownit();
-
+md.use(window.markdownitMathjax());
 vueApp = {
   el: '#app',
   data: {

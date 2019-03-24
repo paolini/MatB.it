@@ -11,6 +11,7 @@ Vue.component("note-item", {
   },
   computed: {
     text_rendered: function() {
+      this.renderMathjax();
       return this.note ? md.render(this.note.text) : " ... ";
     }
   },
@@ -29,26 +30,32 @@ Vue.component("note-item", {
   },
   methods: {
     render(event) {
-      this.note.text = document.getElementById('note_text').innerText;
+      this.note.text = this.$refs.text.innerText;
+    },
+    renderMathjax(event) {
+        var that=this;
+        this.$nextTick().then(function() {
+          window.MathJax.Hub.Queue(
+            ["Typeset",
+             window.MathJax.Hub,
+             that.$refs.text_rendered]);
+         });
     },
     edit_note(event) {
       this.edit = true;
-      el = document.getElementById('note_text');
+      el = this.$refs.text;
       el.innerText = this.note.text;
       el.focus();
     },
     keydown_note_title(event) {
-      if(event.keyCode == 13)
-        {
-          event.preventDefault();
-        }
+      if (event.keyCode == 13) {event.preventDefault();}
     },
     save_note(event) {
       this.edit = false;
       var user = this.$parent.user;
       var note = this.note;
-      note.title = document.getElementById('note_title').innerText;
-      note.text = document.getElementById('note_text').innerText;
+      note.title = this.$refs.title.innerText;
+      note.text = this.$refs.text.innerText;
       note.author_uid = user ? user.uid : null;
       var id = this.id;
       db.collection("notes").doc(id).set(note).then(function () {
@@ -61,10 +68,11 @@ Vue.component("note-item", {
   },
   template:
     '<div v-if="note">' +
-    '<h1 id="note_title" v-bind:class="{editing: edit}" v-bind:contenteditable="edit" v-on:keydown="keydown_note_title">{{ note.title }}</h1>' +
-    '<p id="note_text" v-show="edit" class=editing contenteditable="true" @input="render" ></p>' +
-    '<p v-html="text_rendered"></p>' +
+    '<h1 ref="title" v-bind:class="{editing: edit}" v-bind:contenteditable="edit" v-on:keydown="keydown_note_title">{{ note.title }}</h1>' +
+    '<p ref="text" v-show="edit" class=editing contenteditable="true" @input="render" ></p>' +
+    '<p ref="text_rendered" v-html="text_rendered"></p>' +
     '<button v-if="!edit" v-on:click="edit_note"><i class="fa fa-edit">edit</i></button>' +
-    '<button class="editing" id="note_title_save" v-if="edit" v-on:click="save_note"><i class="fa fa-save">save</i></button>' +
+    '<button class="editing" v-if="edit" v-on:click="save_note"><i class="fa fa-save">save</i></button>' +
+    '<button @click="renderMathjax">mathjax</button>' +
     '</div>'
 });
