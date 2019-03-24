@@ -5,7 +5,6 @@ Vue.component("note-item", {
       debug: "this is a note-item",
       id: null,
       note: null,
-      can_edit: false,
       edit: false
     };
   },
@@ -13,6 +12,12 @@ Vue.component("note-item", {
     text_rendered: function() {
       this.renderMathjax();
       return this.note ? md.render(this.note.text) : " ... ";
+    },
+    can_edit: function() {
+      return (this.note
+        && (this.note.author_uid == null
+            || (this.$parent.user != null
+                && this.note.author_uid == this.$parent.user.uid)));
     }
   },
   created: function() {
@@ -21,9 +26,6 @@ Vue.component("note-item", {
     db.collection("notes").doc(id).get().then(function(doc) {
       that.id = id;
       that.note = doc.data();
-      var user = that.$parent.user;
-      that.can_edit = (that.note.author_uid == null) ||
-        (user && that.note.author_uid == user.uid);
     }).catch(function(error){
       console.log("loading notes/" + id + " error: " + error);
     });
@@ -68,11 +70,10 @@ Vue.component("note-item", {
   },
   template:
     '<div v-if="note">' +
-    '<h1 ref="title" v-bind:class="{editing: edit}" v-bind:contenteditable="edit" v-on:keydown="keydown_note_title">{{ note.title }}</h1>' +
+    '<h1 ref="title" :class="{editing: edit}" :contenteditable="edit" @keydown="keydown_note_title">{{ note.title }}</h1>' +
     '<p ref="text" v-show="edit" class=editing contenteditable="true" @input="render" ></p>' +
     '<p ref="text_rendered" v-html="text_rendered"></p>' +
-    '<button v-if="!edit" v-on:click="edit_note"><i class="fa fa-edit">edit</i></button>' +
-    '<button class="editing" v-if="edit" v-on:click="save_note"><i class="fa fa-save">save</i></button>' +
-    '<button @click="renderMathjax">mathjax</button>' +
+    '<button v-if="can_edit && !edit" @click="edit_note"><i class="fa fa-edit">edit</i></button>' +
+    '<button class="editing" v-if="edit" @click="save_note"><i class="fa fa-save">save</i></button>' +
     '</div>'
 });
