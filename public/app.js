@@ -5,7 +5,8 @@ vueApp = {
   el: '#app',
   data: {
     debug: "this is the main app",
-    user: null
+    user: null,
+    authToken: null
   },
   methods: {
     logout(event) {
@@ -16,9 +17,15 @@ vueApp = {
     var that = this;
     firebase.auth().onAuthStateChanged(function(user) {
       if (user) {
-        // User is signed in.
         that.user = user;
-        user.getIdToken().then(function(accessToken) {});
+        user.getIdToken().then(function(idToken) {
+          that.authToken = idToken;
+          axios.post('/api/v0/user/login', {}, {
+            headers: {'Authorization': 'Bearer ' + idToken}
+          }).catch(function(err) {
+            console.log("error sending login message: " + err);
+          });
+        });
       } else {
         that.user = null;
       }

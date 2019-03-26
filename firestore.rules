@@ -3,9 +3,5 @@ service cloud.firestore {
     match /global/public {
     	allow read;
     }
-    match /notes/{note} {
-      allow read;
-      allow write: if resource.data.author_uid == null || resource.data.author_uid == request.auth.uid;
-    }
   }
 }
