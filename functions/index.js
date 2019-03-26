@@ -77,11 +77,11 @@ app.get('/api/v0/note', (req, res) => {
     querySnapshot.forEach(documentSnapshot => {
       const data = documentSnapshot.data();
       notes.push({
-        id: documentSnapshot.id,
-        data: {
+          id: documentSnapshot.id,
           title: data.title,
-          author_uid: data.author_uid
-        }
+          author_uid: data.author_uid,
+          created_on: data.created_on.toDate(),
+          updated_on: data.updated_on.toDate()
       });
       if (data.author_uid != null) {
         authors[data.author_uid] = db.doc('users/' + data.author_uid);
@@ -95,10 +95,10 @@ app.get('/api/v0/note', (req, res) => {
       }
       console.dir(authors);
       notes.forEach(note => {
-        if (note.data.author_uid != null) {
-          note.data.author_name = authors[note.data.author_uid].data().displayName;
+        if (note.author_uid != null) {
+          note.author_name = authors[note.author_uid].data().displayName;
         } else {
-          note.data.author_name = "";
+          note.author_name = "";
         }
       });
       return res.json({data: {notes: notes}});
@@ -111,11 +111,13 @@ app.get('/api/v0/note', (req, res) => {
 });
 
 app.post('/api/v0/note', (req, res) => {
+  var now = admin.firestore.Timestamp.now();
   data = {
     title: req.body.title,
     text: req.body.text,
     author: req.user ? req.user.uid : null,
-    created_on: admin.firestore.Timestamp.now()
+    created_on: now,
+    updated_on: now
   };
   db.collection('notes').add(data).then(docRef => {
     return res.json({id: docRef.id});

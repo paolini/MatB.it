@@ -28,41 +28,47 @@ Vue.component("note-item", {
   },
   created: function() {
     var id = window.location.pathname.match(/^.*\/([^\/]*)$/)[1];
+    this.$parent.$on('userLogin', this.userChanged);
     if (id == 'new') {
       id = null;
       this.id = id;
       this.note = {
-        title: 'no title',
-        text: '',
+        title: 'some title',
+        text: 'some text',
         author: {uid: this.$parent.user ? this.$parent.user.uid : null},
-        created_timestamp: firebase.firestore.FieldValue.serverTimestamp()
       };
-      this.original = {
-        title: this.note.title,
-        text: this.note.text
-      };
-      that = this;
-      this.$nextTick().then(function(){that.edit_note()});
+      this.original = Object.assign({}, this.note);
+      this.edit_note();
     } else {
       var that = this;
       axios.get('/api/v0/note/' + id).then(
         function(data) {
-          if ('note' in data.data) {
-            that.id = id;
-            that.note = data.data.note;
-            that.original = {
-              title: that.note.title,
-              text: that.note.text
-            }
-          } else {
-            console.log("loading note " + id + " error: " + data.error);
-          }
+          that.id = id;
+          that.note = data.data.note;
+          that.original = Object.assign({}, that.note);
+        }).catch(function(err){
+          console.log("loading note " + id + " error: " + data.error);
         });
     }
+  },
+  beforeDestroy: function() {
+    this.$parent.$off('userLogin');
   },
   methods: {
     render(event) {
       this.note.text = this.$refs.text.innerText;
+    },
+    userChanged(event) {
+      if (this.edit) {
+        if (this.can_edit) {
+          // I was editing the note as anonymous,
+          // now set the correct author
+          this.edit_note();
+        } else {
+          // I can no longer edit the note, let's cancel
+          this.cancel_note();
+        }
+      }
     },
     renderMathjax(event) {
         var that=this;
@@ -75,16 +81,20 @@ Vue.component("note-item", {
     },
     edit_note(event) {
       this.edit = true;
-      el = this.$refs.text;
-      el.innerText = this.note.text;
-      el.focus();
-    },
-    keydown_note_title(event) {
-      if (event.keyCode == 13) {event.preventDefault();}
+      if (this.$parent.user) {
+        this.note.author.uid = this.$parent.user.uid;
+        this.note.author.displayName = this.$parent.user.displayName;
+        this.note.author.photoURL = this.$parent.user.photoURL;
+      }
+      that = this;
+      this.$nextTick().then(function(){
+        el = that.$refs.text;
+        el.innerText = that.note.text;
+        el.focus();
+      });
     },
     cancel_note(event) {
-      this.note.title = this.original.title;
-      this.note.text = this.original.text;
+      this.note = Object.assign({}, this.original)
       this.edit = false;
     },
     save_note(event) {
@@ -105,21 +115,11 @@ Vue.component("note-item", {
       var p;
       if (id == null) {
         p = axios.post('/api/v0/note', data, config);
-        /*
-        db.collection("notes").add(note).then(function(docRef) {
-          that.id = docRef.id;
-          console.log("new note " + docRef.id + "created");
-          window.location.href = "/note/" + docRef.id;
-        }).catch(function (err){
-          console.log("error creating new doc: " + err);
-        });
-        */
       } else {
         p = axios.put('/api/v0/note/' + id, data, config);
       }
       p.then(function (out) {
-          that.original.title = that.note.title;
-          that.original.text = that.note.text;
+          that.original = Object.assign({}, that.note);
           if (id == null) {
               that.id = out.data.id;
               console.log("new note " + out.data.id + " created");
@@ -135,7 +135,7 @@ Vue.component("note-item", {
   },
   template:
     '<div v-if="note">' +
-    '<h1 ref="title" :class="{editing: edit}" :contenteditable="edit" @keydown="keydown_note_title">{{ note.title }}</h1>' +
+    '<h1 ref="title" :class="{editing: edit}" :contenteditable="edit" @keydown.enter.prevent>{{ note.title }}</h1>' +
     '<p ref="text" v-show="edit" class=editing contenteditable="true" @input="render" ></p>' +
     '<p v-if="edit">' +
     '<button class="editing" @click="cancel_note"><i class="fa fa-times">cancel</i></button>' +

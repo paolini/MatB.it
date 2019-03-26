@@ -16,6 +16,7 @@ vueApp = {
   created: function() {
     var that = this;
     firebase.auth().onAuthStateChanged(function(user) {
+      old_user = that.user;
       if (user) {
         that.user = user;
         user.getIdToken().then(function(idToken) {
@@ -26,7 +27,9 @@ vueApp = {
             console.log("error sending login message: " + err);
           });
         });
+        that.$emit('userLogin', user);
       } else {
+        that.$emit('userLogout', that.user);
         that.user = null;
       }
     }, function(error) {
