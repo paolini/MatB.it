@@ -22,11 +22,11 @@ app.set('view engine', 'handlebars');
 
 const validateFirebaseIdToken = (req, res, next) => {
   let idToken;
-  console.log("validate middleware " + req.headers.authorization);
+  //  console.log("validate middleware " + req.headers.authorization);
   if (req.headers.authorization && req.headers.authorization.startsWith('Bearer ')) {
     idToken = req.headers.authorization.split('Bearer ')[1];
     admin.auth().verifyIdToken(idToken).then((decodedIdToken) => {
-      console.log('ID Token correctly decoded', decodedIdToken);
+      // console.log('ID Token correctly decoded', decodedIdToken);
       req.user = decodedIdToken;
       return next();
     }).catch((error) => {
@@ -34,7 +34,7 @@ const validateFirebaseIdToken = (req, res, next) => {
       res.status(403).send('Unauthorized');
     });
   } else {
-    console.log("invalid header found: " + req.headers.authorization);
+    // console.log("invalid header found: " + req.headers.authorization);
     req.user = null;
     return next();
   }
@@ -70,10 +70,11 @@ app.post('/api/v0/user/login', (req, res) => {
   });
 });
 
-app.get('/api/v0/notes', (req, res) => {
+app.get('/api/v0/note', (req, res) => {
   db.collection('notes').get().then(function (querySnapshot){
     var notes = [];
-    querySnapshot.forEach(function (documentSnapshot){
+    var authors = {};
+    querySnapshot.forEach(documentSnapshot => {
       const data = documentSnapshot.data();
       notes.push({
         id: documentSnapshot.id,
@@ -82,11 +83,30 @@ app.get('/api/v0/notes', (req, res) => {
           author_uid: data.author_uid
         }
       });
+      if (data.author_uid != null) {
+        authors[data.author_uid] = db.doc('users/' + data.author_uid);
+      }
     });
-    res.json({data: {notes: notes}});
+    const values = Object.values(authors);
+    return db.getAll(...values).then(users =>{
+      const keys = Object.keys(authors);
+      for(var i=0; i<keys.length; i++) {
+        authors[keys[i]] = users[i];
+      }
+      console.dir(authors);
+      notes.forEach(note => {
+        if (note.data.author_uid != null) {
+          note.data.author_name = authors[note.data.author_uid].data().displayName;
+        } else {
+          note.data.author_name = "";
+        }
+      });
+      return res.json({data: {notes: notes}});
+    });
   }).catch(function(error){
     console.log("loading notes error: " + error);
-    res.json({error: error});
+    console.dir(error);
+    return res.json({error: "" + error});
   });
 });
 
@@ -94,7 +114,8 @@ app.post('/api/v0/note', (req, res) => {
   data = {
     title: req.body.title,
     text: req.body.text,
-    author: req.user ? req.user.uid : null
+    author: req.user ? req.user.uid : null,
+    created_on: admin.firestore.Timestamp.now()
   };
   db.collection('notes').add(data).then(docRef => {
     return res.json({id: docRef.id});
