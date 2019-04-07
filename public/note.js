@@ -47,7 +47,7 @@ Vue.component("note-item", {
           that.note = data.data.note;
           that.original = Object.assign({}, that.note);
         }).catch(function(err){
-          console.log("loading note " + id + " error: " + data.error);
+          console.log("loading note " + id + " error: " + err);
         });
     }
   },
@@ -104,12 +104,13 @@ Vue.component("note-item", {
       var note = this.note;
       note.title = this.$refs.title.innerText;
       note.text = this.$refs.text.innerText;
-      data = {
+      var data = {
         title: note.title,
         text: note.text
       }
-      config = {
-        headers: {'Authorization': 'Bearer ' + this.$parent.authToken}
+      var config = {};
+      if (user) {
+        config.header = {'Authorization': 'Bearer ' + this.$parent.authToken};
       }
       var id = this.id;
       var p;
@@ -143,7 +144,7 @@ Vue.component("note-item", {
     '</p>' +
     '<p ref="text_rendered" v-html="text_rendered"></p>' +
     '<p>' +
-    '<span v-if="note.author.uid==null">[no author]</span><span v-else>by: {{ note.author.displayName }}<img class="thumbnail" :src="note.author.photoURL" /></span>' +
+    '<span v-if="note.author==null">[no author]</span><span v-else>by: {{ note.author.displayName }}<img class="thumbnail" :src="note.author.photoURL" /></span>' +
     ' ' +
     '<button v-if="can_edit && !edit" @click="edit_note"><i class="fa fa-edit">edit</i></button>' +
     '</p>' +

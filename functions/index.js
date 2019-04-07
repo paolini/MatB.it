@@ -2,6 +2,13 @@ const functions = require('firebase-functions');
 const admin = require('firebase-admin');
 admin.initializeApp();
 
+class ForbiddenError extends Error {
+  constructor(message){
+    super(message)
+    // Add additional properties
+  }
+}
+
 const db = admin.firestore();
 
 const express = require('express');
@@ -25,13 +32,13 @@ const validateFirebaseIdToken = (req, res, next) => {
   //  console.log("validate middleware " + req.headers.authorization);
   if (req.headers.authorization && req.headers.authorization.startsWith('Bearer ')) {
     idToken = req.headers.authorization.split('Bearer ')[1];
-    admin.auth().verifyIdToken(idToken).then((decodedIdToken) => {
+    return admin.auth().verifyIdToken(idToken).then((decodedIdToken) => {
       // console.log('ID Token correctly decoded', decodedIdToken);
       req.user = decodedIdToken;
       return next();
     }).catch((error) => {
       console.error('Error while verifying Firebase ID token:', error);
-      res.status(403).send('Unauthorized');
+      return res.status(403).send('Unauthorized');
     });
   } else {
     // console.log("invalid header found: " + req.headers.authorization);
@@ -52,12 +59,12 @@ app.get('/note/:id', (req, res) => {
 });
 
 app.post('/api/v0/user/login', (req, res) => {
-  if (req.user == null) {
+  if (req.user === null) {
     res.status(403).send('Unauthorized');
     return;
   }
   console.log("login " + req.user.uid);
-  return db.collection('users').doc(req.user.uid).set({
+  db.collection('users').doc(req.user.uid).set({
     email: req.user.email,
     emailVerified: req.user.email_verified,
     displayName: req.user.name,
@@ -71,9 +78,9 @@ app.post('/api/v0/user/login', (req, res) => {
 });
 
 app.get('/api/v0/note', (req, res) => {
-  db.collection('notes').get().then(function (querySnapshot){
-    var notes = [];
-    var authors = {};
+  var notes = [];
+  var authors = {};
+  db.collection('notes').get().then(querySnapshot => {
     querySnapshot.forEach(documentSnapshot => {
       const data = documentSnapshot.data();
       notes.push({
@@ -82,31 +89,30 @@ app.get('/api/v0/note', (req, res) => {
           author_uid: data.author_uid,
           created_on: data.created_on.toDate(),
           updated_on: data.updated_on.toDate()
-      });
-      if (data.author_uid != null) {
+        });
+      if (data.author_uid !== null) {
         authors[data.author_uid] = db.doc('users/' + data.author_uid);
       }
     });
     const values = Object.values(authors);
-    return db.getAll(...values).then(users =>{
-      const keys = Object.keys(authors);
-      for(var i=0; i<keys.length; i++) {
-        authors[keys[i]] = users[i];
+    return db.getAll(...values);
+  }).then(users => {
+    const keys = Object.keys(authors);
+    for(var i=0; i<keys.length; i++) {
+      authors[keys[i]] = users[i];
+    }
+    notes.forEach(note => {
+      if (note.author_uid !== null) {
+        note.author_name = authors[note.author_uid].data().displayName;
+      } else {
+        note.author_name = "";
       }
-      console.dir(authors);
-      notes.forEach(note => {
-        if (note.author_uid != null) {
-          note.author_name = authors[note.author_uid].data().displayName;
-        } else {
-          note.author_name = "";
-        }
-      });
-      return res.json({data: {notes: notes}});
     });
-  }).catch(function(error){
-    console.log("loading notes error: " + error);
+    return res.json({data: {notes: notes}});
+  }).catch(error => {
+    console.log("loading notes error: " + String(error));
     console.dir(error);
-    return res.json({error: "" + error});
+    return res.status(500).json({error: String(error)});
   });
 });
 
@@ -115,7 +121,7 @@ app.post('/api/v0/note', (req, res) => {
   data = {
     title: req.body.title,
     text: req.body.text,
-    author: req.user ? req.user.uid : null,
+    author_uid: req.user ? req.user.uid : null,
     created_on: now,
     updated_on: now
   };
@@ -126,58 +132,88 @@ app.post('/api/v0/note', (req, res) => {
   });
 });
 
+function user_can_edit_note(uid, note_id) {
+  return db.collection('notes').doc(note_id).get().then(snap => {
+    data = snap.data();
+    return data.author_uid ? uid === data.author_uid : true;
+  });
+}
+
 app.put('/api/v0/note/:id', (req, res) => {
   const id = req.params.id;
-  var doc = db.collection('notes').doc(id)
-  return doc.get().then(snap => {
-    data = snap.data();
-    if (data.author_uid == null || (req.user && req.user.uid == data.author_uid)) {
-      doc.update({
-        title: req.body.title,
-        text: req.body.text,
-        author_uid: req.user ? req.user.uid : null,
-        updated_on: admin.firestore.Timestamp.now()
-      }).then(() => {
-        return res.json({ok: "ok"});
-      });
-    } else {
-      return res.status(403).send('Unauthorized');
-    }
-  }).catch((err) => {
-    console.error("error updating note: " + err);
-    return res.status(500).json({'error': err});
-  });
+  const uid = req.user ? req.user.uid : null;
+
+  user_can_edit_note(uid, id)
+   .then(yes => {
+     if(!yes) throw new ForbiddenError();
+     return db.collection('notes').doc(id).update({
+       title: req.body.title,
+       text: req.body.text,
+       author_uid: req.user ? req.user.uid : null,
+       updated_on: admin.firestore.Timestamp.now()
+     });
+   })
+   .then(() => {
+     // Update completed, respond with ok.
+     return res.json({
+       ok: "ok"
+     });
+   })
+   .catch((err) => {
+     if (err instanceof ForbiddenError) {
+       return res.status(403).json({
+         error: "Permission Denied",
+         note_id: id
+       })
+     } else {
+       return res.status(500).json({
+         error: "Server error"
+       })
+     }
+   })
 });
 
-app.get('/api/v0/note/:id', (req, res) => {
-  const id = req.params.id;
-  db.collection('notes').doc(id).get().then(
-    doc => {
-      const data = doc.data();
-      var out = {
-        note: {
-          id: id,
-          title: data.title,
-          text: data.text,
-          author: {
-            uid: data.author_uid
-          }
-        }
-      };
-      if (data.author_uid == null) {
-        return res.json(out);
-      }
-      return db.collection('users').doc(data.author_uid)
-        .get().then(doc => {
+function get_author_data(author_uid) {
+  if (author_uid) {
+    return db.collection('users').doc(author_uid).get()
+      .then(doc => {
           const data = doc.data();
-          out.note.author.displayName = data.displayName;
-          out.note.author.photoURL = data.photoURL;
-          return res.json(out);
-      });
-    }).catch(err => {
-      console.error(err);
-      res.json({error: err})
+          return {
+            displayName: data.displayName,
+            photoURL: data.photoURL
+          };
+        });
+  } else {
+    return Promise.resolve(null);
+  }
+}
+
+function get_note_full(note_id) {
+  return db.collection('notes').doc(note_id).get()
+    .then(doc => {
+      const data = doc.data();
+      return get_author_data(data.author_uid)
+        .then(author => {
+          console.log("*** got author_data " + author);
+          return ({
+              id: note_id,
+              title: data.title,
+              text: data.text,
+              author: author
+            });
+        });
     });
+}
+
+app.get('/api/v0/note/:id', (req, res) => {
+  try {
+    return get_note_full(req.params.id)
+      .then(note => {
+        return res.json({note: note});
+      });
+  } catch (err) {
+    res.json({error: err})
+  }
 });
 
 exports.app = functions.https.onRequest(app);
