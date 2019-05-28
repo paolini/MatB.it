@@ -10,8 +10,24 @@ Vue.component("note-item", {
     };
   },
   computed: {
+    title_rendered: function() {
+      var that=this;
+      this.$nextTick().then(function() {
+         window.MathJax.Hub.Queue(
+           ["Typeset",
+            window.MathJax.Hub,
+            that.$refs.title_rendered]);
+       });
+      return this.note ? md.render(this.note.title) : " ... ";
+    },
     text_rendered: function() {
-      this.renderMathjax();
+      var that=this;
+      this.$nextTick().then(function() {
+         window.MathJax.Hub.Queue(
+           ["Typeset",
+            window.MathJax.Hub,
+            that.$refs.text_rendered]);
+       });
       return this.note ? md.render(this.note.text) : " ... ";
     },
     can_edit: function() {
@@ -55,7 +71,10 @@ Vue.component("note-item", {
     this.$parent.$off('userLogin');
   },
   methods: {
-    render(event) {
+    title_input(event) {
+      this.note.title = this.$refs.title.innerText;
+    },
+    text_input(event) {
       this.note.text = this.$refs.text.innerText;
     },
     userChanged(event) {
@@ -70,15 +89,6 @@ Vue.component("note-item", {
         }
       }
     },
-    renderMathjax(event) {
-        var that=this;
-        this.$nextTick().then(function() {
-          window.MathJax.Hub.Queue(
-            ["Typeset",
-             window.MathJax.Hub,
-             that.$refs.text_rendered]);
-         });
-    },
     edit_note(event) {
       this.edit = true;
       if (this.$parent.user) {
@@ -89,6 +99,8 @@ Vue.component("note-item", {
       }
       that = this;
       this.$nextTick().then(function(){
+        el = that.$refs.title;
+        el.innerText = that.note.title;
         el = that.$refs.text;
         el.innerText = that.note.text;
         el.focus();
@@ -144,8 +156,9 @@ Vue.component("note-item", {
   },
   template:
     '<div v-if="note">' +
-    '<h1 ref="title" :class="{editing: edit}" :contenteditable="edit" @keydown.enter.prevent>{{ note.title }}</h1>' +
-    '<p ref="text" v-show="edit" class=editing contenteditable="true" @input="render" ></p>' +
+    '<h1 v-if="edit" ref="title" :class="{editing: edit}" :contenteditable="edit" @input="title_input" @keydown.enter.prevent></h1>' +
+    '<h1 v-else ref="title_rendered" v-html="title_rendered"></h1>' +
+    '<p ref="text" v-show="edit" class=editing contenteditable="true" @input="text_input" ></p>' +
     '<p v-if="edit">' +
     '<button class="editing" @click="cancel_note"><i class="fa fa-times">cancel</i></button>' +
     '<button class="editing" v-if="changed" @click="save_note"><i class="fa fa-save">save</i></button>' +
