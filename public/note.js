@@ -82,6 +82,7 @@ Vue.component("note-item", {
     edit_note(event) {
       this.edit = true;
       if (this.$parent.user) {
+        this.note.author = {};
         this.note.author.uid = this.$parent.user.uid;
         this.note.author.displayName = this.$parent.user.displayName;
         this.note.author.photoURL = this.$parent.user.photoURL;
@@ -97,6 +98,13 @@ Vue.component("note-item", {
       this.note = Object.assign({}, this.original)
       this.edit = false;
     },
+    delete_note(event) {
+      var id = this.id;
+      axios.delete('/api/v0/note/' + id)
+      .then(function (out) {
+        window.location.href = '/';
+      })
+    },
     save_note(event) {
       this.edit = false;
       var user = this.$parent.user;
@@ -110,7 +118,7 @@ Vue.component("note-item", {
       }
       var config = {};
       if (user) {
-        config.header = {'Authorization': 'Bearer ' + this.$parent.authToken};
+        config.headers = {'Authorization': 'Bearer ' + this.$parent.authToken};
       }
       var id = this.id;
       var p;
@@ -147,6 +155,7 @@ Vue.component("note-item", {
     '<span v-if="note.author==null">[no author]</span><span v-else>by: {{ note.author.displayName }}<img class="thumbnail" :src="note.author.photoURL" /></span>' +
     ' ' +
     '<button v-if="can_edit && !edit" @click="edit_note"><i class="fa fa-edit">edit</i></button>' +
+    '<button v-if="can_edit && !edit" @click="delete_note"><i class="fa fa-trash">delete</i></button>' +
     '</p>' +
     '</div>'
 });

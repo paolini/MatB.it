@@ -80,7 +80,7 @@ app.post('/api/v0/user/login', (req, res) => {
 app.get('/api/v0/note', (req, res) => {
   var notes = [];
   var authors = {};
-  db.collection('notes').get().then(querySnapshot => {
+  db.collection('notes').orderBy('created_on','desc').get().then(querySnapshot => {
     querySnapshot.forEach(documentSnapshot => {
       const data = documentSnapshot.data();
       notes.push({
@@ -155,6 +155,35 @@ app.put('/api/v0/note/:id', (req, res) => {
    })
    .then(() => {
      // Update completed, respond with ok.
+     return res.json({
+       ok: "ok"
+     });
+   })
+   .catch((err) => {
+     if (err instanceof ForbiddenError) {
+       return res.status(403).json({
+         error: "Permission Denied",
+         note_id: id
+       })
+     } else {
+       return res.status(500).json({
+         error: "Server error"
+       })
+     }
+   })
+});
+
+app.delete('/api/v0/note/:id', (req, res) => {
+  const id = req.params.id;
+  const uid = req.user ? req.user.uid : null;
+
+  user_can_edit_note(uid, id)
+   .then(yes => {
+     if(!yes) throw new ForbiddenError();
+     return db.collection('notes').doc(id).delete();
+   })
+   .then(() => {
+     // delete completed, respond with ok.
      return res.json({
        ok: "ok"
      });
