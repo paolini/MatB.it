@@ -217,21 +217,16 @@ function get_author_data(author_uid) {
   }
 }
 
-function get_note_full(note_id) {
-  return db.collection('notes').doc(note_id).get()
-    .then(doc => {
-      const data = doc.data();
-      return get_author_data(data.author_uid)
-        .then(author => {
-          console.log("*** got author_data " + author);
-          return ({
-              id: note_id,
-              title: data.title,
-              text: data.text,
-              author: author
-            });
-        });
-    });
+async function get_note_full(note_id) {
+    const doc = await db.collection('notes').doc(note_id).get();
+    const data = doc.data();
+    const author = await get_author_data(data.author_uid);
+    return {
+        id: note_id,
+        title: data.title,
+        text: data.text,
+        author: author
+    }
 }
 
 app.get('/api/v0/note/:id', (req, res) => {
