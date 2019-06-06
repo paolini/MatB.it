@@ -1,5 +1,6 @@
 const functions = require('firebase-functions');
 const admin = require('firebase-admin');
+const fs = require('fs');
 admin.initializeApp();
 
 class ForbiddenError extends Error {
@@ -12,20 +13,7 @@ class ForbiddenError extends Error {
 const db = admin.firestore();
 
 const express = require('express');
-const exphbs = require('express-handlebars');
 const app = express();
-
-var hbs = exphbs.create({
-    defaultLayout: 'main',
-    // Specify helpers which are only registered on this instance.
-    helpers: {
-        raw: function (options) {return options.fn(this);},
-        json: function (context) {return JSON.stringify(context);},
-    }
-});
-
-app.engine('handlebars', hbs.engine);
-app.set('view engine', 'handlebars');
 
 const validateFirebaseIdToken = (req, res, next) => {
   let idToken;
@@ -49,13 +37,28 @@ const validateFirebaseIdToken = (req, res, next) => {
 
 app.use(validateFirebaseIdToken);
 
+function render(body, callback) {
+  fs.readFile("./main.html", "utf8", function(err, data) {
+      if (err) {
+        throw err;
+      }
+      console.dir(typeof data);
+      data = data.replace('{{{ body }}}', body);
+      callback(data);
+  });
+}
+
 app.get('/', (req, res) => {
-//  console.log('Signed-in user:', req.user);
-  return res.render('home', {});
+  //  console.log('Signed-in user:', req.user);
+  render("<note-list></note-list>", function(html) {
+    res.send(html);
+  });
 });
 
 app.get('/note/:id', (req, res) => {
-  return res.render('note', {});
+  render('<note-item :user="user"></note-item>', function(html) {
+    res.send(html);
+  });
 });
 
 app.post('/api/v0/user/login', (req, res) => {
