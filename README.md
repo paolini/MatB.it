@@ -1,3 +1,8 @@
+* install
+
+npm install -g firebase-tools
+npm install
+
 * serve on localhost:
 
 firebase serve --only hosting

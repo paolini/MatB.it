@@ -4,6 +4,7 @@
   "description": "collect mathjax notes",
   "main": "",
   "dependencies": {
+    "firebase-admin": "^7.0.0",
     "firebase-functions": "^2.2.1"
   },
   "devDependencies": {
