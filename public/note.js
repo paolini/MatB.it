@@ -1,3 +1,21 @@
+function get_auth_config(user) {
+  /*
+  create config for axios.put/post request with
+  user auth information
+  */
+  if (user) {
+    return user.getIdToken().then(function (token) {
+      var config = {};
+      config.headers = {'Authorization': 'Bearer ' + token};
+      return config;
+    });
+  } else {
+    return new Promise(function(resolve,reject){
+      var config = {};
+      resolve(config);
+    });
+  }
+}
 
 Vue.component("note-item", {
   data: function(){
@@ -32,9 +50,9 @@ Vue.component("note-item", {
     },
     can_edit: function() {
       return (this.note
-        && (this.note.author_uid == null
+        && (this.note.author.uid == null
             || (this.$parent.user != null
-                && this.note.author_uid == this.$parent.user.uid)));
+                && this.note.author.uid == this.$parent.user.uid)));
     },
     changed: function() {
       return this.original == null ||
@@ -112,10 +130,15 @@ Vue.component("note-item", {
     },
     delete_note(event) {
       var id = this.id;
-      axios.delete('/api/v0/note/' + id)
-      .then(function (out) {
-        window.location.href = '/';
-      })
+      var user = this.$parent.user;
+      get_auth_config(user).then(function(config) {
+        axios.delete('/api/v0/note/' + id, config)
+        .then(function (out) {
+          window.location.href = '/';
+        }).catch(function(err) {
+          alert("error: " + err);
+        });
+      });
     },
     save_note(event) {
       this.edit = false;
@@ -128,29 +151,28 @@ Vue.component("note-item", {
         title: note.title,
         text: note.text
       }
-      var config = {};
-      if (user) {
-        config.headers = {'Authorization': 'Bearer ' + this.$parent.authToken};
-      }
-      var id = this.id;
-      var p;
-      if (id == null) {
-        p = axios.post('/api/v0/note', data, config);
-      } else {
-        p = axios.put('/api/v0/note/' + id, data, config);
-      }
-      p.then(function (out) {
-          that.original = Object.assign({}, that.note);
-          if (id == null) {
-              that.id = out.data.id;
-              console.log("new note " + out.data.id + " created");
-              window.location.href = "/note/" + out.data.id;
-          } else {
-             console.log("document " + id + " successfully written!");
-          }
-      }).catch(function (err) {
-          console.log("error writing " + id + ": " + err);
-          alert("error: " + err);
+
+      get_auth_config(user).then(function(config) {
+        var id = that.id;
+        var p;
+        if (id == null) {
+          p = axios.post('/api/v0/note', data, config);
+        } else {
+          p = axios.put('/api/v0/note/' + id, data, config);
+        }
+        p.then(function (out) {
+            that.original = Object.assign({}, that.note);
+            if (id == null) {
+                that.id = out.data.id;
+                console.log("new note " + out.data.id + " created");
+                window.location.href = "/note/" + out.data.id;
+            } else {
+               console.log("document " + id + " successfully written!");
+            }
+        }).catch(function (err) {
+            console.log("error writing " + id + ": " + err);
+            alert("error: " + err);
+        });
       });
     }
   },

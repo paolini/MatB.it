@@ -6,7 +6,6 @@ vueApp = {
   data: {
     debug: "this is the main app",
     user: null,
-    authToken: null
   },
   methods: {
     logout(event) {
@@ -20,7 +19,6 @@ vueApp = {
       if (user) {
         that.user = user;
         user.getIdToken().then(function(idToken) {
-          that.authToken = idToken;
           axios.post('/api/v0/user/login', {}, {
             headers: {'Authorization': 'Bearer ' + idToken}
           }).catch(function(err) {

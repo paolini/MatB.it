@@ -212,7 +212,8 @@ function get_author_data(author_uid) {
           const data = doc.data();
           return {
             displayName: data.displayName,
-            photoURL: data.photoURL
+            photoURL: data.photoURL,
+            uid: author_uid
           };
         });
   } else {
