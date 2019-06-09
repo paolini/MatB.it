@@ -2,6 +2,7 @@ const functions = require('firebase-functions');
 const admin = require('firebase-admin');
 const fs = require('fs');
 admin.initializeApp();
+const assert = require('assert');
 
 class ForbiddenError extends Error {
   constructor(message){
@@ -11,6 +12,7 @@ class ForbiddenError extends Error {
 }
 
 const db = admin.firestore();
+const db_now = admin.firestore.FieldValue.serverTimestamp();
 
 const express = require('express');
 const app = express();
@@ -61,23 +63,34 @@ app.get('/note/:id', (req, res) => {
   });
 });
 
-app.post('/api/v0/user/login', (req, res) => {
-  if (req.user === null) {
-    res.status(403).send('Unauthorized');
-    return;
-  }
-  console.log("login " + req.user.uid);
-  db.collection('users').doc(req.user.uid).set({
-    email: req.user.email,
-    emailVerified: req.user.email_verified,
-    displayName: req.user.name,
-    photoURL: req.user.picture
-  }).then(() => {
+app.post('/api/v0/user/login', async (req, res) => {
+  try {
+    if (req.user === null) {
+      res.status(403).send('Unauthorized');
+      return;
+    }
+    console.log("login " + req.user.uid);
+    var user_doc = await db.collection('users').doc(req.user.uid).get()
+    if (!user_doc.exists) {
+      console.dir(req.user);
+      await db.collection('users').doc(req.user.uid).set({
+        email: req.user.email,
+        emailVerified: req.user.email_verified,
+        displayName: req.user.name,
+        photoURL: req.user.picture || null,
+        first_login: db_now,
+        last_login: db_now,
+        pro: false
+      });
+    } else {
+      await db.collection('users').doc(req.user.uid).update({
+        last_login: db_now});
+    }
     return res.json({ok: "ok"});
-  }).catch(err => {
+  } catch(err) {
     console.error("in user login: " + err);
     return res.json({error: err})
-  });
+  };
 });
 
 app.get('/api/v0/note', (req, res) => {
