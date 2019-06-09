@@ -39,6 +39,23 @@ const validateFirebaseIdToken = (req, res, next) => {
 
 app.use(validateFirebaseIdToken);
 
+async function patch_database() {
+  console.log('patching database');
+  try {
+    var querySnapshot = await db.collection('notes').get();
+    var count = 0;
+    await querySnapshot.forEach(documentSnapshot => {
+      db.collection('notes').doc(documentSnapshot.id).update({private: false});
+      count ++;
+    });
+    console.log("" + count +" documents patched");
+  } catch(err) {
+    console.log(err);
+  }
+}
+
+// patch_database();
+
 function render(body, callback) {
   fs.readFile("./main.html", "utf8", function(err, data) {
       if (err) {
@@ -86,10 +103,13 @@ app.post('/api/v0/user/login', async (req, res) => {
       await db.collection('users').doc(req.user.uid).update({
         last_login: db_now});
     }
-    return res.json({ok: "ok"});
+    var user = await db.collection('users').doc(req.user.uid).get();
+    var data = user.data();
+    data.uid = req.user.uid;
+    return res.json({user: data});
   } catch(err) {
-    console.error("in user login: " + err);
-    return res.json({error: err})
+    console.error("ERROR in user login: " + err);
+    return res.status(500).json({error: err})
   };
 });
 
@@ -132,50 +152,56 @@ app.get('/api/v0/note', (req, res) => {
   });
 });
 
-app.post('/api/v0/note', (req, res) => {
-  var now = admin.firestore.Timestamp.now();
-  data = {
-    title: req.body.title,
+async function validate_note_form(req) {
+  var note_id = null;
+  const uid = req.user ? req.user.uid : null;
+  if (req.method == 'PUT') {
+    note_id = req.params.id;
+    var note = (await db.collection('notes').doc(note_id).get()).data();
+    if (note.author_uid && uid !== note.author_uid) {
+      return Promise.reject(new ForbiddenError("not permitted to edit note (different author)"));
+    }
+  }
+
+  var user_doc = await db.collection('users').doc(req.user.uid).get();
+  var user = user_doc.data();
+  var out = {
+    title: req.body.title || "[no title]",
     text: req.body.text,
     author_uid: req.user ? req.user.uid : null,
-    created_on: now,
-    updated_on: now
+    updated_on: db_now,
+    private: req.body.private || false
   };
-  db.collection('notes').add(data).then(docRef => {
-    return res.json({id: docRef.id});
-  }).catch(err => {
-    return res.status(500).json({error: err});
-  });
-});
-
-function user_can_edit_note(uid, note_id) {
-  return db.collection('notes').doc(note_id).get().then(snap => {
-    data = snap.data();
-    return data.author_uid ? uid === data.author_uid : true;
-  });
+  if (out.private && !(user && user.pro)) {
+    return Promise.reject(new ForbiddenError("only 'pro' user can create private notes"));
+  }
+  if (req.method === 'POST') {
+    out.created_on = db_now;
+  }
+  return out;
 }
 
-app.put('/api/v0/note/:id', (req, res) => {
-  const id = req.params.id;
-  const uid = req.user ? req.user.uid : null;
+app.post('/api/v0/note', async (req, res) => {
+  try {
+    data = await validate_note_form(req);
+    var docRef = await db.collection('notes').add(data);
+    return res.json({id: docRef.id});
+  } catch(err) {
+    console.log(err);
+    return res.status(500).json({error: err});
+  }
+});
 
-  user_can_edit_note(uid, id)
-   .then(yes => {
-     if(!yes) throw new ForbiddenError();
-     return db.collection('notes').doc(id).update({
-       title: req.body.title,
-       text: req.body.text,
-       author_uid: req.user ? req.user.uid : null,
-       updated_on: admin.firestore.Timestamp.now()
-     });
-   })
-   .then(() => {
-     // Update completed, respond with ok.
-     return res.json({
+app.put('/api/v0/note/:id', async (req, res) => {
+  var id = req.params.id;
+  try {
+    data = await validate_note_form(req);
+    await db.collection('notes').doc(id).update(data);
+    return res.json({
        ok: "ok"
      });
-   })
-   .catch((err) => {
+   } catch (err) {
+     console.log(err);
      if (err instanceof ForbiddenError) {
        return res.status(403).json({
          error: "Permission Denied",
@@ -186,7 +212,7 @@ app.put('/api/v0/note/:id', (req, res) => {
          error: "Server error"
        })
      }
-   })
+   }
 });
 
 app.delete('/api/v0/note/:id', (req, res) => {
@@ -226,7 +252,7 @@ function get_author_data(author_uid) {
           return {
             displayName: data.displayName,
             photoURL: data.photoURL,
-            uid: author_uid
+            uid: author_uid,
           };
         });
   } else {
@@ -242,7 +268,8 @@ async function get_note_full(note_id) {
         id: note_id,
         title: data.title,
         text: data.text,
-        author: author
+        author: author,
+        private: data.private
     }
 }
 

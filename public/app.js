@@ -17,10 +17,12 @@ vueApp = {
     firebase.auth().onAuthStateChanged(function(user) {
       old_user = that.user;
       if (user) {
-        that.user = user;
         user.getIdToken().then(function(idToken) {
           axios.post('/api/v0/user/login', {}, {
             headers: {'Authorization': 'Bearer ' + idToken}
+          }).then(function(data) {
+            that.user = data.data.user;
+            that.auth_user = user;
           }).catch(function(err) {
             console.log("error sending login message: " + err);
           });
@@ -29,6 +31,7 @@ vueApp = {
       } else {
         that.$emit('userLogout', that.user);
         that.user = null;
+        that.auth_user = null;
       }
     }, function(error) {
       console.log(error);

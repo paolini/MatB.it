@@ -1,10 +1,10 @@
-function get_auth_config(user) {
+function get_auth_config(auth_user) {
   /*
   create config for axios.put/post request with
   user auth information
   */
-  if (user) {
-    return user.getIdToken().then(function (token) {
+  if (auth_user) {
+    return auth_user.getIdToken().then(function (token) {
       var config = {};
       config.headers = {'Authorization': 'Bearer ' + token};
       return config;
@@ -57,7 +57,8 @@ Vue.component("note-item", {
     changed: function() {
       return this.original == null ||
         this.note.text != this.original.text ||
-        this.note.title != this.original.title;
+        this.note.title != this.original.title ||
+        this.note.private != this.original.private;
     }
   },
   created: function() {
@@ -70,6 +71,7 @@ Vue.component("note-item", {
         title: 'some title',
         text: 'some text',
         author: {uid: this.$parent.user ? this.$parent.user.uid : null},
+        private: false
       };
       this.original = Object.assign({}, this.note);
       this.edit_note();
@@ -130,8 +132,7 @@ Vue.component("note-item", {
     },
     delete_note(event) {
       var id = this.id;
-      var user = this.$parent.user;
-      get_auth_config(user).then(function(config) {
+      get_auth_config(this.$parent.auth_user).then(function(config) {
         axios.delete('/api/v0/note/' + id, config)
         .then(function (out) {
           window.location.href = '/';
@@ -142,17 +143,17 @@ Vue.component("note-item", {
     },
     save_note(event) {
       this.edit = false;
-      var user = this.$parent.user;
       var that = this;
       var note = this.note;
       note.title = this.$refs.title.innerText;
       note.text = this.$refs.text.innerText;
       var data = {
         title: note.title,
-        text: note.text
+        text: note.text,
+        private: note.private
       }
 
-      get_auth_config(user).then(function(config) {
+      get_auth_config(this.$parent.auth_user).then(function(config) {
         var id = that.id;
         var p;
         if (id == null) {
@@ -182,11 +183,13 @@ Vue.component("note-item", {
     '<h1 v-else ref="title_rendered" v-html="title_rendered"></h1>' +
     '<p ref="text" v-show="edit" class=editing contenteditable="true" @input="text_input" ></p>' +
     '<p v-if="edit">' +
-    '<button class="editing" @click="cancel_note"><i class="fa fa-times">cancel</i></button>' +
-    '<button class="editing" v-if="changed" @click="save_note"><i class="fa fa-save">save</i></button>' +
+    '  <span class="editing" v-if="$parent.user.pro"><input type="checkbox" id="checkbox_private" v-model="note.private"></input><label for="checkbox_private">private</label></span>' +
+    '  <button class="editing" @click="cancel_note"><i class="fa fa-times">cancel</i></button>' +
+    '  <button class="editing" v-if="changed" @click="save_note"><i class="fa fa-save">save</i></button>' +
     '</p>' +
     '<p ref="text_rendered" v-html="text_rendered"></p>' +
     '<p>' +
+    '<span v-if="!edit && note.private">private note</span> ' +
     '<span v-if="note.author==null">[no author]</span><span v-else>by: {{ note.author.displayName }}<img class="thumbnail" :src="note.author.photoURL" /></span>' +
     ' ' +
     '<button v-if="can_edit && !edit" @click="edit_note"><i class="fa fa-edit">edit</i></button>' +
