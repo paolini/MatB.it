@@ -1,22 +1,3 @@
-function get_auth_config(auth_user) {
-  /*
-  create config for axios.put/post request with
-  user auth information
-  */
-  if (auth_user) {
-    return auth_user.getIdToken().then(function (token) {
-      var config = {};
-      config.headers = {'Authorization': 'Bearer ' + token};
-      return config;
-    });
-  } else {
-    return new Promise(function(resolve,reject){
-      var config = {};
-      resolve(config);
-    });
-  }
-}
-
 Vue.component("note-item", {
   data: function(){
     return {
@@ -51,8 +32,8 @@ Vue.component("note-item", {
     can_edit: function() {
       return (this.note
         && (this.note.author.uid == null
-            || (this.$parent.user != null
-                && this.note.author.uid == this.$parent.user.uid)));
+            || (this.$root.user != null
+                && this.note.author.uid == this.$root.user.uid)));
     },
     changed: function() {
       return this.original == null ||
@@ -63,14 +44,14 @@ Vue.component("note-item", {
   },
   created: function() {
     var id = window.location.pathname.match(/^.*\/([^\/]*)$/)[1];
-    this.$parent.$on('userLogin', this.userChanged);
+    this.$root.$on('userLogin', this.userChanged);
     if (id == 'new') {
       id = null;
       this.id = id;
       this.note = {
         title: 'some title',
         text: 'some text',
-        author: {uid: this.$parent.user ? this.$parent.user.uid : null},
+        author: {uid: this.$root.user ? this.$root.user.uid : null},
         private: false
       };
       this.original = Object.assign({}, this.note);
@@ -88,7 +69,7 @@ Vue.component("note-item", {
     }
   },
   beforeDestroy: function() {
-    this.$parent.$off('userLogin');
+    this.$root.$off('userLogin');
   },
   methods: {
     title_input(event) {
@@ -111,11 +92,11 @@ Vue.component("note-item", {
     },
     edit_note(event) {
       this.edit = true;
-      if (this.$parent.user) {
+      if (this.$root.user) {
         this.note.author = {};
-        this.note.author.uid = this.$parent.user.uid;
-        this.note.author.displayName = this.$parent.user.displayName;
-        this.note.author.photoURL = this.$parent.user.photoURL;
+        this.note.author.uid = this.$root.user.uid;
+        this.note.author.displayName = this.$root.user.displayName;
+        this.note.author.photoURL = this.$root.user.photoURL;
       }
       that = this;
       this.$nextTick().then(function(){
@@ -132,7 +113,7 @@ Vue.component("note-item", {
     },
     delete_note(event) {
       var id = this.id;
-      get_auth_config(this.$parent.auth_user).then(function(config) {
+      get_auth_config(this.$root.auth_user).then(function(config) {
         axios.delete('/api/v0/note/' + id, config)
         .then(function (out) {
           window.location.href = '/';
@@ -153,7 +134,7 @@ Vue.component("note-item", {
         private: note.private
       }
 
-      get_auth_config(this.$parent.auth_user).then(function(config) {
+      get_auth_config(this.$root.auth_user).then(function(config) {
         var id = that.id;
         var p;
         if (id == null) {
@@ -183,7 +164,7 @@ Vue.component("note-item", {
     '<h1 v-else ref="title_rendered" v-html="title_rendered"></h1>' +
     '<p ref="text" v-show="edit" class=editing contenteditable="true" @input="text_input" ></p>' +
     '<p v-if="edit">' +
-    '  <span class="editing" v-if="$parent.user.pro"><input type="checkbox" id="checkbox_private" v-model="note.private"></input><label for="checkbox_private">private</label></span>' +
+    '  <span class="editing" v-if="$root.user.pro"><input type="checkbox" id="checkbox_private" v-model="note.private"></input><label for="checkbox_private">private</label></span>' +
     '  <button class="editing" @click="cancel_note"><i class="fa fa-times">cancel</i></button>' +
     '  <button class="editing" v-if="changed" @click="save_note"><i class="fa fa-save">save</i></button>' +
     '</p>' +

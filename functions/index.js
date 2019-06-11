@@ -4,11 +4,23 @@ const fs = require('fs');
 admin.initializeApp();
 const assert = require('assert');
 
-class ForbiddenError extends Error {
-  constructor(message){
-    super(message)
-    // Add additional properties
+class HttpError extends Error {
+  constructor(message, status) {
+    super(message);
+    this.status = status;
   }
+}
+
+class ForbiddenError extends HttpError {
+  constructor(message){super(message, 403)}
+}
+
+class UnauthorizedError extends HttpError {
+  constructor(message){super(message, 401)}
+}
+
+class InternalServerError extends HttpError {
+  constructor(message){super(message, 500)}
 }
 
 const db = admin.firestore();
@@ -56,6 +68,25 @@ async function patch_database() {
 
 // patch_database();
 
+async function test() {
+  console.log('testing database');
+  try {
+    var query = await db.collection('notes').get();
+    var count = 0;
+    for (document of query.docs) {
+      console.log(document.id);
+      var doc = await db.collection('notes').doc(document.id).get();
+      var data = doc.data();
+      console.dir(data);
+      count ++;
+    }
+    console.log("total: " + count);
+  } catch(err) {
+    console.log(err);
+  }
+}
+// test();
+
 function render(body, callback) {
   fs.readFile("./main.html", "utf8", function(err, data) {
       if (err) {
@@ -69,7 +100,7 @@ function render(body, callback) {
 
 app.get('/', (req, res) => {
   //  console.log('Signed-in user:', req.user);
-  render("<note-list></note-list>", function(html) {
+  render("<dashboard></dashboard>", function(html) {
     res.send(html);
   });
 });
@@ -79,6 +110,10 @@ app.get('/note/:id', (req, res) => {
     res.send(html);
   });
 });
+
+//
+// API v0
+//
 
 app.post('/api/v0/user/login', async (req, res) => {
   try {
@@ -113,26 +148,38 @@ app.post('/api/v0/user/login', async (req, res) => {
   };
 });
 
-app.get('/api/v0/note', (req, res) => {
-  var notes = [];
-  var authors = {};
-  db.collection('notes').orderBy('created_on','desc').get().then(querySnapshot => {
-    querySnapshot.forEach(documentSnapshot => {
-      const data = documentSnapshot.data();
-      notes.push({
-          id: documentSnapshot.id,
-          title: data.title,
-          author_uid: data.author_uid,
-          created_on: data.created_on.toDate(),
-          updated_on: data.updated_on.toDate()
-        });
-      if (data.author_uid !== null) {
-        authors[data.author_uid] = db.doc('users/' + data.author_uid);
+app.get('/api/v0/note', async (req, res) => {
+  try {
+    var notes = [];
+    var authors = {};
+    var query = db.collection('notes');
+    console.log("query");
+    console.dir(req.query);
+    if (req.query.hasOwnProperty("private")) {
+      if (!req.user) {
+        throw new ForbiddenError("authentication needed to list private notes");
       }
-    });
+      const uid = req.user.uid;
+      query = query.where("private", "==", true).where("author_uid", "==", uid)
+    } else {
+      query = query.where("private", "==", false);
+    }
+    query = await query.orderBy('created_on','desc').get();
+    query.forEach(doc => {
+        const data = doc.data();
+        notes.push({
+            id: doc.id,
+            title: data.title,
+            author_uid: data.author_uid,
+            created_on: data.created_on.toDate(),
+            updated_on: data.updated_on.toDate()
+          });
+        if (data.author_uid !== null) {
+          authors[data.author_uid] = db.doc('users/' + data.author_uid);
+        }
+      });
     const values = Object.values(authors);
-    return db.getAll(...values);
-  }).then(users => {
+    var users = values.length ? await db.getAll(...values) : [];
     const keys = Object.keys(authors);
     for(var i=0; i<keys.length; i++) {
       authors[keys[i]] = users[i];
@@ -145,11 +192,11 @@ app.get('/api/v0/note', (req, res) => {
       }
     });
     return res.json({data: {notes: notes}});
-  }).catch(error => {
+  } catch(error) {
     console.log("loading notes error: " + String(error));
     console.dir(error);
-    return res.status(500).json({error: String(error)});
-  });
+    return res.status(error.status || 500).json({error: String(error)});
+  }
 });
 
 async function validate_note_form(req) {
@@ -218,6 +265,8 @@ app.put('/api/v0/note/:id', async (req, res) => {
 app.delete('/api/v0/note/:id', (req, res) => {
   const id = req.params.id;
   const uid = req.user ? req.user.uid : null;
+
+  // implementare controllo user_can_edit_note
 
   user_can_edit_note(uid, id)
    .then(yes => {

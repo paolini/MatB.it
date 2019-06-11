@@ -1,6 +1,26 @@
 var db = firebase.firestore();
 var md = window.markdownit();
 md.use(window.markdownitMathjax());
+
+function get_auth_config(auth_user) {
+  /*
+  create config for axios.put/post request with
+  user auth information
+  */
+  if (auth_user) {
+    return auth_user.getIdToken().then(function (token) {
+      var config = {};
+      config.headers = {'Authorization': 'Bearer ' + token};
+      return config;
+    });
+  } else {
+    return new Promise(function(resolve,reject){
+      var config = {};
+      resolve(config);
+    });
+  }
+}
+
 vueApp = {
   el: '#app',
   data: {
