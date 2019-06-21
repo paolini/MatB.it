@@ -164,7 +164,7 @@ Vue.component("note-item", {
     '<h1 v-else ref="title_rendered" v-html="title_rendered"></h1>' +
     '<p ref="text" v-show="edit" class=editing contenteditable="true" @input="text_input" ></p>' +
     '<p v-if="edit">' +
-    '  <span class="editing" v-if="$root.user.pro"><input type="checkbox" id="checkbox_private" v-model="note.private"></input><label for="checkbox_private">private</label></span>' +
+    '  <span class="editing" v-if="$root.user && $root.user.pro"><input type="checkbox" id="checkbox_private" v-model="note.private"></input><label for="checkbox_private">private</label></span>' +
     '  <button class="editing" @click="cancel_note"><i class="fa fa-times">cancel</i></button>' +
     '  <button class="editing" v-if="changed" @click="save_note"><i class="fa fa-save">save</i></button>' +
     '</p>' +
