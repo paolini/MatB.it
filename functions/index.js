@@ -60,7 +60,7 @@ async function patch_database() {
       db.collection('notes').doc(documentSnapshot.id).update({private: false});
       count ++;
     });
-    console.log("" + count +" documents patched");
+    console.log(String(count) +" documents patched");
   } catch(err) {
     console.log(err);
   }
@@ -68,27 +68,8 @@ async function patch_database() {
 
 // patch_database();
 
-async function test() {
-  console.log('testing database');
-  try {
-    var query = await db.collection('notes').get();
-    var count = 0;
-    for (document of query.docs) {
-      console.log(document.id);
-      var doc = await db.collection('notes').doc(document.id).get();
-      var data = doc.data();
-      console.dir(data);
-      count ++;
-    }
-    console.log("total: " + count);
-  } catch(err) {
-    console.log(err);
-  }
-}
-// test();
-
 function render(body, callback) {
-  fs.readFile("./main.html", "utf8", function(err, data) {
+  fs.readFile("./main.html", "utf8", (err, data) => {
       if (err) {
         throw err;
       }
@@ -100,13 +81,13 @@ function render(body, callback) {
 
 app.get('/', (req, res) => {
   //  console.log('Signed-in user:', req.user);
-  render("<dashboard></dashboard>", function(html) {
+  render("<dashboard></dashboard>", (html) => {
     res.send(html);
   });
 });
 
 app.get('/note/:id', (req, res) => {
-  render('<note-item :user="user"></note-item>', function(html) {
+  render('<note-item :user="user"></note-item>', (html) => {
     res.send(html);
   });
 });
@@ -141,11 +122,11 @@ app.post('/api/v0/user/login', async (req, res) => {
     var user = await db.collection('users').doc(req.user.uid).get();
     var data = user.data();
     data.uid = req.user.uid;
-    return res.json({user: data});
+    res.json({user: data});
   } catch(err) {
     console.error("ERROR in user login: " + err);
-    return res.status(500).json({error: err})
-  };
+    res.status(500).json({error: err})
+  }
 });
 
 app.get('/api/v0/note', async (req, res) => {
@@ -202,7 +183,7 @@ app.get('/api/v0/note', async (req, res) => {
 async function validate_note_form(req) {
   var note_id = null;
   const uid = req.user ? req.user.uid : null;
-  if (req.method == 'PUT') {
+  if (req.method === 'PUT') {
     note_id = req.params.id;
     var note = (await db.collection('notes').doc(note_id).get()).data();
     if (note.author_uid && uid !== note.author_uid) {
@@ -329,7 +310,7 @@ app.get('/api/v0/note/:id', (req, res) => {
         return res.json({note: note});
       });
   } catch (err) {
-    res.json({error: err})
+    return res.json({error: err})
   }
 });
 
