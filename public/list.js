@@ -4,7 +4,7 @@ Vue.component("note-list", {
   },
   data: function(){
     return {
-      notes: []
+      notes: null
     };
   },
   created() {
@@ -33,12 +33,13 @@ Vue.component("note-list", {
   },
   template:
     '<div class="note-list">' +
-    '<ul>' +
+    '<ul v-if="notes !== null">' +
     '  <li v-if="!notes.length">...no items...</li>' +
     '  <li v-for="note in notes"><a v-bind:href="\'note/\' + note.id ">{{ note.title }}</a>' +
     '  <span v-if="note.author_uid">by {{ note.author_name }}</span>' +
     '  on {{ note.created_on.toDateString() }}' +
     '  </li>' +
     '</ul>' +
+    '<p v-else>...loading...</p>' +
     '</div>'
 });
