@@ -9,6 +9,10 @@ cd functions ; npm install  # necessario?
 gcloud auth application-default login  # una tantum
 firebase serve
 
+in caso di errore di autenticazione prova: 
+    firebase logout 
+    firebase login
+
 * deployment to http://matb.in:
 
 firebase deploy

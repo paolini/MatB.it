@@ -86,6 +86,22 @@ app.get('/', (req, res) => {
   });
 });
 
+app.get('/tos', (req, res) => {
+  fs.readFile("./tos.html", "utf8", (err, data) => {
+    render(data, (html) => { 
+      res.send(html);
+    });
+  });
+});
+
+app.get('/privacy', (req, res) => {
+  fs.readFile("./privacy.html", "utf8", (err, data) => {
+    render(data, (html) => { 
+      res.send(html);
+    });
+  });
+});
+
 app.get('/note/:id', (req, res) => {
   render('<note-item :user="user"></note-item>', (html) => {
     res.send(html);
