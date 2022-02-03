@@ -13,6 +13,6 @@ in caso di errore di autenticazione prova:
     firebase logout 
     firebase login
 
-* deployment to http://matb.in:
+* deployment to http://matb.it:
 
 firebase deploy

@@ -88,6 +88,9 @@ app.get('/', (req, res) => {
 
 app.get('/tos', (req, res) => {
   fs.readFile("./tos.html", "utf8", (err, data) => {
+    if (err) {
+      throw err;
+    }
     render(data, (html) => { 
       res.send(html);
     });
@@ -96,6 +99,9 @@ app.get('/tos', (req, res) => {
 
 app.get('/privacy', (req, res) => {
   fs.readFile("./privacy.html", "utf8", (err, data) => {
+    if (err) {
+      throw err;
+    }
     render(data, (html) => { 
       res.send(html);
     });
