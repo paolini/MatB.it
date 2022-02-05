@@ -1,6 +1,9 @@
 const mongoose = require("mongoose");
 
 const UserSchema = mongoose.Schema({
+  firebase_id: {
+    type: String,
+  },
   displayName: {
     type: String,
     required: true
@@ -15,15 +18,14 @@ const UserSchema = mongoose.Schema({
   },
   first_login: {
     type: Date,
-    default: Date.now()
+    // default: Date.now()
   },
   last_login: {
     type: Date,
-    default: Date.now()
+    // default: Date.now()
   },
   photoURL: {
-    type: URL,
-    default: Date.now()
+    type: String
   },
   pro: {
     type: Boolean,
@@ -31,7 +33,7 @@ const UserSchema = mongoose.Schema({
   },
   password: {
     type: String,
-    required: true
+    required: false
   },
   createdAt: {
     type: Date,

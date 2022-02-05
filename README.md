@@ -20,3 +20,10 @@ To start the server:
 ```bash
     node index.js
 ```
+
+### import firebase data
+
+```bash
+npx -p node-firestore-import-export firestore-export -a matbit-5e23b34aa561.json -b backup.json
+node import.js
+```
