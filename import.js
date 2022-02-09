@@ -14,7 +14,7 @@ function convert_date(data, field) {
 
 (async () => {
     await init_mongo();  
-    if (false) {  
+    if (true) {  
         for (id in users) {
             var data = users[id];
             data['firebase_id'] = id;
@@ -32,8 +32,8 @@ function convert_date(data, field) {
             data.firebase_id = id;
             convert_date(data, "updated_on");
             convert_date(data, "created_on");
-            data.author = await User.findOne({ firebase_id: data.author_uid});
-            console.log(data);
+            data.author_id = (await User.findOne({ firebase_id: data.author_uid}))._id;
+            // console.log(data);
             var note = new Note(data);
             console.log(note);
             await note.save();

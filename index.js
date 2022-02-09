@@ -8,6 +8,10 @@ const fs = require("fs");
 
 const user = require("./route/user");
 const InitiateMongoServer = require("./config/db");
+const mongoose = require("mongoose");
+
+const Note = require("./model/Note");
+const User = require("./model/User");
 
 InitiateMongoServer();
 
@@ -95,48 +99,35 @@ server.get('/privacy', (req, res) => {
   
 server.get('/api/v0/note', async (req, res) => {
     try {
-      var notes = [];
       var authors = {};
-      var query = db.collection('notes');
-      console.log("query");
-      console.dir(req.query);
+      var query = {
+        private: false,
+      };
+//      console.log("query");
+//      console.dir(req.query);
       if (req.query.hasOwnProperty("private")) {
         if (!req.user) {
           throw new ForbiddenError("authentication needed to list private notes");
         }
         const uid = req.user.uid;
-        query = query.where("private", "==", true).where("author_uid", "==", uid)
-      } else {
-        query = query.where("private", "==", false);
+        query.private = true;
+        query.author = req.user;
       }
-      query = await query.orderBy('created_on','desc').get();
-      query.forEach(doc => {
-          const data = doc.data();
-          notes.push({
-              id: doc.id,
-              title: data.title,
-              author_uid: data.author_uid,
-              created_on: data.created_on.toDate(),
-              updated_on: data.updated_on.toDate()
-            });
-          if (data.author_uid !== null) {
-            authors[data.author_uid] = db.doc('users/' + data.author_uid);
-          }
+      Note
+        .aggregate([
+          { $match: query},
+          {
+          $lookup: {
+            from: "users",
+            localField: 'author_id',
+            foreignField: '_id',
+            as: 'author'
+          }},
+          {$unwind: "$author"}
+        ], (err, notes) => {
+          console.log(notes);
+          res.json({data: {notes: notes}});
         });
-      const values = Object.values(authors);
-      var users = values.length ? await db.getAll(...values) : [];
-      const keys = Object.keys(authors);
-      for(var i=0; i<keys.length; i++) {
-        authors[keys[i]] = users[i];
-      }
-      notes.forEach(note => {
-        if (note.author_uid !== null) {
-          note.author_name = authors[note.author_uid].data().displayName;
-        } else {
-          note.author_name = "";
-        }
-      });
-      return res.json({data: {notes: notes}});
     } catch(error) {
       console.log("loading notes error: " + String(error));
       console.dir(error);

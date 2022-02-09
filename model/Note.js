@@ -5,7 +5,7 @@ const NoteSchema = mongoose.Schema({
   firebase_id: {
     type: String
   },
-  author: {
+  author_id: {
     type: mongoose.Schema.Types.ObjectId, 
     ref: 'user'
   },
