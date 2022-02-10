@@ -84,6 +84,20 @@ server.get('/privacy', (req, res) => {
     });
 });
   
+const AUTHOR_LOOKUP = {$lookup: {
+    from: "users",
+    localField: 'author_id',
+    foreignField: '_id',
+    as: 'author'}};
+
+const AUTHOR_UNWIND = {$unwind: "$author"};
+const AUTHOR_PROJECT = {$project: 
+  {email: 0, emailVerified: 0, pro: 0}};
+const NOTE_PROJECT = {$project: {
+  "author": AUTHOR_PROJECT.$project
+}}
+
+
 server.get('/api/v0/note', async (req, res) => {
     try {
       var authors = {};
@@ -104,16 +118,9 @@ server.get('/api/v0/note', async (req, res) => {
         .aggregate([
           { $match: query},
           { $sort: { "created_on": -1}},
-          {            
-          $lookup: {
-            from: "users",
-            localField: 'author_id',
-            foreignField: '_id',
-            as: 'author'
-          }},
-          {
-            $unwind: "$author"
-          }
+          AUTHOR_LOOKUP,
+          AUTHOR_UNWIND,
+          NOTE_PROJECT
         ], (err, notes) => {
           console.log(notes);
           res.json({data: {notes: notes}});
@@ -127,15 +134,14 @@ server.get('/api/v0/note', async (req, res) => {
   
 async function get_note_full(note_id) {
   console.log(note_id);
-  // const data = await Note.findById(note_id);
+  const MATCH = { $match: (note_id.length == 20)
+    ? { firebase_id: note_id}
+    : { _id: mongoose.Types.ObjectId(note_id)}};
   const data = (await Note.aggregate([
-    {$match: {_id: mongoose.Types.ObjectId(note_id)}},
-    {$lookup: {
-      from: "users",
-      localField: 'author_id',
-      foreignField: '_id',
-      as: 'author'}},
-    {$unwind: "$author"}
+    MATCH,
+    AUTHOR_LOOKUP, 
+    AUTHOR_UNWIND, 
+    NOTE_PROJECT
   ]).exec())[0];
   console.log("return");
   console.log(data);
