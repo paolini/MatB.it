@@ -35,8 +35,8 @@ Vue.component("note-list", {
     '<div class="note-list">' +
     '<ul v-if="notes !== null">' +
     '  <li v-if="!notes.length">...no items...</li>' +
-    '  <li v-for="note in notes"><a v-bind:href="\'note/\' + note.id ">{{ note.title }}</a>' +
-    '  <span v-if="note.author_uid">by {{ note.author_name }}</span>' +
+    '  <li v-for="note in notes"><a v-bind:href="\'note/\' + note._id ">{{ note.title }}</a>' +
+    '  <span v-if="note.author">by {{ note.author.displayName }}</span>' +
     '  on {{ note.created_on.toDateString() }}' +
     '  </li>' +
     '</ul>' +

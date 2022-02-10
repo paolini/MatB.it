@@ -29,6 +29,9 @@ server.use(express.json());
 // parse requests of content-type - application/x-www-form-urlencoded
 server.use(express.urlencoded({ extended: true }));
 
+// serve static files from directory "html"
+server.use(express.static("html"));
+
 const PORT = process.env.PORT || 4000;
 
 server.get("/api", (req, res) => {
@@ -59,22 +62,6 @@ server.get('/', (req, res) => {
     });
 });
 
-[
-    'index.css', 
-    'app.js', 
-    'dashboard.js',
-    'list.js',
-    'note.js'
-].forEach(path => 
-    server.get('/' + path, (req, res) => {
-        fs.readFile("./html/" + path, "utf8", (err, data) => {
-            if (err) {
-                throw err;
-            }
-            res.send(data);
-        });
-    }));
-    
 server.get('/tos', (req, res) => {
     fs.readFile("./tos.html", "utf8", (err, data) => {
         if (err) {
@@ -116,14 +103,17 @@ server.get('/api/v0/note', async (req, res) => {
       Note
         .aggregate([
           { $match: query},
-          {
+          { $sort: { "created_on": -1}},
+          {            
           $lookup: {
             from: "users",
             localField: 'author_id',
             foreignField: '_id',
             as: 'author'
           }},
-          {$unwind: "$author"}
+          {
+            $unwind: "$author"
+          }
         ], (err, notes) => {
           console.log(notes);
           res.json({data: {notes: notes}});
@@ -131,10 +121,38 @@ server.get('/api/v0/note', async (req, res) => {
     } catch(error) {
       console.log("loading notes error: " + String(error));
       console.dir(error);
-      return res.status(error.status || 500).json({error: String(error)});
+      res.status(error.status || 500).json({error: String(error)});
     }
   });
   
+async function get_note_full(note_id) {
+  console.log(note_id);
+  // const data = await Note.findById(note_id);
+  const data = (await Note.aggregate([
+    {$match: {_id: mongoose.Types.ObjectId(note_id)}},
+    {$lookup: {
+      from: "users",
+      localField: 'author_id',
+      foreignField: '_id',
+      as: 'author'}},
+    {$unwind: "$author"}
+  ]).exec())[0];
+  console.log("return");
+  console.log(data);
+  return data;
+}
+
+server.get('/api/v0/note/:id', (req, res) => {
+  try {
+    return get_note_full(req.params.id)
+      .then(note => {
+        return res.json({note: note});
+      });
+  } catch (err) {
+    return res.json({error: err})
+  }
+});
+
 server.get('/note/:id', (req, res) => {
     render('<note-item :user="user"></note-item>', (html) => {
         res.send(html);
