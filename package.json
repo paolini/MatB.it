@@ -34,6 +34,7 @@
     "mongoose": "^6.2.0",
     "morgan": "^1.10.0",
     "passport": "^0.5.2",
-    "passport-google-oidc": "^0.1.0"
+    "passport-google-oidc": "^0.1.0",
+    "passport-twitter": "^0.1.5"
   }
 }

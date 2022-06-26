@@ -1,14 +1,21 @@
 var express = require('express');
 var passport = require('passport');
 var GoogleStrategy = require('passport-google-oidc');
+const User = require('../model/User');
 
 var router = express.Router();
 
-router.get('/login/federated/google', passport.authenticate('google'));
-router.get('/oauth2/redirect/google', passport.authenticate('google', {
-  successRedirect: '/',
-  failureRedirect: '/login'
-}));
+router.get('/login/federated/google', 
+  passport.authenticate('google', {
+      scope: [
+        'https://www.googleapis.com/auth/userinfo.profile',
+        'https://www.googleapis.com/auth/userinfo.email']}
+  ));
+router.get('/oauth2/redirect/google', 
+  passport.authenticate('google', {
+    successRedirect: '/',
+    failureRedirect: '/login'
+  }));
 
 module.exports = router;
 
@@ -18,39 +25,20 @@ passport.use(new GoogleStrategy({
     callbackURL: '/oauth2/redirect/google',
     scope: [ 'profile' ]
   },
-  function(issuer, profile, cb) {
-    console.log("LOGIN");
-    db.get('SELECT * FROM federated_credentials WHERE provider = ? AND subject = ?', [
-      issuer,
-      profile.id
-    ], function(err, row) {
-      if (err) { return cb(err); }
-      if (!row) {
-        db.run('INSERT INTO users (name) VALUES (?)', [
-          profile.displayName
-        ], function(err) {
-          if (err) { return cb(err); }
-  
-          var id = this.lastID;
-          db.run('INSERT INTO federated_credentials (user_id, provider, subject) VALUES (?, ?, ?)', [
-            id,
-            issuer,
-            profile.id
-          ], function(err) {
-            if (err) { return cb(err); }
-            var user = {
-              id: id,
-              name: profile.displayName
-            };
-            return cb(null, user);
-          });
-        });
-      } else {
-        db.get('SELECT rowid AS id, * FROM users WHERE rowid = ?', [ row.user_id ], function(err, row) {
-          if (err) { return cb(err); }
-          if (!row) { return cb(null, false); }
-          return cb(null, row);
-        });
-      }
-    });
+  async function(issuer, profile, done) {
+    console.log("LOGIN",issuer,profile);
+    var user = await User.findOne({'google.id': profile.id});
+    if (user) { // user found
+      console.log('USER FOUND: ', user);
+      done(null, user);
+    } else {
+      var user = new User();
+      user.google = profile;
+      user.displayName = profile.displayName;
+      user.email = profile.emails[0];
+      user.emailVerified = true; 
+      console.log("NEW USER: ", user);
+      await user.save();
+      done(null, user);
+    }
   }));

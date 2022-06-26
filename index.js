@@ -5,6 +5,7 @@ require('dotenv').config()
 // console.log(process.env) // check environment variables
 const path = require('path');
 const express = require("express");
+const passport = require("passport");
 const morgan = require('morgan'); // logger
 const session = require('express-session');
 const createError = require('http-errors');
@@ -13,14 +14,9 @@ const bodyParser = require("body-parser");
 const fs = require("fs");
 const mongoose = require("mongoose");
 const MongoStore = require('connect-mongo');
-/*
-const InitiateMongoServer = require('./config/db');
-// block until database is ready
-InitiateMongoServer(); 
-console.log("blocked?!?");
-*/
 const MONGOURI = "mongodb://localhost/matbit";
 
+console.log("connecting to " + MONGOURI);
 mongoose.connect(MONGOURI, {
     useNewUrlParser: true
   }, 
@@ -33,14 +29,46 @@ mongoose.connect(MONGOURI, {
     main()
   });
 
+function setup_twitter(server) {
+    // twitter social auth
+    console.log("setting up twitter social login");
+    const { Strategy } = require('passport-twitter');
+    const { TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET } =  process.env;
+  
+    passport.use(new Strategy({
+        consumerKey: TWITTER_CONSUMER_KEY,
+        consumerSecret: TWITTER_CONSUMER_SECRET,
+        callbackURL: '/return'
+      },
+      (accessToken, refreshToken, profile, cb) => {
+        return cb(null, profile);
+    }));
+  
+    passport.serializeUser((user, cb) => {
+      cb(null, user);
+    });
+  
+    passport.deserializeUser((obj, cb) => {
+      cb(null, obj);
+    });  
+
+    server.get('/login/twitter', passport.authenticate('twitter'));
+
+    server.get('/return', 
+      passport.authenticate('twitter', { failureRedirect: '/' }),
+      (req, res, next) => {
+        res.redirect('/');
+    });
+}
+
 async function main() {
   const user = require("./route/user");
   const Note = require("./model/Note");
   const User = require("./model/User");
-  
+
   const server = express();
   
-  server.use(morgan('tiny'));
+  server.use(morgan('tiny')); // log requests to stdout
 
   server.use(session({
     secret: 'keyboard cat',
@@ -73,6 +101,13 @@ async function main() {
 
   server.use('/', authRouter);
 
+  server.get('/login', (req, res) => res.render('login.ejs'))
+
+  server.get('/logout', (req, res, next) => {
+    req.logout();
+    res.redirect('/');
+  });
+  
   server.get("/api", (req, res) => {
     res.json({ message: "Welcome to MatbIt" });
   });
@@ -123,6 +158,8 @@ async function main() {
       });
   });
     
+  setup_twitter(server);
+
   const AUTHOR_LOOKUP = {$lookup: {
       from: "users",
       localField: 'author_id',
@@ -219,6 +256,7 @@ async function main() {
     res.render('error');
   });
 
+  // listen
   const PORT = process.env.PORT || 4000;
 
   server.listen(PORT, (req, res) => {

@@ -38,7 +38,7 @@
     <a href="#" class="w3-bar-item w3-button w3-hide-small w3-hover-white">Contact</a>
     <a href="#" class="w3-bar-item w3-button w3-hide-small w3-hide-medium w3-hover-white">Clients</a>
     <a href="#" class="w3-bar-item w3-button w3-hide-small w3-hide-medium w3-hover-white">Partners</a-->
-    <div v-if="!user" class="w3-bar-item w3-right w3-hover-white"><a href="/login.html">[login]</a></div>
+    <div v-if="!user" class="w3-bar-item w3-right w3-hover-white"><a href="/login">[login]</a></div>
     <div v-if="user" class="w3-bar-item w3-right">
       <b>{{ user.display_name}}</b>
       <img class="thumbnail" :src="user.photoURL">
