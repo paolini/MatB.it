@@ -5,7 +5,7 @@ require('dotenv').config()
 // console.log(process.env) // check environment variables
 const path = require('path');
 const express = require("express");
-const passport = require("passport");
+const passport = require('passport');
 const morgan = require('morgan'); // logger
 const session = require('express-session');
 const createError = require('http-errors');
@@ -28,38 +28,6 @@ mongoose.connect(MONGOURI, {
     console.log("Successfully connected to database " + MONGOURI);
     main()
   });
-
-function setup_twitter(server) {
-    // twitter social auth
-    console.log("setting up twitter social login");
-    const { Strategy } = require('passport-twitter');
-    const { TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET } =  process.env;
-  
-    passport.use(new Strategy({
-        consumerKey: TWITTER_CONSUMER_KEY,
-        consumerSecret: TWITTER_CONSUMER_SECRET,
-        callbackURL: '/return'
-      },
-      (accessToken, refreshToken, profile, cb) => {
-        return cb(null, profile);
-    }));
-  
-    passport.serializeUser((user, cb) => {
-      cb(null, user);
-    });
-  
-    passport.deserializeUser((obj, cb) => {
-      cb(null, obj);
-    });  
-
-    server.get('/login/twitter', passport.authenticate('twitter'));
-
-    server.get('/return', 
-      passport.authenticate('twitter', { failureRedirect: '/' }),
-      (req, res, next) => {
-        res.redirect('/');
-    });
-}
 
 async function main() {
   const user = require("./route/user");
@@ -94,11 +62,14 @@ async function main() {
 
   // view engine setup
   server.set('views', path.join(__dirname, 'templates'));
-  server.set('view engine', 'ejs');
+  server.set('view engine', 'ejs');  
+  
+  server.use(passport.initialize());
+  server.use(passport.session());
 
-  var authRouter = require('./route/auth');
   const { exit } = require("process");
-
+  
+  var authRouter = require('./route/auth')(express, passport);
   server.use('/', authRouter);
 
   server.get('/login', (req, res) => res.render('login.ejs'))
@@ -158,8 +129,6 @@ async function main() {
       });
   });
     
-  setup_twitter(server);
-
   const AUTHOR_LOOKUP = {$lookup: {
       from: "users",
       localField: 'author_id',

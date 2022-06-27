@@ -1,44 +1,86 @@
-var express = require('express');
-var passport = require('passport');
 var GoogleStrategy = require('passport-google-oidc');
 const User = require('../model/User');
 
-var router = express.Router();
+module.exports = function(express, passport) {
+  var router = express.Router();
 
-router.get('/login/federated/google', 
-  passport.authenticate('google', {
-      scope: [
-        'https://www.googleapis.com/auth/userinfo.profile',
-        'https://www.googleapis.com/auth/userinfo.email']}
-  ));
-router.get('/oauth2/redirect/google', 
-  passport.authenticate('google', {
-    successRedirect: '/',
-    failureRedirect: '/login'
-  }));
+  passport.serializeUser((user, cb) => {
+    console.log("serializeUser " + JSON.stringify(user));
+    cb(null, user._id);
+  });
 
-module.exports = router;
+  passport.deserializeUser(async (obj, cb) => {
+    const user = await User.findById(obj);
+    cb(null, user);
+  });  
 
-passport.use(new GoogleStrategy({
-    clientID: process.env['GOOGLE_CLIENT_ID'],
-    clientSecret: process.env['GOOGLE_CLIENT_SECRET'],
-    callbackURL: '/oauth2/redirect/google',
-    scope: [ 'profile' ]
-  },
-  async function(issuer, profile, done) {
-    console.log("LOGIN",issuer,profile);
-    var user = await User.findOne({'google.id': profile.id});
-    if (user) { // user found
-      console.log('USER FOUND: ', user);
-      done(null, user);
-    } else {
-      var user = new User();
-      user.google = profile;
-      user.displayName = profile.displayName;
-      user.email = profile.emails[0];
-      user.emailVerified = true; 
-      console.log("NEW USER: ", user);
-      await user.save();
-      done(null, user);
-    }
-  }));
+  router.get('/login/federated/google', 
+    passport.authenticate('google', {
+        scope: [
+          'https://www.googleapis.com/auth/userinfo.profile',
+          'https://www.googleapis.com/auth/userinfo.email']}
+    ));
+  router.get('/oauth2/redirect/google', 
+    passport.authenticate('google', {
+      successRedirect: '/',
+      failureRedirect: '/login'
+    }));
+
+  passport.use(new GoogleStrategy({
+      clientID: process.env['GOOGLE_CLIENT_ID'],
+      clientSecret: process.env['GOOGLE_CLIENT_SECRET'],
+      callbackURL: '/oauth2/redirect/google',
+      scope: [ 'profile' ]
+    },
+    async function(issuer, profile, done) {
+      console.log("LOGIN",issuer,profile);
+      var conditions = [
+        {'google_id': profile.id},
+      ];
+      profile.emails.forEach(email => {
+        conditions.push({'email': email.value })
+      });
+      console.log("conditions: " + JSON.stringify(conditions));
+      var user = await User.findOne({ $or: conditions });
+      if (user) { // user found
+        console.log('USER FOUND: ', user);
+        done(null, user);
+      } else {
+        var user = new User();
+        user.google_id = profile.id;
+        user.displayName = profile.displayName;
+        user.email = profile.emails[0].value;
+        user.emailVerified = true; 
+        console.log("NEW USER: ", user);
+        await user.save();
+        done(null, user);
+      }
+    }));
+
+    return router;
+
+    function setup_twitter(server) {
+      // twitter social auth
+      const { TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET } =  process.env;
+      console.log("setting up twitter social login " + TWITTER_CONSUMER_KEY);
+      const { Strategy } = require('passport-twitter');
+    
+      passport.use(new Strategy({
+          consumerKey: TWITTER_CONSUMER_KEY,
+          consumerSecret: TWITTER_CONSUMER_SECRET,
+          callbackURL: 'http://localhost:4000/return'
+        },
+        (accessToken, refreshToken, profile, cb) => {
+          return cb(null, profile);
+      }));
+    
+      server.get('/login/twitter', passport.authenticate('twitter'));
+
+      server.get('/return', 
+        passport.authenticate('twitter', { failureRedirect: '/' }),
+        (req, res, next) => {
+          res.redirect('/');
+      });
+  }
+}
+

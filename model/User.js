@@ -1,9 +1,6 @@
 const mongoose = require("mongoose");
 
 const UserSchema = mongoose.Schema({
-  firebase_id: {
-    type: String,
-  },
   displayName: {
     type: String,
     required: true
@@ -38,7 +35,13 @@ const UserSchema = mongoose.Schema({
   createdAt: {
     type: Date,
     default: Date.now()
-  }
+  },
+  firebase_id: {
+    type: String,
+  },
+  google_id: {
+    type: String,
+  },
 });
 
 // export model user with UserSchema
