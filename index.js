@@ -161,7 +161,7 @@ async function main() {
           }
           const uid = req.user.uid;
           query.private = true;
-          query.author = req.user;
+          query.author_id = req.user._id;
         }
         Note
           .aggregate([
