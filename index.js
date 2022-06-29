@@ -128,6 +128,10 @@ async function main() {
           });
       });
   });
+
+  server.get('/api/v0/user', async (req, res) => {
+    res.json({'user': req.user});
+  });
     
   const AUTHOR_LOOKUP = {$lookup: {
       from: "users",

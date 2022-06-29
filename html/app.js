@@ -32,6 +32,11 @@ vueApp = {
   },
   created: function() {
     var that = this;
+    axios.get('/api/v0/user').then(function (res) {
+      that.user = res.data.user;
+    }).catch(function(err){
+      console.error(err);
+    });
   }
 };
 
