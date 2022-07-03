@@ -24,6 +24,8 @@ const NoteSchema = mongoose.Schema({
   private: {
     type: Boolean
   }
+}, {
+  timestamps: {createdAt: "created_on", updatedAt: "updated_on"}
 });
 
 // export model user with UserSchema

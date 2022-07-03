@@ -31,7 +31,7 @@ Vue.component("note-item", {
     },
     can_edit: function() {
       return (this.note
-        && (this.note.author.uid == null
+        && (this.note.author == null
             || (this.$root.user != null
                 && this.note.author.uid == this.$root.user.uid)));
     },
@@ -145,9 +145,9 @@ Vue.component("note-item", {
         p.then(function (out) {
             that.original = Object.assign({}, that.note);
             if (id == null) {
-                that.id = out.data.id;
-                console.log("new note " + out.data.id + " created");
-                window.location.href = "/note/" + out.data.id;
+                that.id = out.data.note._id;
+                console.log("new note " + out.data.note._id + " created");
+                window.location.href = "/note/" + out.data.note._id;
             } else {
                console.log("document " + id + " successfully written!");
             }

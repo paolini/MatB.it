@@ -18,7 +18,7 @@ To install node libraries:
 ```
 To start the server:
 ```bash
-    nodemon index.js
+    npm start
 ```
 
 ### import firebase data

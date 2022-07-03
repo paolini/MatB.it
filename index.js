@@ -10,7 +10,6 @@ const morgan = require('morgan'); // logger
 const session = require('express-session');
 const createError = require('http-errors');
 const cors = require("cors");
-const bodyParser = require("body-parser");
 const fs = require("fs");
 const mongoose = require("mongoose");
 const MongoStore = require('connect-mongo');
@@ -138,8 +137,7 @@ async function main() {
       localField: 'author_id',
       foreignField: '_id',
       as: 'author'}};
-
-  const AUTHOR_UNWIND = {$unwind: "$author"};
+  const AUTHOR_FIRST = {$set: {author: {$ifNull: [{$first: "$author"}, null]}}}
   const AUTHOR_PROJECT = {$project: 
     {email: 0, emailVerified: 0, pro: 0}};
   const NOTE_PROJECT = {$project: {
@@ -168,7 +166,7 @@ async function main() {
             { $match: query},
             { $sort: { "created_on": -1}},
             AUTHOR_LOOKUP,
-            AUTHOR_UNWIND,
+            AUTHOR_FIRST,
             NOTE_PROJECT
           ], (err, notes) => {
             // console.log(notes);
@@ -181,6 +179,13 @@ async function main() {
       }
     });
     
+  server.post('/api/v0/note', async (req, res) => {
+    note = new Note(req.body)
+    await note.save()
+    console.log(`saved note ${note._id}`)
+    res.json({note: note})
+  })
+
   async function get_note_full(note_id) {
     // console.log(note_id);
     const MATCH = { $match: (note_id.length == 20)
@@ -189,7 +194,7 @@ async function main() {
     const data = (await Note.aggregate([
       MATCH,
       AUTHOR_LOOKUP, 
-      AUTHOR_UNWIND, 
+      AUTHOR_FIRST, 
       NOTE_PROJECT
     ]).exec())[0];
     // console.log(data);
