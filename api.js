@@ -29,7 +29,6 @@ server.get("/", (req, res) => {
     "author": AUTHOR_PROJECT.$project
   }}
 
-
   server.get('/note', async (req, res) => {
       try {
         var authors = {};
@@ -96,6 +95,16 @@ server.get("/", (req, res) => {
       return res.json({error: err})
     }
   });
+
+  server.put('/note/:id', async (req, res) => {
+    let note = await Note.findById(req.params.id)
+    console.log(`note: ${note}`)
+    note.title = req.body.title
+    note.text = req.body.text
+    await note.save()
+    console.log(`note saved ${JSON.stringify(note)}`)
+    res.json({note: note})
+  })
 
   // catch 404 and forward to error handler
   server.use(function(req, res, next) {
