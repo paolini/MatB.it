@@ -1,6 +1,7 @@
 const express = require("express") 
 const createError = require('http-errors')
 const mongoose = require("mongoose");
+// const helmet = require("helmet")
 
 const Note = require("./model/Note");
 const User = require("./model/User");
@@ -9,12 +10,31 @@ var server = express.Router()
 
 module.exports = server
 
+// server.use(helmet())
+
+function can_read_note(user, note) {
+  return !note.private || !note.author_id || (user && user._id.equals(note.author_id))
+}
+
+function can_create_note(user) {
+  return true
+}
+
+function can_write_note(user, note) {
+  return !note.author_id || (user && user._id.equals(note.author_id))
+}
+
+function can_delete_note(user, note) {
+  return can_write_note(user, note)
+}
+
 server.get("/", (req, res) => {
     res.json({ message: "Welcome to MatbIt" });
   });
 
   server.get('/user', async (req, res) => {
-    res.json({'user': req.user});
+    console.log(`get user: ${JSON.stringify(req.user)}`)
+    res.json({'user': req.user, 'bla': 42});
   });
     
   const AUTHOR_LOOKUP = {$lookup: {
@@ -41,7 +61,6 @@ server.get("/", (req, res) => {
           if (!req.user) {
             throw new ForbiddenError("authentication needed to list private notes");
           }
-          const uid = req.user.uid;
           query.private = true;
           query.author_id = req.user._id;
         }
@@ -53,7 +72,6 @@ server.get("/", (req, res) => {
             AUTHOR_FIRST,
             NOTE_PROJECT
           ], (err, notes) => {
-            // console.log(notes);
             res.json({data: {notes: notes}});
           });
       } catch(error) {
@@ -64,9 +82,18 @@ server.get("/", (req, res) => {
     });
     
   server.post('/note', async (req, res) => {
-    note = new Note(req.body)
+    note = new Note()
+    note.title = req.body.title
+    note.text = req.body.text
+    note.private = req.body.private
+    if (!can_create_note(req.user)) {
+      // Forbidden:
+      res.status(403).json({error: "cannot create note", user: req.user})
+      return
+    }
+    note.author_id = req.user ? req.user._id : null;
     await note.save()
-    console.log(`saved note ${note._id}`)
+    console.log(`create note ${JSON.stringify(note)}`)
     res.json({note: note})
   })
 
@@ -89,7 +116,14 @@ server.get("/", (req, res) => {
     try {
       return get_note_full(req.params.id)
         .then(note => {
-          return res.json({note: note});
+          console.log(`get note: ${JSON.stringify(note
+              )}`);
+          if (can_read_note(req.user, note)) {
+            return res.json({note: note});
+          } else {
+            // forbidden:
+            return res.status(403).json({error: "note is private", user: req.user})
+          }
         });
     } catch (err) {
       return res.json({error: err})
@@ -98,12 +132,30 @@ server.get("/", (req, res) => {
 
   server.put('/note/:id', async (req, res) => {
     let note = await Note.findById(req.params.id)
-    console.log(`note: ${note}`)
-    note.title = req.body.title
-    note.text = req.body.text
-    await note.save()
-    console.log(`note saved ${JSON.stringify(note)}`)
-    res.json({note: note})
+    if (can_write_note(req.user, note)) {
+      note.title = req.body.title
+      note.text = req.body.text
+      note.private = req.body.private
+      note.author_id = req.user ? req.user._id : null
+      await note.save()
+      console.log(`note saved ${JSON.stringify(note)}`)
+      res.json({ note })
+    } else {
+      // Forbidden
+      res.status(403).json({ error: "cannot write", user: req.user })
+    }
+  })
+
+  server.delete('/note/:id', async (req, res) => {
+    let note = await Note.findById(req.params.id)
+    if (can_delete_note(req.user, note)) {
+      console.log(`deleting note ${note._id}`)
+      await Note.findByIdAndDelete(note._id)
+      res.json({ deleted: true, note })
+    } else {
+      // Forbidden:
+      res.status(403).json({error: "cannot delete note", note_id: note._id, user: req.user})
+    }
   })
 
   // catch 404 and forward to error handler

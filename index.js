@@ -1,7 +1,6 @@
 const assert = require("assert");
 const NODE_VERSION = process.version.match(/^v(\d+)\..*/)[1];
 assert(NODE_VERSION >= 12);
-require('dotenv').config()
 // console.log(process.env) // check environment variables
 const path = require('path');
 const express = require("express");
@@ -11,11 +10,13 @@ const session = require('express-session');
 const cors = require("cors");
 const fs = require("fs");
 const mongoose = require("mongoose");
-const MongoStore = require('connect-mongo');
-const MONGOURI = "mongodb://localhost/matbit";
 
-console.log("connecting to " + MONGOURI);
-mongoose.connect(MONGOURI, {
+const config = require("./config")
+
+const MongoStore = require('connect-mongo');
+
+console.log("connecting to " + config.MONGO_URI);
+mongoose.connect(config.MONGO_URI, {
     useNewUrlParser: true
   }, 
   err => {
@@ -23,7 +24,7 @@ mongoose.connect(MONGOURI, {
       console.log(err);
       exit(1);
     }
-    console.log("Successfully connected to database " + MONGOURI);
+    console.log("Successfully connected to database " + config.MONGO_URI);
     main()
   });
 

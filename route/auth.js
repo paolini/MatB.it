@@ -1,5 +1,8 @@
 var GoogleStrategy = require('passport-google-oidc');
+const jwt = require("jsonwebtoken")
+
 const User = require('../model/User');
+const config = require("../config")
 
 module.exports = function(express, passport) {
   var router = express.Router();
@@ -20,6 +23,7 @@ module.exports = function(express, passport) {
           'https://www.googleapis.com/auth/userinfo.profile',
           'https://www.googleapis.com/auth/userinfo.email']}
     ));
+
   router.get('/oauth2/redirect/google', 
     passport.authenticate('google', {
       successRedirect: '/',
@@ -27,8 +31,8 @@ module.exports = function(express, passport) {
     }));
 
   passport.use(new GoogleStrategy({
-      clientID: process.env['GOOGLE_CLIENT_ID'],
-      clientSecret: process.env['GOOGLE_CLIENT_SECRET'],
+      clientID: config.GOOGLE_CLIENT_ID,
+      clientSecret: config.GOOGLE_CLIENT_SECRET,
       callbackURL: '/oauth2/redirect/google',
       scope: [ 'profile' ]
     },
@@ -43,6 +47,9 @@ module.exports = function(express, passport) {
       console.log("conditions: " + JSON.stringify(conditions));
       var user = await User.findOne({ $or: conditions });
       if (user) { // user found
+        user._token = jwt.sign({ id: user._id }, 
+          config.SECRET,
+          { expiresIn: 86400 });
         console.log('USER FOUND: ', user);
         done(null, user);
       } else {
@@ -51,6 +58,9 @@ module.exports = function(express, passport) {
         user.displayName = profile.displayName;
         user.email = profile.emails[0].value;
         user.emailVerified = true; 
+        user._token =  jwt.sign({ id: user.id }, 
+          config.SECRET, 
+          { expiresIn: 86400 });
         console.log("NEW USER: ", user);
         await user.save();
         done(null, user);
