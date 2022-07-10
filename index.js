@@ -36,14 +36,14 @@ async function main() {
   server.use(morgan('tiny')); // log requests to stdout
 
   server.use(session({
-    secret: 'keyboard cat',
+    secret: config.SECRET,
     resave: false,
     saveUninitialized: true,
     store: new MongoStore({client: mongoose.connection.client})
   }));
 
   const corsOptions = {
-    origin: "http://localhost:8081"
+    origin: config.URI
   };
 
   server.use(cors(corsOptions));
@@ -131,11 +131,8 @@ async function main() {
       });
   });
 
-  // listen
-  const PORT = process.env.PORT || 4000;
-
-  server.listen(PORT, (req, res) => {
-    console.log(`Server Started http://localhost:${PORT}/`);
+  server.listen(config.PORT, (req, res) => {
+    console.log(`Server Started ${config.URI}`);
   });
 
   return server;

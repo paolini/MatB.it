@@ -33,7 +33,6 @@ server.get("/", (req, res) => {
   });
 
   server.get('/user', async (req, res) => {
-    console.log(`get user: ${JSON.stringify(req.user)}`)
     res.json({'user': req.user, 'bla': 42});
   });
     
@@ -55,8 +54,6 @@ server.get("/", (req, res) => {
         var query = {
           private: false,
         };
-  //      console.log("query");
-  //      console.dir(req.query);
         if (req.query.hasOwnProperty("private")) {
           if (!req.user) {
             throw new ForbiddenError("authentication needed to list private notes");
@@ -75,7 +72,6 @@ server.get("/", (req, res) => {
             res.json({data: {notes: notes}});
           });
       } catch(error) {
-        console.log("loading notes error: " + String(error));
         console.dir(error);
         res.status(error.status || 500).json({error: String(error)});
       }
@@ -93,7 +89,6 @@ server.get("/", (req, res) => {
     }
     note.author_id = req.user ? req.user._id : null;
     await note.save()
-    console.log(`create note ${JSON.stringify(note)}`)
     res.json({note: note})
   })
 
@@ -108,7 +103,6 @@ server.get("/", (req, res) => {
       AUTHOR_FIRST, 
       NOTE_PROJECT
     ]).exec())[0];
-    // console.log(data);
     return data;
   }
 
@@ -116,8 +110,6 @@ server.get("/", (req, res) => {
     try {
       return get_note_full(req.params.id)
         .then(note => {
-          console.log(`get note: ${JSON.stringify(note
-              )}`);
           if (can_read_note(req.user, note)) {
             return res.json({note: note});
           } else {
@@ -138,7 +130,6 @@ server.get("/", (req, res) => {
       note.private = req.body.private
       note.author_id = req.user ? req.user._id : null
       await note.save()
-      console.log(`note saved ${JSON.stringify(note)}`)
       res.json({ note })
     } else {
       // Forbidden
@@ -149,7 +140,6 @@ server.get("/", (req, res) => {
   server.delete('/note/:id', async (req, res) => {
     let note = await Note.findById(req.params.id)
     if (can_delete_note(req.user, note)) {
-      console.log(`deleting note ${note._id}`)
       await Note.findByIdAndDelete(note._id)
       res.json({ deleted: true, note })
     } else {
