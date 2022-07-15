@@ -31,9 +31,9 @@ Vue.component("note-item", {
     },
     can_edit: function() {
       return (this.note
-        && (this.note.author == null
+        && (this.note.author_id == null
             || (this.$root.user != null
-                && this.note.author.uid == this.$root.user.uid)));
+                && this.note.author_id == this.$root.user._id)));
     },
     changed: function() {
       return this.original == null ||
