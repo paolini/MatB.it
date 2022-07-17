@@ -95,6 +95,7 @@ async function main() {
             throw err;
           }
           data = data.replace('{{{ body }}}', body);
+          data = data.replace('{{{ version }}}', config.VERSION)
           callback(data);
       });
     }
