@@ -18,10 +18,13 @@ function setup_google(router, passport) {
       failureRedirect: '/login'
     }));
 
+  const callbackURL = `${config.URI}/oauth2/redirect/google`
+  console.log(`google strategy, callbackURL: ${callbackURL}`)
+
   passport.use(new GoogleStrategy({
       clientID: config.GOOGLE_CLIENT_ID,
       clientSecret: config.GOOGLE_CLIENT_SECRET,
-      callbackURL: `${config.URI}/oauth2/redirect/google`,
+      callbackURL: callbackURL,
       scope: [ 'profile' ]
     },
     async function(issuer, profile, done) {
