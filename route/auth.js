@@ -21,7 +21,7 @@ function setup_google(router, passport) {
   passport.use(new GoogleStrategy({
       clientID: config.GOOGLE_CLIENT_ID,
       clientSecret: config.GOOGLE_CLIENT_SECRET,
-      callbackURL: '/oauth2/redirect/google',
+      callbackURL: `${config.URI}/oauth2/redirect/google`,
       scope: [ 'profile' ]
     },
     async function(issuer, profile, done) {
