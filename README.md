@@ -28,3 +28,26 @@ npx -p node-firestore-import-export firestore-export -a matbit-5e23b34aa561.json
 node import.js
 ```
 
+## create docker image
+
+```bash
+docker build . -t paolini/matbit
+docker tag paolini/matbit paolini/matbit:1.2.3
+docker push paolini/matbit
+```
+
+## deployment
+
+create a `docker-compose.yml` starting from the template `docker-deploy.yml`.
+Set a custom `SECRET`. Get your google keys.
+
+To start the service:
+```bash
+docker-compose up -d
+```
+
+To update the image:
+```bash
+docker-compose pull matbit
+docker-compose up -d
+```

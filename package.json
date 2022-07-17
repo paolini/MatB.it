@@ -1,11 +1,12 @@
 {
   "name": "matbit",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "store notes with latex content",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon index.js"
+    "start": "nodemon index.js",
+    "version": "node version.js"
   },
   "repository": {
     "type": "git",

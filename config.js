@@ -1,8 +1,10 @@
 require('dotenv').config()
 
+const package = require('./package.json');
+
 function fill(conf) {
     if (!conf.URI) conf.URI = `http://localhost:${conf.PORT}`
-    conf.VERSION = "1.0.1"
+    conf.VERSION = package.version
     return conf
 }
 
