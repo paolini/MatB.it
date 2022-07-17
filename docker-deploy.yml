@@ -1,0 +1,34 @@
+version: "3.8"
+
+services:
+  mongodb:
+    image: mongo
+    container_name: mongodb
+    restart: unless-stopped
+    environment:
+      - PUID=1000
+      - PGID=1000
+    volumes:
+      - ./database:/data/db
+    ports:
+      - 27017:27017
+    networks:
+      - backend
+
+  matbit:
+    build: .
+    container_name: matbit
+    restart: unless-stopped
+    depends_on: 
+      - mongodb
+    ports:
+      - 4000:4000
+    networks:
+      - backend
+    environment:
+      - "MONGO_URI=mongodb://mongodb/matbit"
+    env_file:
+      - ./.env
+
+networks:
+  backend:

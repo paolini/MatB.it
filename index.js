@@ -22,7 +22,7 @@ mongoose.connect(config.MONGO_URI, {
   err => {
     if (err) {
       console.log(err);
-      exit(1);
+      process.exit(1);
     }
     console.log("Successfully connected to database " + config.MONGO_URI);
     main()
@@ -64,9 +64,6 @@ async function main() {
   server.use(passport.initialize());
   server.use(passport.session());
 
-  const { exit } = require("process");
-
-  
   var authRouter = require('./route/auth')(express, passport);
   server.use('/', authRouter);
   

@@ -1,0 +1,8 @@
+node_modules
+database
+google.env
+matbit-*.json
+.env*
+backup.json
+client_secret.json
+.git
