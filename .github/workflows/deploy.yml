@@ -15,6 +15,26 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v3
 
+#    - name: Setup ssh key 
+#      uses: webfactory/ssh-agent@v0.5.4
+#      with:
+#        ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+    - name: setup SSH key
+      run: |
+          mkdir -p ~/.ssh/
+          echo "$SSH_PRIVATE_KEY" > ../private.key
+          sudo chmod 600 ../private.key
+          echo "$SSH_KNOWN_HOSTS_PROD" > ~/.ssh/known_hosts
+      shell: bash
+      env:
+          SSH_PRIVATE_KEY: ${{secrets.SSH_PRIVATE_KEY}}
+          SSH_KNOWN_HOSTS: ${{secrets.SSH_KNOWN_HOSTS}}
+
+    - name: test ssh
+      run: |
+        ssh root@matb.it hostname
+
     - name: get version
       id: vars
       run: echo ::set-output name=tag::${GITHUB_REF#refs/*/}
@@ -33,4 +53,5 @@ jobs:
         docker login -u paolini -p ${{ secrets.DOCKERHUB_TOKEN }}
         docker push paolini/matbit
         docker push paolini/matbit:${{ steps.vars.outputs.tag }}
-
+        ssh root@matb.it docker-compose -f docker/matbit/docker-compose.yml pull
+        ssh root@matb.it docker-compose -f docker/matbit/docker-compose.yml up -d
