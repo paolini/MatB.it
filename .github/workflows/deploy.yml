@@ -33,6 +33,7 @@ jobs:
 
     - name: test ssh
       run: |
+        cat ~/.ssh/known_hosts
         ssh -o "UserKnownHostsFile ~/.ssh/known_hosts" root@matb.it hostname
         false
 
