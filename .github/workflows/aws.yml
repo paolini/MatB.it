@@ -1,0 +1,35 @@
+name: Deploy to Amazon ECS
+
+on:
+  push:
+    branches:
+      - "main"
+    tags:
+      - "*.*.*"
+
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - name: et version
+      id: vars
+      run: echo ::set-output name=tag::${GITHUB_REF#refs/*/}
+
+    - name: Build, tag, and push image to dockerhub
+      id: build-image
+      env:
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        IMAGE_TAG: ${{ github.sha }}
+      run: |
+        echo version ${{ steps.vars.outputs.tag }} 
+        docker build . -t paolini/matbit
+        docker tag paolini/matbit paolini/matbit:${{ steps.vars.outputs.tag }}
+        docker login -u paolini -p ${{ secrets.DOCKERHUB_TOKEN }}
+        docker push paolini/matbit
+
