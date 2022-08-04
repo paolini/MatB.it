@@ -31,10 +31,10 @@ jobs:
 #          SSH_PRIVATE_KEY: ${{secrets.SSH_PRIVATE_KEY}}
 #          SSH_KNOWN_HOSTS: ${{secrets.SSH_KNOWN_HOSTS}}
 
-    - name: test ssh
-      run: |
-        ssh -o "StrictHostKeyChecking no" root@matb.it hostname
-        false
+#    - name: test ssh
+#      run: |
+#        ssh -o "StrictHostKeyChecking no" root@matb.it hostname
+#        false
 
     - name: get version
       id: vars
@@ -54,5 +54,5 @@ jobs:
         docker login -u paolini -p ${{ secrets.DOCKERHUB_TOKEN }}
         docker push paolini/matbit
         docker push paolini/matbit:${{ steps.vars.outputs.tag }}
-        ssh root@matb.it docker-compose -f docker/matbit/docker-compose.yml pull
-        ssh root@matb.it docker-compose -f docker/matbit/docker-compose.yml up -d
+        ssh -o "StrictHostKeyChecking no" root@matb.it docker-compose -f docker/matbit/docker-compose.yml pull
+        ssh -o "StrictHostKeyChecking no" root@matb.it docker-compose -f docker/matbit/docker-compose.yml up -d

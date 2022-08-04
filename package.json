@@ -1,6 +1,6 @@
 {
   "name": "matbit",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "store notes with latex content",
   "main": "index.js",
   "scripts": {
