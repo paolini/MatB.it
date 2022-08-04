@@ -1,9 +1,7 @@
-name: Deploy to Amazon ECS
+name: Deploy to dockerhub
 
 on:
   push:
-    branches:
-      - "main"
     tags:
       - "*.*.*"
 
@@ -17,7 +15,7 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v3
 
-    - name: et version
+    - name: get version
       id: vars
       run: echo ::set-output name=tag::${GITHUB_REF#refs/*/}
 
