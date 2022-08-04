@@ -33,7 +33,8 @@ jobs:
 
     - name: test ssh
       run: |
-        ssh root@matb.it hostname
+        ssh -o "UserKnownHostsFile ~/.ssh/known_hosts" root@matb.it hostname
+        false
 
     - name: get version
       id: vars
