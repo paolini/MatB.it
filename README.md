@@ -21,6 +21,8 @@ To start the server:
     npm start
 ```
 
+Change version number in `package.json`.
+
 ### import firebase data
 
 ```bash

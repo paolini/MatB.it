@@ -26,8 +26,11 @@ jobs:
         IMAGE_TAG: ${{ github.sha }}
       run: |
         echo version ${{ steps.vars.outputs.tag }} 
+        echo docker build
         docker build . -t paolini/matbit
         docker tag paolini/matbit paolini/matbit:${{ steps.vars.outputs.tag }}
+        echo docker push
         docker login -u paolini -p ${{ secrets.DOCKERHUB_TOKEN }}
         docker push paolini/matbit
+        docker push paolini/matbit:${{ steps.vars.outputs.tag }}
 
