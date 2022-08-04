@@ -15,26 +15,25 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v3
 
-#    - name: Setup ssh key 
-#      uses: webfactory/ssh-agent@v0.5.4
-#      with:
-#        ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+    - name: Setup ssh key 
+      uses: webfactory/ssh-agent@v0.5.4
+      with:
+        ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-    - name: setup SSH key
-      run: |
-          mkdir -p ~/.ssh/
-          echo "$SSH_PRIVATE_KEY" > ../private.key
-          sudo chmod 600 ../private.key
-          echo "$SSH_KNOWN_HOSTS_PROD" > ~/.ssh/known_hosts
-      shell: bash
-      env:
-          SSH_PRIVATE_KEY: ${{secrets.SSH_PRIVATE_KEY}}
-          SSH_KNOWN_HOSTS: ${{secrets.SSH_KNOWN_HOSTS}}
+#    - name: setup SSH key
+#      run: |
+#          mkdir -p ~/.ssh/
+#          echo "$SSH_PRIVATE_KEY" > ../private.key
+#          sudo chmod 600 ../private.key
+#          echo "$SSH_KNOWN_HOSTS_PROD" > ~/.ssh/known_hosts
+#      shell: bash
+#      env:
+#          SSH_PRIVATE_KEY: ${{secrets.SSH_PRIVATE_KEY}}
+#          SSH_KNOWN_HOSTS: ${{secrets.SSH_KNOWN_HOSTS}}
 
     - name: test ssh
       run: |
-        cat ~/.ssh/known_hosts
-        ssh -o "UserKnownHostsFile ~/.ssh/known_hosts" root@matb.it hostname
+        ssh -o "StrictHostKeyChecking no" root@matb.it hostname
         false
 
     - name: get version
