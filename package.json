@@ -34,7 +34,7 @@
     "jsonwebtoken": "^8.5.1",
     "mongoose": "^6.2.0",
     "morgan": "^1.10.0",
-    "nodemon": "^2.0.18",
+    "nodemon": "^2.0.20",
     "passport": "^0.5.2",
     "passport-google-oidc": "^0.1.0",
     "passport-twitter": "^0.1.5"
