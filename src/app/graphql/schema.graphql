@@ -2,10 +2,17 @@ scalar ObjectId
 scalar Timestamp
 scalar JSON
 
+type User {
+  _id: ObjectId!
+  displayName: String
+  photoURL: String
+}
+
 type Note {
   _id: ObjectId!
   title: String!
   text: String
+  author: User!
   created_on: Timestamp!
   updated_on: Timestamp!
 }

@@ -5,6 +5,23 @@ import { ObjectIdType, JSONType } from './types'
 import { Resolvers } from './generated'
 import { getNotesCollection } from '@/lib/models'
 
+const NOTES_PIPELINE = [
+  { $match: { private: { $ne: true } } },
+  { $sort: { updated_on: -1 } },
+  {
+    $lookup: {
+      from: 'users',
+      localField: 'author_id',
+      foreignField: '_id',
+      as: 'author'
+    }
+  },
+  {
+    // da array a oggetto singolo
+    $unwind: '$author'
+  },
+]
+
 export const resolvers = {
   ObjectId: ObjectIdType,
   JSON: JSONType,
@@ -16,9 +33,8 @@ export const resolvers = {
 
     notes: async (_parent: any, _args: any, context: Context) => {
       return await getNotesCollection(context.db)
-        .find({ private: { $ne: true } })
-        .sort({ created_on: -1 })
-        .toArray()
+        .aggregate(NOTES_PIPELINE)
+        .toArray() as any
     },
 
     note: async (_parent: any, args: { _id: ObjectId }, context: Context) => {
@@ -31,3 +47,4 @@ export const resolvers = {
     }
   },
 } satisfies Partial<Resolvers<Context>>
+

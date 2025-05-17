@@ -10,6 +10,9 @@ const notesQuery = gql`
             title
             created_on
             updated_on
+            author {
+                displayName
+            }
         }
     }
 `
@@ -24,8 +27,9 @@ export default function Notes() {
                 <div key={note._id} className="border p-4 rounded-md">
                     <h3 className="text-xl font-bold">{note.title}</h3>
                     <p className="text-gray-500">
-                        {new Date(note.created_on).toLocaleDateString()} {}
-                        {new Date(note.updated_on).toLocaleDateString()}
+                        {note.author && <span>by {note.author.displayName}</span>}
+                        {} created on {new Date(note.created_on).toLocaleDateString()} {}
+                        {} modified on {new Date(note.updated_on).toLocaleDateString()}
                     </p>
                 </div>
             ))}
