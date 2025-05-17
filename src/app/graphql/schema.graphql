@@ -6,6 +6,8 @@ type Note {
   _id: ObjectId!
   title: String!
   text: String
+  created_on: Timestamp!
+  updated_on: Timestamp!
 }
 
 type Query {

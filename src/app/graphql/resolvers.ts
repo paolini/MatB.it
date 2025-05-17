@@ -15,7 +15,10 @@ export const resolvers = {
     },
 
     notes: async (_parent: any, _args: any, context: Context) => {
-      return await getNotesCollection(context.db).find().toArray()
+      return await getNotesCollection(context.db)
+        .find({ private: { $ne: true } })
+        .sort({ created_on: -1 })
+        .toArray()
     },
 
     note: async (_parent: any, args: { _id: ObjectId }, context: Context) => {

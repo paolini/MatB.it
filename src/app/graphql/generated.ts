@@ -34,8 +34,10 @@ export type MutationNewNoteArgs = {
 export type Note = {
   __typename?: 'Note';
   _id: Scalars['ObjectId']['output'];
+  created_on: Scalars['Timestamp']['output'];
   text: Maybe<Scalars['String']['output']>;
   title: Scalars['String']['output'];
+  updated_on: Scalars['Timestamp']['output'];
 };
 
 export type Query = {
@@ -154,8 +156,10 @@ export type MutationResolvers<ContextType = Context, ParentType extends Resolver
 
 export type NoteResolvers<ContextType = Context, ParentType extends ResolversParentTypes['Note'] = ResolversParentTypes['Note']> = ResolversObject<{
   _id: Resolver<ResolversTypes['ObjectId'], ParentType, ContextType>;
+  created_on: Resolver<ResolversTypes['Timestamp'], ParentType, ContextType>;
   text: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   title: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  updated_on: Resolver<ResolversTypes['Timestamp'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
