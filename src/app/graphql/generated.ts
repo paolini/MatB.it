@@ -1,4 +1,5 @@
-import { GraphQLResolveInfo } from 'graphql';
+import { GraphQLResolveInfo, GraphQLScalarType, GraphQLScalarTypeConfig } from 'graphql';
+import { Context } from './types';
 export type Maybe<T> = T | null;
 export type InputMaybe<T> = Maybe<T>;
 export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
@@ -14,38 +15,43 @@ export type Scalars = {
   Boolean: { input: boolean; output: boolean; }
   Int: { input: number; output: number; }
   Float: { input: number; output: number; }
+  JSON: { input: any; output: any; }
+  ObjectId: { input: any; output: any; }
+  Timestamp: { input: any; output: any; }
 };
 
 export type Mutation = {
   __typename?: 'Mutation';
-  newNote?: Maybe<Note>;
+  newNote: Maybe<Note>;
 };
 
 
 export type MutationNewNoteArgs = {
-  description?: InputMaybe<Scalars['String']['input']>;
+  description: InputMaybe<Scalars['String']['input']>;
   title: Scalars['String']['input'];
 };
 
 export type Note = {
   __typename?: 'Note';
-  description?: Maybe<Scalars['String']['output']>;
-  id: Scalars['ID']['output'];
+  _id: Scalars['ObjectId']['output'];
+  text: Maybe<Scalars['String']['output']>;
   title: Scalars['String']['output'];
 };
 
 export type Query = {
   __typename?: 'Query';
-  note?: Maybe<Note>;
+  hello: Scalars['String']['output'];
+  note: Maybe<Note>;
   notes: Array<Note>;
 };
 
 
 export type QueryNoteArgs = {
-  id: Scalars['ID']['input'];
+  _id: Scalars['ObjectId']['input'];
 };
 
-
+export type WithIndex<TObject> = TObject & Record<string, any>;
+export type ResolversObject<TObject> = WithIndex<TObject>;
 
 export type ResolverTypeWrapper<T> = Promise<T> | T;
 
@@ -115,44 +121,64 @@ export type DirectiveResolverFn<TResult = {}, TParent = {}, TContext = {}, TArgs
 
 
 /** Mapping between all available schema types and the resolvers types */
-export type ResolversTypes = {
+export type ResolversTypes = ResolversObject<{
   Boolean: ResolverTypeWrapper<Scalars['Boolean']['output']>;
-  ID: ResolverTypeWrapper<Scalars['ID']['output']>;
+  JSON: ResolverTypeWrapper<Scalars['JSON']['output']>;
   Mutation: ResolverTypeWrapper<{}>;
   Note: ResolverTypeWrapper<Note>;
+  ObjectId: ResolverTypeWrapper<Scalars['ObjectId']['output']>;
   Query: ResolverTypeWrapper<{}>;
   String: ResolverTypeWrapper<Scalars['String']['output']>;
-};
+  Timestamp: ResolverTypeWrapper<Scalars['Timestamp']['output']>;
+}>;
 
 /** Mapping between all available schema types and the resolvers parents */
-export type ResolversParentTypes = {
+export type ResolversParentTypes = ResolversObject<{
   Boolean: Scalars['Boolean']['output'];
-  ID: Scalars['ID']['output'];
+  JSON: Scalars['JSON']['output'];
   Mutation: {};
   Note: Note;
+  ObjectId: Scalars['ObjectId']['output'];
   Query: {};
   String: Scalars['String']['output'];
-};
+  Timestamp: Scalars['Timestamp']['output'];
+}>;
 
-export type MutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = {
-  newNote?: Resolver<Maybe<ResolversTypes['Note']>, ParentType, ContextType, RequireFields<MutationNewNoteArgs, 'title'>>;
-};
+export interface JsonScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['JSON'], any> {
+  name: 'JSON';
+}
 
-export type NoteResolvers<ContextType = any, ParentType extends ResolversParentTypes['Note'] = ResolversParentTypes['Note']> = {
-  description?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
-  title?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+export type MutationResolvers<ContextType = Context, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = ResolversObject<{
+  newNote: Resolver<Maybe<ResolversTypes['Note']>, ParentType, ContextType, RequireFields<MutationNewNoteArgs, 'title'>>;
+}>;
+
+export type NoteResolvers<ContextType = Context, ParentType extends ResolversParentTypes['Note'] = ResolversParentTypes['Note']> = ResolversObject<{
+  _id: Resolver<ResolversTypes['ObjectId'], ParentType, ContextType>;
+  text: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  title: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-};
+}>;
 
-export type QueryResolvers<ContextType = any, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = {
-  note?: Resolver<Maybe<ResolversTypes['Note']>, ParentType, ContextType, RequireFields<QueryNoteArgs, 'id'>>;
-  notes?: Resolver<Array<ResolversTypes['Note']>, ParentType, ContextType>;
-};
+export interface ObjectIdScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['ObjectId'], any> {
+  name: 'ObjectId';
+}
 
-export type Resolvers<ContextType = any> = {
-  Mutation?: MutationResolvers<ContextType>;
-  Note?: NoteResolvers<ContextType>;
-  Query?: QueryResolvers<ContextType>;
-};
+export type QueryResolvers<ContextType = Context, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = ResolversObject<{
+  hello: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  note: Resolver<Maybe<ResolversTypes['Note']>, ParentType, ContextType, RequireFields<QueryNoteArgs, '_id'>>;
+  notes: Resolver<Array<ResolversTypes['Note']>, ParentType, ContextType>;
+}>;
+
+export interface TimestampScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['Timestamp'], any> {
+  name: 'Timestamp';
+}
+
+export type Resolvers<ContextType = Context> = ResolversObject<{
+  JSON: GraphQLScalarType;
+  Mutation: MutationResolvers<ContextType>;
+  Note: NoteResolvers<ContextType>;
+  ObjectId: GraphQLScalarType;
+  Query: QueryResolvers<ContextType>;
+  Timestamp: GraphQLScalarType;
+}>;
 

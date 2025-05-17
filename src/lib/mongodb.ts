@@ -16,12 +16,3 @@ async function connect() {
 const clientPromise = connect()
 
 export default clientPromise
-
-export async function getCollection<T extends Document=Document>(collection: string) {
-    const client = await clientPromise
-    const db = client.db()
-    return db.collection<T>(collection)
-  }
-  
-
-

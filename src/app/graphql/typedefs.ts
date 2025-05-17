@@ -4,7 +4,7 @@ import { loadFilesSync } from '@graphql-tools/load-files'
 import { mergeTypeDefs } from '@graphql-tools/merge'
 
 // Risolve il percorso a partire dalla root del progetto
-const schemaPath = path.resolve(process.cwd(), 'public/schema.graphql');
+const schemaPath = path.resolve(process.cwd(), 'src/app/graphql/schema.graphql');
 
 // Verifica se il file esiste
 if (!fs.existsSync(schemaPath)) {

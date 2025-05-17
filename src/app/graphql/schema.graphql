@@ -1,11 +1,16 @@
+scalar ObjectId
+scalar Timestamp
+scalar JSON
+
 type Note {
-  id: ID!
+  _id: ObjectId!
   title: String!
-  description: String
+  text: String
 }
 
 type Query {
-  note(id: ID!): Note
+  hello: String!
+  note(_id: ObjectId!): Note
   notes: [Note!]!
 }
 

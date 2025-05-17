@@ -6,12 +6,14 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "codegen": "graphql-codegen --config codegen.ts"
   },
   "dependencies": {
     "@apollo/client": "^3.13.8",
     "@apollo/server": "^4.12.1",
     "@as-integrations/next": "^3.2.0",
+    "@graphql-tools/load-files": "^7.0.1",
     "graphql": "^16.11.0",
     "mongodb": "^6.16.0",
     "next": "15.3.1",
@@ -23,6 +25,7 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3",
     "@graphql-codegen/cli": "^5.0.6",
+    "@graphql-codegen/typescript-resolvers": "^4.5.1",
     "@tailwindcss/postcss": "^4",
     "@types/graphql": "^14.2.3",
     "@types/mongodb": "^4.0.6",

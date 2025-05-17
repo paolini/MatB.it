@@ -4,6 +4,7 @@ import { getToken } from "next-auth/jwt"
 import { ObjectId } from 'mongodb'
 import { NextApiRequest } from 'next'
 
+import clientPromise from '@/lib/mongodb'
 import { Context } from './types'
 import { resolvers } from './resolvers'
 import { typeDefs } from './typedefs'
@@ -15,7 +16,10 @@ const server = new ApolloServer<Context>({
 
 const handler = startServerAndCreateNextHandler<NextApiRequest,Context>(server, {
     context: async (req, res): Promise<Context> => { 
-      const ctx: Context = { req, res }
+      const db = (await clientPromise).db()
+      const ctx: Context = { req, res, db, user: null }
+      return ctx
+      /*
       try {
         const token = await getToken({ req })
         
@@ -28,7 +32,6 @@ const handler = startServerAndCreateNextHandler<NextApiRequest,Context>(server, 
           ...db_user,
           _id: new ObjectId(db_user._id),
         }
-
         return { 
           ...ctx,
           user,
@@ -36,9 +39,10 @@ const handler = startServerAndCreateNextHandler<NextApiRequest,Context>(server, 
       } catch (err) {
         throw err;
       }
+      */
   }
 });
 
-export default handler;
+// export default handler;
 
-// export { handler as GET, handler as POST };
+export { handler as GET, handler as POST };
