@@ -37,12 +37,16 @@ export const resolvers = {
         .toArray() as any
     },
 
-    note: async (_parent: any, args: { _id: ObjectId }, context: Context) => {
+    note: async (_parent: any, {_id}: { _id: ObjectId }, context: Context) => {
       const collection = getNotesCollection(context.db)
-      const note = await collection.findOne({ _id: args._id })
-      if (!note) {
-        throw new Error('Note not found')
-      }
+      const notes = await collection.aggregate([
+          { $match: { _id } },
+          ...NOTES_PIPELINE
+        ]).toArray()
+
+      if (notes.length === 0) throw new Error('Note not found')
+      if (notes.length > 1) throw new Error('Multiple notes found')
+      const note = notes[0] as any
       return note
     }
   },

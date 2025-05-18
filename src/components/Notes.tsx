@@ -1,5 +1,6 @@
 "use client"
 import { gql, useQuery } from "@apollo/client"
+import Link from 'next/link'
 
 import { Loading, Error } from "@/components/utils"
 
@@ -25,7 +26,7 @@ export default function Notes() {
         <div className="flex flex-col gap-4">
             {data.notes.map((note: any) => (
                 <div key={note._id} className="border p-4 rounded-md">
-                    <h3 className="text-xl font-bold">{note.title}</h3>
+                    <h3 className="text-xl font-bold"><Link href={`/note/${note._id}`}>{note.title}</Link></h3>
                     <p className="text-gray-500">
                         {note.author && <span>by {note.author.displayName}</span>}
                         {} created on {new Date(note.created_on).toLocaleDateString()} {}

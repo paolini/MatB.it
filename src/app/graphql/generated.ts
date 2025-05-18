@@ -36,6 +36,7 @@ export type Note = {
   _id: Scalars['ObjectId']['output'];
   author: User;
   created_on: Scalars['Timestamp']['output'];
+  private: Scalars['Boolean']['output'];
   text: Maybe<Scalars['String']['output']>;
   title: Scalars['String']['output'];
   updated_on: Scalars['Timestamp']['output'];
@@ -168,6 +169,7 @@ export type NoteResolvers<ContextType = Context, ParentType extends ResolversPar
   _id: Resolver<ResolversTypes['ObjectId'], ParentType, ContextType>;
   author: Resolver<ResolversTypes['User'], ParentType, ContextType>;
   created_on: Resolver<ResolversTypes['Timestamp'], ParentType, ContextType>;
+  private: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   text: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   title: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   updated_on: Resolver<ResolversTypes['Timestamp'], ParentType, ContextType>;

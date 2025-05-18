@@ -13,6 +13,7 @@ type Note {
   title: String!
   text: String
   author: User!
+  private: Boolean!
   created_on: Timestamp!
   updated_on: Timestamp!
 }
