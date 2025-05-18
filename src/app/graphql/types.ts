@@ -1,5 +1,5 @@
 import { GraphQLScalarType, Kind, ValueNode } from "graphql"
-import { ObjectId, WithId, Db } from "mongodb"
+import { ObjectId, Db } from "mongodb"
 import { NextApiRequest, NextApiResponse } from "next"
 
 export type Context = {

@@ -1,7 +1,7 @@
 import { ApolloServer } from '@apollo/server'
 import { startServerAndCreateNextHandler } from '@as-integrations/next'
-import { getToken } from "next-auth/jwt"
-import { ObjectId } from 'mongodb'
+// import { getToken } from "next-auth/jwt"
+// import { ObjectId } from 'mongodb'
 import { NextApiRequest } from 'next'
 
 import clientPromise from '@/lib/mongodb'
