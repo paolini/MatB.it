@@ -88,22 +88,34 @@ class MyFormula extends Embed {
     const node = super.create(value);
     if (typeof value === 'string') {
       // @ts-expect-error
-      window.katex.render(value, node, {
-        throwOnError: false,
-        errorColor: '#f00'
-      });
       node.setAttribute('data-value', value);
+      this.render(node);
     }
     return node;
   }
 
+  static render(node) {
+    const value = node.getAttribute('data-value');
+    const displaystyle = node.classList.contains('tex-displaystyle');
+
+    console.log('Formula.render', value, displaystyle);
+
+    window.katex.render(value, node, {
+      throwOnError: false,
+      errorColor: '#f00',
+      displayMode: displaystyle,
+    });
+  }
+
   format(name, value) {
+    console.log('MyFormula format', name, value);
     if (name === 'displaystyle') {
       if (value) {
         this.domNode.classList.add('tex-displaystyle')
       } else {
         this.domNode.classList.remove('tex-displaystyle')
       }
+      MyFormula.render(this.domNode);
     } else {
       super.format(name, value);
     }
@@ -117,9 +129,7 @@ class MyFormula extends Embed {
     console.log('MyFormula update', mutations, context);
     super.update(mutations, context);
 
-    const formula = this.domNode.getAttribute('data-value');
-    const displaystyle = this.domNode.classList.contains('tex-displaystyle');
-    //katex.render(formula, this.domNode, { displayMode: displaystyle });
+    render(this.domNode);
   }
 
   html() {
