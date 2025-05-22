@@ -6,6 +6,7 @@ export { Delta } from 'quill-next'
 
 const GUARD_TEXT = '\uFEFF';
 
+// classe base, copiata dal codice sorgente di quill-next
 class Embed extends EmbedBlot {
   static blotName = 'formula';
   static tagName = 'span';
@@ -80,6 +81,7 @@ class Embed extends EmbedBlot {
   }
 }
 
+// classe modificata, basata sul codice sorgente di quill-next
 class MyFormula extends Embed {
   static blotName = 'formula'; // importante: deve mantenere lo stesso nome
   static tagName = 'SPAN';     // o ciò che serve
@@ -152,7 +154,27 @@ class FormulaEditorModule {
   constructor(quill) {
     this.quill = quill;
     this.quill.root.addEventListener('click', this.handleClick.bind(this));
-  }
+
+    // Cerca il pulsante formula nella toolbar
+    const toolbar = quill.getModule('toolbar');
+    if (toolbar) {
+      const formulaButton = toolbar.container.querySelector('.ql-formula');
+
+      // Aggiungi handler al click per mostrare il formula editor
+      if (formulaButton) {
+        formulaButton.addEventListener('click', () => {
+          const range = this.quill.getSelection();
+          if (range) {
+            this.quill.insertEmbed(index, 'formula', '', 'user');
+            this.quill.setSelection(index + 1, 0, 'silent');
+        
+            const [blot] = this.quill.getLeaf(index + 1);
+            this.showFormulaEditor(blot);
+          }
+        });
+      }
+    }
+  }  
 
   handleClick(event) {
     const formulaEl = event.target.closest('.ql-formula');
@@ -185,7 +207,7 @@ class FormulaEditorModule {
   
     const input = editor.querySelector('#matbit-formula-input');
     const button = editor.querySelector('#matbit-formula-save');
-  
+
     const rect = blot.domNode.getBoundingClientRect();
     editor.style.top = `${window.scrollY + rect.bottom}px`;
     editor.style.left = `${window.scrollX + rect.left}px`;

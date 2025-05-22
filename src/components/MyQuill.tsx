@@ -9,6 +9,7 @@ const config = {
             [{ 'header': [1, 2, false] }],
             ['bold', 'italic', 'underline'],
             ['code-block'],
+            ['formula'],
             [{ 'list': 'ordered' }, { 'list': 'bullet' }],
             ['link', 'image'],
             ['clean'],
