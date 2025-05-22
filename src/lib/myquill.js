@@ -7,6 +7,10 @@ export { Delta } from 'quill-next'
 const GUARD_TEXT = '\uFEFF';
 
 class Embed extends EmbedBlot {
+  static blotName = 'formula';
+  static tagName = 'span';
+  static className = 'ql-formula';
+
   constructor(scroll, node) {
     super(scroll, node);
     this.contentNode = document.createElement('span');
@@ -64,6 +68,7 @@ class Embed extends EmbedBlot {
     node.data = GUARD_TEXT;
     return range;
   }
+
   update(mutations, context) {
     console.log('Embed update', mutations, context);
     mutations.forEach(mutation => {
@@ -115,7 +120,7 @@ class MyFormula extends Embed {
       } else {
         this.domNode.classList.remove('tex-displaystyle')
       }
-      MyFormula.render(this.domNode);
+      this.constructor.render(this.domNode);
     } else {
       super.format(name, value);
     }
@@ -142,6 +147,89 @@ class MyFormula extends Embed {
 }
 
 MyQuill.register('formats/formula', MyFormula, true);
+
+class FormulaEditorModule {
+  constructor(quill) {
+    this.quill = quill;
+    this.quill.root.addEventListener('click', this.handleClick.bind(this));
+  }
+
+  handleClick(event) {
+    const formulaEl = event.target.closest('.ql-formula');
+    console.log('FormulaEditorModule handleClick', formulaEl);;
+    if (formulaEl) {
+      const blot = MyQuill.find(formulaEl);
+      this.showFormulaEditor(blot);
+    }
+  }
+
+  showFormulaEditor(blot) {
+    let editor = document.getElementById('matbit-formula-editor');
+  
+    // Crea il widget se non esiste
+    if (!editor) {
+      editor = document.createElement('div');
+      editor.id = 'matbit-formula-editor';
+      editor.style.position = 'absolute';
+      editor.style.display = 'none';
+      editor.style.background = 'white';
+      editor.style.border = '1px solid #ccc';
+      editor.style.padding = '8px';
+      editor.style.zIndex = '1000';
+      editor.innerHTML = `
+        <input type="text" id="matbit-formula-input" style="width: 300px;">
+        <button id="matbit-formula-save">Salva</button>
+      `;
+      document.body.appendChild(editor);
+    }
+  
+    const input = editor.querySelector('#matbit-formula-input');
+    const button = editor.querySelector('#matbit-formula-save');
+  
+    const rect = blot.domNode.getBoundingClientRect();
+    editor.style.top = `${window.scrollY + rect.bottom}px`;
+    editor.style.left = `${window.scrollX + rect.left}px`;
+    editor.style.display = 'block';
+  
+    input.value = blot.domNode.getAttribute('data-value');
+  
+    const quill = this.quill;
+
+    const update = () => {
+      // indice della posizione di inizio del blot
+      const index = quill.getIndex(blot);
+      quill.updateContents([
+        { retain: index },
+        { delete: 1 },
+        { insert: { formula: input.value } }
+      ], 'user');
+      // restituisce il blot a sinistra dell'indice
+      // per questo serve il +1:
+      blot = quill.getLeaf(index+1)[0];
+    };
+
+    // Preview live mentre si scrive
+    const liveUpdate = () => {
+      update();
+    };
+  
+    input.removeEventListener('input', liveUpdate); // per evitare duplicazioni
+    input.addEventListener('input', liveUpdate);
+  
+    const saveHandler = () => {
+      editor.style.display = 'none';
+  
+      button.removeEventListener('click', saveHandler);
+      input.removeEventListener('input', liveUpdate);
+    };
+  
+    button.removeEventListener('click', saveHandler);
+    button.addEventListener('click', saveHandler);
+  }
+    
+}
+
+MyQuill.register('modules/formulaEditor', FormulaEditorModule);
 
 export const Quill = MyQuill
 export const QuillEditor = MyQuillEditor

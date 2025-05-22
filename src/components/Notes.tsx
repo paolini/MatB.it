@@ -6,7 +6,7 @@ import { Loading, Error } from "@/components/utils"
 import { Note } from "@/app/graphql/generated"
 import dynamic from "next/dynamic"
 
-const MyQuill = dynamic(() => import('@/components/MyQuill'), { ssr: false })
+const MyQuill = dynamic(() => import('@/components/MyQuill'), { ssr: false });
 
 const notesQuery = gql`
     query Notes {
