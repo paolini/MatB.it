@@ -1,4 +1,3 @@
-import { useRef } from 'react'
 import { Delta, QuillEditor } from '@/lib/myquill'
 import 'katex/dist/katex.min.css';
 
@@ -25,7 +24,6 @@ const content = new Delta()
     .insert({ formula: "f(x) = \\sum_{n=0}^{\\infty} \\frac{f^{(n)}(a)}{n!} (x-a)^n" }, {displaystyle: true})
 
 export default function MyQuill() {
-    const quillRef = useRef(null);
 
     return <>
         <div>

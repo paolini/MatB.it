@@ -88,13 +88,13 @@ class MyFormula extends Embed {
 
   static create(value) {
     console.log('Formula.create', value);
-    // @ts-expect-error
+    // @ts-expect-error KaTeX is loaded globally via a script tag and may not be recognized by TypeScript.
     if (window.katex == null) {
       throw new Error('Formula module requires KaTeX.');
     }
     const node = super.create(value);
     if (typeof value === 'string') {
-      // @ts-expect-error
+      // @ts-expect-error KaTeX is loaded globally and used here.
       node.setAttribute('data-value', value);
       this.render(node);
     }
@@ -136,14 +136,12 @@ class MyFormula extends Embed {
     console.log('MyFormula update', mutations, context);
     super.update(mutations, context);
 
-    render(this.domNode);
+    MyFormula.render(this.domNode);
   }
 
   html() {
     console.log('MyFormula html');
-    const {
-      formula
-    } = this.value();
+    const formula = this.value();
     return `<span>${formula}</span>`;
   }
 }
@@ -165,10 +163,10 @@ class FormulaEditorModule {
         formulaButton.addEventListener('click', () => {
           const range = this.quill.getSelection();
           if (range) {
-            this.quill.insertEmbed(index, 'formula', '', 'user');
-            this.quill.setSelection(index + 1, 0, 'silent');
+            this.quill.insertEmbed(range.index, 'formula', '', 'user');
+            this.quill.setSelection(range.index + 1, 0, 'silent');
         
-            const [blot] = this.quill.getLeaf(index + 1);
+            const [blot] = this.quill.getLeaf(range.index + 1);
             this.showFormulaEditor(blot);
           }
         });
