@@ -29,10 +29,42 @@ docker tag paolini/matbit paolini/matbit:1.2.3
 docker push paolini/matbit
 ```
 
+## configuration
+
+Use environment variables.
+```
+MONGODB_URI=mongodb://127.0.0.1:27017/matbit
+```
+
+Environment variables can also be put in a `.env` file
+in the root directory.
+
+## migrations
+
+See also `package.json` for script shortcuts.
+
+Status:
+```
+npx migrate-mongo status
+```
+create a migration:
+```
+npx migrate-mongo create nome-della-migrazione
+```
+apply migrations:
+```
+npx migrate-mongo up
+```
+revert last migration:
+```
+npx migrate-mongo down
+```
+
 ## deployment
 
 create a `docker-compose.yml` starting from the template `docker-deploy.yml`.
 Set a custom `SECRET`. Get your google keys.
+Configure environment variables.
 
 To start the service:
 ```bash
@@ -43,5 +75,4 @@ To update the image:
 ```bash
 docker-compose pull matbit
 docker-compose up -d
-```This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
-
+```
