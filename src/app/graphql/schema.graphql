@@ -11,7 +11,7 @@ type User {
 type Note {
   _id: ObjectId!
   title: String!
-  text: String
+  delta: JSON
   author: User!
   private: Boolean!
   created_on: Timestamp!
