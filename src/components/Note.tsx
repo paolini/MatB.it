@@ -34,5 +34,10 @@ export default function NoteElement({_id}: {_id: string}) {
     return <div>
         <h1>{ note.title }</h1>
         <MyQuill readOnly={true} content={note.delta}/>
+        { note.author &&
+            <p className="text-gray-500">
+                By {note.author.displayName}.
+            </p>    
+        }
     </div>
 }
