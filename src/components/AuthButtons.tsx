@@ -1,4 +1,5 @@
 "use client";
+import React from "react";
 import { SessionProvider, useSession, signIn, signOut } from "next-auth/react";
 
 // Determina i provider abilitati tramite variabili d'ambiente pubbliche
@@ -40,9 +41,33 @@ function LoginButton() {
 }
 
 function ProfileMenuComponent({ session }: { session: any }) {
+  const [open, setOpen] = React.useState(false);
+  const menuRef = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setOpen(false);
+      }
+    }
+    if (open) {
+      document.addEventListener("mousedown", handleClickOutside);
+    } else {
+      document.removeEventListener("mousedown", handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [open]);
+
   return (
-    <div className="relative group">
-      <button className="flex items-center gap-2 focus:outline-none">
+    <div className="relative" ref={menuRef}>
+      <button
+        className="flex items-center gap-2 focus:outline-none"
+        onClick={() => setOpen((v) => !v)}
+        aria-haspopup="true"
+        aria-expanded={open}
+      >
         {session.user?.image ? (
           <img src={session.user.image} alt="avatar" className="w-8 h-8 rounded-full border" />
         ) : (
@@ -50,19 +75,18 @@ function ProfileMenuComponent({ session }: { session: any }) {
             {session.user?.name?.[0] || session.user?.email?.[0] || "U"}
           </span>
         )}
-        <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-        </svg>
       </button>
-      <div className="absolute right-0 mt-2 w-40 bg-white border rounded shadow-lg opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto transition-opacity z-10">
-        <div className="px-4 py-2 text-gray-700 border-b">{session.user?.name || session.user?.email}</div>
-        <button
-          className="w-full text-left px-4 py-2 text-red-600 hover:bg-gray-100"
-          onClick={() => signOut()}
-        >
-          Logout
-        </button>
-      </div>
+      {open && (
+        <div className="absolute right-0 mt-2 w-40 bg-white border rounded shadow-lg z-10">
+          <div className="px-4 py-2 text-gray-700 border-b">{session.user?.name || session.user?.email}</div>
+          <button
+            className="w-full text-left px-4 py-2 text-red-600 hover:bg-gray-100"
+            onClick={() => signOut()}
+          >
+            Logout
+          </button>
+        </div>
+      )}
     </div>
   );
 }
