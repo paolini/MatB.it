@@ -1,6 +1,8 @@
 import NextAuth from "next-auth";
 import GitHubProvider from "next-auth/providers/github";
 import GoogleProvider from "next-auth/providers/google";
+import clientPromise from "@/lib/mongodb";
+import { MongoDBAdapter } from "@auth/mongodb-adapter";
 
 const providers = [];
 
@@ -29,6 +31,7 @@ if (process.env.GOOGLE_CLIENT_ID) {
 
 const handler = NextAuth({
   providers,
+  adapter: MongoDBAdapter(clientPromise),
 });
 
 export { handler as GET, handler as POST };
