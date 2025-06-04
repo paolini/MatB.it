@@ -10,12 +10,12 @@ export type MongoNote = {
 }
 
 export type MongoUser = {
-    displayName: string
+    name: string
     email: string
     emailVerified: boolean
     first_login: Date
     last_login: Date
-    photoURL: string
+    image: string
     pro: boolean
     createdAt: Date
 }
@@ -28,6 +28,6 @@ export function getUsersCollection(db: Db) {
     return db.collection<MongoUser>('users')
 }
 
-  
+
 
 

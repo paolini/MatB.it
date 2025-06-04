@@ -3,7 +3,7 @@ import { ObjectId } from 'mongodb'
 import { Context } from './types'
 import { ObjectIdType, JSONType } from './types'
 import { Resolvers, Note } from './generated'
-import { getNotesCollection } from '@/lib/models'
+import { getNotesCollection, getUsersCollection } from '@/lib/models'
 
 const NOTES_PIPELINE = [
   { $match: { private: { $ne: true } } },
@@ -48,6 +48,10 @@ export const resolvers = {
       if (notes.length > 1) throw new Error('Multiple notes found')
       const note = notes[0]
       return note
+    },
+
+    profile: async (_parent: unknown, _args: unknown, context: Context) => {
+      return context.user || null
     }
   },
 } satisfies Partial<Resolvers<Context>>

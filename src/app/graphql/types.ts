@@ -1,11 +1,12 @@
 import { GraphQLScalarType, Kind, ValueNode } from "graphql"
-import { ObjectId, Db } from "mongodb"
+import { ObjectId, Db, WithId } from "mongodb"
 import { NextApiRequest, NextApiResponse } from "next"
+import { MongoUser } from '@/lib/models'
 
 export type Context = {
     req: NextApiRequest
     res: NextApiResponse|undefined
-    user: null
+    user: WithId<MongoUser> | null
     db: Db
   }
   
