@@ -6,27 +6,63 @@ const enabledProviders: string[] = [];
 if (process.env.NEXT_PUBLIC_GITHUB_ID) enabledProviders.push("github");
 if (process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID) enabledProviders.push("google");
 
-export default function AuthButtonsWrapper() {
+export default function AuthBar() {
   return (
     <SessionProvider>
-      <AuthButtons />
+      <NavBar />
     </SessionProvider>
   );
 }
 
-function AuthButtons() {
+function NavBar() {
   const { data: session } = useSession();
-  if (session) {
-    return (
-      <div>
-        <p>Benvenuto, {session.user?.name || session.user?.email}!</p>
-        <button onClick={() => signOut()}>Logout</button>
-      </div>
-    );
-  }
   return (
-    <div>
-      <button onClick={() => signIn()}>Login</button>
+    <nav className="w-full flex items-center justify-between bg-white border-b border-gray-200 px-4 py-2 shadow-sm">
+      <div className="flex items-center gap-2">
+        <span className="font-bold text-xl text-blue-600">MatBit</span>
+      </div>
+      <div>
+        {session ? <ProfileMenuComponent session={session} /> : <LoginButton />}
+      </div>
+    </nav>
+  );
+}
+
+function LoginButton() {
+  return (
+    <button
+      className="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700 transition"
+      onClick={() => signIn()}
+    >
+      Login
+    </button>
+  );
+}
+
+function ProfileMenuComponent({ session }: { session: any }) {
+  return (
+    <div className="relative group">
+      <button className="flex items-center gap-2 focus:outline-none">
+        {session.user?.image ? (
+          <img src={session.user.image} alt="avatar" className="w-8 h-8 rounded-full border" />
+        ) : (
+          <span className="inline-block w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center text-gray-600 font-bold">
+            {session.user?.name?.[0] || session.user?.email?.[0] || "U"}
+          </span>
+        )}
+        <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+      <div className="absolute right-0 mt-2 w-40 bg-white border rounded shadow-lg opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto transition-opacity z-10">
+        <div className="px-4 py-2 text-gray-700 border-b">{session.user?.name || session.user?.email}</div>
+        <button
+          className="w-full text-left px-4 py-2 text-red-600 hover:bg-gray-100"
+          onClick={() => signOut()}
+        >
+          Logout
+        </button>
+      </div>
     </div>
   );
 }
