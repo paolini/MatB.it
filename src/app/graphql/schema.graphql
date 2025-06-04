@@ -5,7 +5,7 @@ scalar JSON
 type User {
   _id: ObjectId!
   name: String
-  photoURL: String
+  image: String
 }
 
 type Note {
