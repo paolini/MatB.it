@@ -6,10 +6,32 @@ export function Loading() {
 }
 
 export function Error({ error }: { error: ApolloError }) {
-    return <div className="flex justify-center items-center h-screen">
-        <div className="text-red-500">
-            <h1 className="text-2xl font-bold">Error</h1>
-            <p>{error.message}</p>
-        </div>
+    let causeDetails = null
+    // Try to extract GraphQL error details if present
+    const cause = error.cause as any
+    const gqlErrors = cause && typeof cause === 'object' && cause.result && Array.isArray(cause.result.errors)
+        ? cause.result.errors
+        : null
+    if (gqlErrors) {
+        causeDetails = gqlErrors.map((err: any, idx: number) => (
+            <div key={idx} className="mb-2">
+                <div className="font-bold">{err.message}</div>
+                {err.extensions?.code && <div className="text-xs">Codice: {err.extensions.code}</div>}
+                {err.locations && <pre className="text-xs">{JSON.stringify(err.locations, null, 2)}</pre>}
+                {err.extensions?.stacktrace && (
+                    <details>
+                        <summary>Stacktrace</summary>
+                        <pre className="text-xs overflow-x-auto">{err.extensions.stacktrace.join('\n')}</pre>
+                    </details>
+                )}
+            </div>
+        ))
+    } else if (cause) {
+        causeDetails = <pre className="bg-red-100 text-red-700 p-2 mt-2 rounded text-xs overflow-x-auto">{typeof cause === 'string' ? cause : JSON.stringify(cause, null, 2)}</pre>
+    }
+    return <div className="text-red-500">
+        <h1 className="text-2xl font-bold">Error</h1>
+        <p>{error.message}</p>
+        {causeDetails}
     </div>
 }
