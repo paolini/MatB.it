@@ -1,26 +1,13 @@
-"use client";
 import React from "react";
-import { SessionProvider, useSession, signIn, signOut } from "next-auth/react";
+import { useSession, signIn, signOut } from "next-auth/react";
+import Link from "next/link";
 
-// Determina i provider abilitati tramite variabili d'ambiente pubbliche
-const enabledProviders: string[] = [];
-if (process.env.NEXT_PUBLIC_GITHUB_ID) enabledProviders.push("github");
-if (process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID) enabledProviders.push("google");
-
-export default function AuthBar() {
-  return (
-    <SessionProvider>
-      <NavBar />
-    </SessionProvider>
-  );
-}
-
-function NavBar() {
+export default function NavBar() {
   const { data: session } = useSession();
   return (
     <nav className="w-full flex items-center justify-between bg-white border-b border-gray-200 px-4 py-2 shadow-sm">
       <div className="flex items-center gap-2">
-        <span className="font-bold text-xl text-blue-600">MatBit</span>
+        <Link href="/" className="font-bold text-xl text-blue-600">MatBit</Link>
       </div>
       <div>
         {session ? <ProfileMenuComponent session={session} /> : <LoginButton />}
