@@ -86,18 +86,18 @@ class MyFormula extends Embed {
   static blotName = 'formula'; // importante: deve mantenere lo stesso nome
   static tagName = 'SPAN';     // o ciò che serve
 
-  static create(value) {
-    console.log('Formula.create', value);
-    // @ts-expect-error KaTeX is loaded globally via a script tag and may not be recognized by TypeScript.
-    if (window.katex == null) {
-      throw new Error('Formula module requires KaTeX.');
+  static create(data) {
+    // data può essere una stringa (legacy) o un oggetto { value, displaystyle }
+    const node = super.create();
+    if (typeof data === 'string') {
+      node.setAttribute('data-value', data);
+    } else if (data && typeof data === 'object') {
+      node.setAttribute('data-value', data.value);
+      if (data.displaystyle) {
+        node.classList.add('tex-displaystyle');
+      }
     }
-    const node = super.create(value);
-    if (typeof value === 'string') {
-      // @ts-expect-error KaTeX is loaded globally and used here.
-      node.setAttribute('data-value', value);
-      this.render(node);
-    }
+    this.render(node);
     return node;
   }
 
@@ -129,7 +129,10 @@ class MyFormula extends Embed {
   }
 
   static value(domNode) {
-    return domNode.getAttribute('data-value');
+    return {
+      value: domNode.getAttribute('data-value'),
+      displaystyle: domNode.classList.contains('tex-displaystyle')
+    };
   }
 
   update(mutations, context) {
