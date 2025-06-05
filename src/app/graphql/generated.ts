@@ -29,6 +29,7 @@ export type Mutation = {
 
 export type MutationNewNoteArgs = {
   description: InputMaybe<Scalars['String']['input']>;
+  private: InputMaybe<Scalars['Boolean']['input']>;
   title: Scalars['String']['input'];
 };
 

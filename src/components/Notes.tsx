@@ -28,7 +28,11 @@ export default function Notes() {
     const private_notes = data.notes.filter((note: Note) => note.private)
     return <>
         <div className="flex justify-center">
-            <button className="bg-blue-500 text-white px-4 py-2 rounded-md">Create Note</button>
+            <Link href="/note/new">
+                <button className="bg-blue-500 text-white px-4 py-2 rounded-md">
+                    Nuova Nota
+                </button>
+            </Link>
         </div>
 
         { public_notes.length === 0 && private_notes.length === 0 && (
@@ -75,4 +79,4 @@ function NoteItem({ note }: { note: Note }) {
             </p>
         </div>
     )
-}   
+}

@@ -1,5 +1,6 @@
 import { ObjectId } from 'mongodb'
 import type { MutationUpdateNoteArgs } from './generated'
+import type { MutationNewNoteArgs } from './generated'
 
 import { Context } from './types'
 import { ObjectIdType, JSONType } from './types'
@@ -68,7 +69,29 @@ export const resolvers = {
   },
 
   Mutation: {
-    newNote: async () => { throw new Error('Not implemented') },
+    newNote: async (
+      _parent: unknown,
+      args: MutationNewNoteArgs,
+      context: Context
+    ): Promise<Note | null> => {
+      if (!context.user) throw new Error('Not authenticated')
+      const collection = getNotesCollection(context.db)
+      const now = new Date()
+      const note = {
+        author_id: context.user._id,
+        title: args.title,
+        text: args.description || '',
+        private: typeof args.private === 'boolean' ? args.private : false,
+        created_on: now,
+        updated_on: now
+      }
+      const result = await collection.insertOne(note)
+      const notes = await collection.aggregate<Note>([
+        { $match: { _id: result.insertedId } },
+        ...NOTES_PIPELINE
+      ]).toArray()
+      return notes[0] || null
+    },
     updateNote: async (
       _parent: unknown,
       args: MutationUpdateNoteArgs,
