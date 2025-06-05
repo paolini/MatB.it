@@ -1,4 +1,5 @@
 import { ObjectId } from 'mongodb'
+import type { MutationUpdateNoteArgs } from './generated'
 
 import { Context } from './types'
 import { ObjectIdType, JSONType } from './types'
@@ -54,5 +55,36 @@ export const resolvers = {
       return context.user || null
     }
   },
+
+  Mutation: {
+    newNote: async () => { throw new Error('Not implemented') },
+    updateNote: async (
+      _parent: unknown,
+      args: MutationUpdateNoteArgs,
+      context: Context
+    ): Promise<Note | null> => {
+      const { _id, title, delta, private: isPrivate } = args
+      const collection = getNotesCollection(context.db)
+      const note = await collection.findOne({ _id })
+      if (!note) throw new Error('Note not found')
+      
+      if (!context.user) throw new Error('Not authenticated')
+      
+      if (!note.author_id.equals(context.user._id)) throw new Error('Not authorized')
+      
+      const update: any = {}
+      if (typeof title === 'string') update.title = title
+      if (delta) update.delta = delta
+      if (typeof isPrivate === 'boolean') update.private = isPrivate
+      if (Object.keys(update).length === 0) throw new Error('No fields to update')
+      await collection.updateOne({ _id }, { $set: update })
+      // restituisci la nota aggiornata
+      const notes = await collection.aggregate<Note>([
+        { $match: { _id } },
+        ...NOTES_PIPELINE
+      ]).toArray()
+      return notes[0] || null
+    },
+  }
 } satisfies Partial<Resolvers<Context>>
 

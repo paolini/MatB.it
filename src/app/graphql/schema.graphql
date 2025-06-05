@@ -34,4 +34,5 @@ type Query {
 
 type Mutation {
   newNote(title: String!, description: String): Note
+  updateNote(_id: ObjectId!, title: String, delta: JSON, private: Boolean): Note
 }

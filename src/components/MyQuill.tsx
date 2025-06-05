@@ -2,6 +2,7 @@
 
 import { Delta, QuillEditor } from '@/lib/myquill'
 import 'katex/dist/katex.min.css';
+import { useMemo, useRef, useEffect } from 'react';
 
 const config = {
     theme: "snow",
@@ -22,25 +23,32 @@ const config = {
 const readonlyConfig = {
 }
 
-const contentExample = new Delta()
-    .insert("Hello world ")
-    .insert({ formula: "e^{i\\pi} + 1 = 0" })
-    .insert(". Taylor series:\n")
-    .insert({ formula: "f(x) = \\sum_{n=0}^{\\infty} \\frac{f^{(n)}(a)}{n!} (x-a)^n" }, {displaystyle: true})
-
-export default function MyQuill({readOnly,content}:{
+export default function MyQuill({readOnly, content, onSave}: {
     readOnly?: boolean
     content?: Delta
+    onSave?: (delta: Delta) => void
 }) {
-    const delta = readOnly 
-     ? (content || new Delta())
-     : contentExample
+    const quillInstance = useRef<any>(null)
     return <div>
         <QuillEditor
             readOnly={readOnly}
             config={readOnly ? readonlyConfig : config}
-            defaultValue={delta}
-            />
+            defaultValue={content || new Delta()}
+            onReady={quill => { quillInstance.current = quill }}
+        />
+        {!readOnly && onSave && (
+            <button
+                className="mt-2 px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
+                onClick={() => {
+                    if (quillInstance.current) {
+                        const delta = quillInstance.current.getContents()
+                        onSave(delta)
+                    }
+                }}
+            >
+                Salva
+            </button>
+        )}
     </div>
 }
 
