@@ -1,13 +1,18 @@
 import React from "react";
 import { useSession, signIn, signOut } from "next-auth/react";
 import Link from "next/link";
+import { VERSION } from "../version";
+import type { Session } from "next-auth";
 
 export default function NavBar() {
   const { data: session } = useSession();
   return (
     <nav className="w-full flex items-center justify-between bg-white border-b border-gray-200 px-4 py-2 shadow-sm">
       <div className="flex items-center gap-2">
-        <Link href="/" className="font-bold text-xl text-blue-600">MatBit</Link>
+        <Link href="/" className="font-bold text-xl text-blue-600">
+          MatBit
+        </Link>
+        <span className="ml-2 text-xs text-gray-500 align-top">v{VERSION}</span>
       </div>
       <div>
         {session ? <ProfileMenuComponent session={session} /> : <LoginButton />}
@@ -27,7 +32,7 @@ function LoginButton() {
   );
 }
 
-function ProfileMenuComponent({ session }: { session: any }) {
+function ProfileMenuComponent({ session }: { session: Session }) {
   const [open, setOpen] = React.useState(false);
   const menuRef = React.useRef<HTMLDivElement>(null);
 
