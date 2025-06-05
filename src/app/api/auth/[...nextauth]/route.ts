@@ -17,6 +17,7 @@ if (process.env.GITHUB_ID) {
     })
   );
 }
+
 if (process.env.GOOGLE_CLIENT_ID) {
   if (!process.env.GOOGLE_CLIENT_SECRET) {
     throw new Error("GOOGLE_CLIENT_SECRET is required when NEXT_PUBLIC_GOOGLE_CLIENT_ID is set");
@@ -32,6 +33,8 @@ if (process.env.GOOGLE_CLIENT_ID) {
 const handler = NextAuth({
   providers,
   adapter: MongoDBAdapter(clientPromise),
+  secret: process.env.NEXTAUTH_SECRET,
+  session: { strategy: 'jwt' },
 });
 
 export { handler as GET, handler as POST };
