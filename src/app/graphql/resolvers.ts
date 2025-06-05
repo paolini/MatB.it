@@ -4,10 +4,9 @@ import type { MutationUpdateNoteArgs } from './generated'
 import { Context } from './types'
 import { ObjectIdType, JSONType } from './types'
 import { Resolvers, Note } from './generated'
-import { getNotesCollection, getUsersCollection } from '@/lib/models'
+import { getNotesCollection } from '@/lib/models'
 
 const NOTES_PIPELINE = [
-  { $match: { private: { $ne: true } } },
   { $sort: { updated_on: -1 } },
   {
     $lookup: {
@@ -33,8 +32,19 @@ export const resolvers = {
     },
 
     notes: async (_parent: unknown, _args: unknown, context: Context) => {
+      const userId = context.user?._id
+      console.log
       return await getNotesCollection(context.db)
-        .aggregate<Note>(NOTES_PIPELINE)
+        .aggregate<Note>([
+          { $match: {
+              $or: [
+                { private: { $ne: true } },
+                ...(userId ? [{ author_id: userId }] : [])
+              ]
+            }
+          },
+          ...NOTES_PIPELINE
+        ])
         .toArray()
     },
 
@@ -42,6 +52,7 @@ export const resolvers = {
       const collection = getNotesCollection(context.db)
       const notes = await collection.aggregate<Note>([
           { $match: { _id } },
+          { $match: { private: { $ne: true } } },
           ...NOTES_PIPELINE
         ]).toArray()
 

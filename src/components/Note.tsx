@@ -4,7 +4,6 @@ import { useState } from 'react';
 
 import { Note, Profile } from '@/app/graphql/generated'
 import { Loading, Error } from '@/components/utils'
-import { assert } from '@/lib/utils'
 import dynamic from "next/dynamic"
 import { Delta } from '@/lib/myquill'
 
@@ -41,71 +40,31 @@ mutation UpdateNote($_id: ObjectId!, $title: String, $delta: JSON, $private: Boo
   }
 }`
 
-export default function NoteElementWrapper({_id}: {_id: string}) {
+export default function NoteWrapper({_id}: {_id: string}) {
     const { loading, error, data, refetch } = useQuery<{note: Note, profile: Profile}>(
         NoteQuery, {variables: { _id }})
     const [updateNote, { loading: saving, error: saveError }] = useMutation(UpdateNoteMutation)
     if (error) return <Error error={error} />    
     if (loading || !data) return <Loading />
-    return <NoteElementInner 
+    return <NoteInner 
         note={data.note} 
         profile={data.profile} 
         updateNote={updateNote} 
-        saving={saving} 
         saveError={saveError} 
         refetch={refetch} 
     />
 }
 
-function NoteEditInner({
-    note,
-    onSave,
-    onCancel,
-    saving,
-    saveError
-}: {
-    note: Note,
-    onSave: (title: string, delta: Delta, isPrivate: boolean) => void,
-    onCancel: () => void,
-    saving: boolean,
-    saveError: any
-}) {
-    const [title, setTitle] = useState(note.title)
-    const [isPrivate, setIsPrivate] = useState(note.private)
-    return (
-        <>
-            <input className="text-2xl font-bold w-full mb-2" value={title} onChange={e => setTitle(e.target.value)} />
-            <MyQuill
-                readOnly={false}
-                content={note.delta}
-                onSave={delta => onSave(title, delta, isPrivate)}
-            />
-            <div className="mt-2 flex gap-2 items-center">
-                <label className="flex items-center gap-1">
-                    <input type="checkbox" checked={isPrivate} onChange={e => setIsPrivate(e.target.checked)} />
-                    privata
-                </label>
-                <button className="px-4 py-2 bg-gray-300 text-gray-800 rounded hover:bg-gray-400 transition-colors" onClick={onCancel}>
-                    Annulla
-                </button>
-                {saveError && <span className="text-red-500 ml-2">Errore: {saveError.message}</span>}
-            </div>
-        </>
-    )
-}
-
-function NoteElementInner({
+function NoteInner({
     note,
     profile,
     updateNote,
-    saving,
     saveError,
     refetch
 }: {
     note: Note,
     profile: Profile,
     updateNote: any,
-    saving: boolean,
     saveError: any,
     refetch: () => void
 }) {
@@ -115,7 +74,6 @@ function NoteElementInner({
         {editMode ? (
             <NoteEditInner
                 note={note}
-                saving={saving}
                 saveError={saveError}
                 onCancel={() => setEditMode(false)}
                 onSave={async (title, delta, isPrivate) => {
@@ -145,3 +103,39 @@ function NoteElementInner({
         }
     </div>
 }
+
+function NoteEditInner({
+    note,
+    onSave,
+    onCancel,
+    saveError
+}: {
+    note: Note,
+    onSave: (title: string, delta: Delta, isPrivate: boolean) => void,
+    onCancel: () => void,
+    saveError: any
+}) {
+    const [title, setTitle] = useState(note.title)
+    const [isPrivate, setIsPrivate] = useState(note.private)
+    return (
+        <>
+            <input className="text-2xl font-bold w-full mb-2" value={title} onChange={e => setTitle(e.target.value)} />
+            <MyQuill
+                readOnly={false}
+                content={note.delta}
+                onSave={delta => onSave(title, delta, isPrivate)}
+            />
+            <div className="mt-2 flex gap-2 items-center">
+                <label className="flex items-center gap-1">
+                    <input type="checkbox" checked={isPrivate} onChange={e => setIsPrivate(e.target.checked)} />
+                    privata
+                </label>
+                <button className="px-4 py-2 bg-gray-300 text-gray-800 rounded hover:bg-gray-400 transition-colors" onClick={onCancel}>
+                    Annulla
+                </button>
+                {saveError && <span className="text-red-500 ml-2">Errore: {saveError.message}</span>}
+            </div>
+        </>
+    )
+}
+
