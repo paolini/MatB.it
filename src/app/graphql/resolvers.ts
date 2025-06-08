@@ -34,7 +34,6 @@ export const resolvers = {
 
     notes: async (_parent: unknown, _args: unknown, context: Context) => {
       const userId = context.user?._id
-      console.log
       return await getNotesCollection(context.db)
         .aggregate<Note>([
           { $match: {
@@ -53,7 +52,14 @@ export const resolvers = {
       const collection = getNotesCollection(context.db)
       const notes = await collection.aggregate<Note>([
           { $match: { _id } },
-          { $match: { private: { $ne: true } } },
+          // Mostra la nota se non è privata, oppure se l'utente autenticato è l'autore
+          { $match: {
+              $or: [
+                { private: { $ne: true } },
+                ...(context.user ? [{ author_id: context.user._id }] : [])
+              ]
+            }
+          },
           ...NOTES_PIPELINE
         ]).toArray()
 
