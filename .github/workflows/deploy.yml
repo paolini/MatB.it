@@ -20,22 +20,6 @@ jobs:
       with:
         ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-#    - name: setup SSH key
-#      run: |
-#          mkdir -p ~/.ssh/
-#          echo "$SSH_PRIVATE_KEY" > ../private.key
-#          sudo chmod 600 ../private.key
-#          echo "$SSH_KNOWN_HOSTS_PROD" > ~/.ssh/known_hosts
-#      shell: bash
-#      env:
-#          SSH_PRIVATE_KEY: ${{secrets.SSH_PRIVATE_KEY}}
-#          SSH_KNOWN_HOSTS: ${{secrets.SSH_KNOWN_HOSTS}}
-
-#    - name: test ssh
-#      run: |
-#        ssh -o "StrictHostKeyChecking no" root@matb.it hostname
-#        false
-
     - name: Get version from package.json
       id: vars
       run: echo "version=$(jq -r .version package.json)" >> $GITHUB_OUTPUT
@@ -55,5 +39,5 @@ jobs:
         docker tag paolini/matbit paolini/matbit:${{ steps.vars.outputs.version }}
         docker push paolini/matbit
         docker push paolini/matbit:${{ steps.vars.outputs.version }}
-        ssh -o "StrictHostKeyChecking no" root@matb.it docker-compose -f docker/matbit/docker-compose.yml pull
-        ssh -o "StrictHostKeyChecking no" root@matb.it docker-compose -f docker/matbit/docker-compose.yml up -d
+#        ssh -o "StrictHostKeyChecking no" root@matb.it docker-compose -f docker/matbit/docker-compose.yml pull
+#        ssh -o "StrictHostKeyChecking no" root@matb.it docker-compose -f docker/matbit/docker-compose.yml up -d
