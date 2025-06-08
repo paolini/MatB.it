@@ -1,9 +1,7 @@
 ## development
 Requirements:
 
-* nodejs at least version 12
-* docker to run a mongodb database
-* mongo client to access the database from command line
+* a mongodb database
 
 Use docker to setup a database for local development.
 The following command will start a mongodb server in a container using the local folder `/database` to store data permanently and exposing to the default port for mongo:
@@ -14,21 +12,14 @@ Use `docker-compose down` to stop the container. Use `mongo` to access the datab
 
 To install node libraries:
 ```bash
-    npm install
+    npm ci
 ```
-To start the server:
+To start the server locally:
 ```bash
-    npm start
+    npm run dev
 ```
 
 Change version number in `package.json`.
-
-### import firebase data
-
-```bash
-npx -p node-firestore-import-export firestore-export -a matbit-5e23b34aa561.json -b backup.json
-node import.js
-```
 
 ## create docker image
 
@@ -38,10 +29,42 @@ docker tag paolini/matbit paolini/matbit:1.2.3
 docker push paolini/matbit
 ```
 
+## configuration
+
+Use environment variables.
+```
+MONGODB_URI=mongodb://127.0.0.1:27017/matbit
+```
+
+Environment variables can also be put in a `.env` file
+in the root directory.
+
+## migrations
+
+See also `package.json` for script shortcuts.
+
+Status:
+```
+npx migrate-mongo status
+```
+create a migration:
+```
+npx migrate-mongo create nome-della-migrazione
+```
+apply migrations:
+```
+npx migrate-mongo up
+```
+revert last migration:
+```
+npx migrate-mongo down
+```
+
 ## deployment
 
 create a `docker-compose.yml` starting from the template `docker-deploy.yml`.
 Set a custom `SECRET`. Get your google keys.
+Configure environment variables.
 
 To start the service:
 ```bash

@@ -2,8 +2,8 @@ name: Deploy to dockerhub
 
 on:
   push:
-    tags:
-      - "*.*.*"
+    branches:
+      - main
 
 jobs:
   deploy:
@@ -36,23 +36,24 @@ jobs:
 #        ssh -o "StrictHostKeyChecking no" root@matb.it hostname
 #        false
 
-    - name: get version
+    - name: Get version from package.json
       id: vars
-      run: echo ::set-output name=tag::${GITHUB_REF#refs/*/}
+      run: echo "version=$(jq -r .version package.json)" >> $GITHUB_OUTPUT
 
-    - name: Build, tag, and push image to dockerhub
+    - name: Log in to Docker Hub
+      uses: docker/login-action@v3
+      with:
+        username: paolini
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+    - name: Build, tag, and push image to Docker Hub
       id: build-image
-      env:
-        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-        IMAGE_TAG: ${{ github.sha }}
       run: |
-        echo version ${{ steps.vars.outputs.tag }} 
-        echo docker build
+        set -e
+        echo version ${{ steps.vars.outputs.version }}
         docker build . -t paolini/matbit
-        docker tag paolini/matbit paolini/matbit:${{ steps.vars.outputs.tag }}
-        echo docker push
-        docker login -u paolini -p ${{ secrets.DOCKERHUB_TOKEN }}
+        docker tag paolini/matbit paolini/matbit:${{ steps.vars.outputs.version }}
         docker push paolini/matbit
-        docker push paolini/matbit:${{ steps.vars.outputs.tag }}
+        docker push paolini/matbit:${{ steps.vars.outputs.version }}
         ssh -o "StrictHostKeyChecking no" root@matb.it docker-compose -f docker/matbit/docker-compose.yml pull
         ssh -o "StrictHostKeyChecking no" root@matb.it docker-compose -f docker/matbit/docker-compose.yml up -d

@@ -1,0 +1,38 @@
+scalar ObjectId
+scalar Timestamp
+scalar JSON
+
+type User {
+  _id: ObjectId!
+  name: String
+  image: String
+}
+
+type Note {
+  _id: ObjectId!
+  title: String!
+  delta: JSON
+  author: User!
+  private: Boolean!
+  created_on: Timestamp!
+  updated_on: Timestamp!
+}
+
+type Profile {
+  _id: ObjectId!
+  name: String
+  email: String
+  image: String
+}
+
+type Query {
+  hello: String!
+  note(_id: ObjectId!): Note
+  notes: [Note!]!
+  profile: Profile
+}
+
+type Mutation {
+  newNote(title: String!, description: String, private: Boolean): Note
+  updateNote(_id: ObjectId!, title: String, delta: JSON, private: Boolean): Note
+}
