@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "next lint",
     "codegen": "graphql-codegen --config codegen.ts",
-    "migrate": "migrate-mongo up",
+    "migrate": "migrate-mongo status",
+    "migrate:up": "migrate-mongo up",
     "migrate:down": "migrate-mongo down",
     "migrate:create": "migrate-mongo create",
     "migrate:status": "migrate-mongo status"
@@ -28,13 +29,13 @@
     "quill-next-react": "^1.0.5",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "react-spinners": "^0.17.0"
+    "react-spinners": "^0.17.0",
+    "@tailwindcss/postcss": "^4"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.1",
     "@graphql-codegen/cli": "^5.0.6",
     "@graphql-codegen/typescript-resolvers": "^4.5.1",
-    "@tailwindcss/postcss": "^4",
     "@types/graphql": "^14.2.3",
     "@types/mongodb": "^4.0.6",
     "@types/next": "^9.0.0",

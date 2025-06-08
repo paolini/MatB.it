@@ -8,7 +8,7 @@ const packageJson = JSON.parse(
 const version = packageJson.version;
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  output: 'standalone',
   env: {
     NEXT_PUBLIC_VERSION: version,
   },

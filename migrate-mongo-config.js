@@ -1,4 +1,8 @@
-require('dotenv').config();
+try {
+  require('dotenv').config();
+} catch (e) {
+  console.log("dotenv not installed: ignore it")
+}
 
 const MONGODB_URI = process.env.MONGODB_URI || "mongodb://127.0.0.1:27017/matbit?directConnection=true"
 
