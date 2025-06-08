@@ -45,7 +45,7 @@ export default function NoteWrapper({_id}: {_id: string}) {
         NoteQuery, {variables: { _id }})
     const [updateNote, { loading: saving, error: saveError }] = useMutation(UpdateNoteMutation)
     if (error) return <Error error={error} />    
-    if (loading || !data) return <Loading />
+    if (loading || saving || !data) return <Loading />
     return <NoteInner 
         note={data.note} 
         profile={data.profile} 
@@ -64,8 +64,8 @@ function NoteInner({
 }: {
     note: Note,
     profile: Profile,
-    updateNote: any,
-    saveError: any,
+    updateNote: (options: { variables: { _id: string, title?: string, delta?: Delta, private?: boolean } }) => Promise<unknown>,
+    saveError: Error | undefined,
     refetch: () => void
 }) {
     const [editMode, setEditMode] = useState(false)
@@ -113,7 +113,7 @@ function NoteEditInner({
     note: Note,
     onSave: (title: string, delta: Delta, isPrivate: boolean) => void,
     onCancel: () => void,
-    saveError: any
+    saveError: Error | undefined
 }) {
     const [title, setTitle] = useState(note.title)
     const [isPrivate, setIsPrivate] = useState(note.private)

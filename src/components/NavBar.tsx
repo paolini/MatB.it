@@ -61,7 +61,10 @@ function ProfileMenuComponent({ session }: { session: Session }) {
         aria-expanded={open}
       >
         {session.user?.image ? (
-          <img src={session.user.image} alt="avatar" className="w-8 h-8 rounded-full border" />
+          // Impossibile usare Image di nextjs
+          // perché l'immagine sta su un server non noto a priori
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={session.user.image} alt="avatar" width={32} height={32} className="w-8 h-8 rounded-full border" />
         ) : (
           <span className="inline-block w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center text-gray-600 font-bold">
             {session.user?.name?.[0] || session.user?.email?.[0] || "U"}

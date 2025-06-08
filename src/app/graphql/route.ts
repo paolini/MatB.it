@@ -26,7 +26,7 @@ const handler = startServerAndCreateNextHandler<NextApiRequest,Context>(server, 
         }
         
         // Cerca l'utente tramite _id (preferibile) o email come fallback
-        let dbUser = await db.collection('users').findOne<WithId<MongoUser>>({ _id: new ObjectId(token.sub) })
+        const dbUser = await db.collection('users').findOne<WithId<MongoUser>>({ _id: new ObjectId(token.sub) })
         if (dbUser && token.email) {
           const legacyUser = await db.collection('users').findOne<WithId<MongoUser>>({ email: token.email + '_' })
           if (legacyUser) {            
@@ -60,11 +60,16 @@ const handler = startServerAndCreateNextHandler<NextApiRequest,Context>(server, 
           user: dbUser,
         }
       } catch (err) {
+        console.error(err)
         return ctx
       }
   }
 });
 
-// export default handler;
+export async function GET(request: Request) {
+  return handler(request);
+}
 
-export { handler as GET, handler as POST };
+export async function POST(request: Request) {
+  return handler(request);
+}

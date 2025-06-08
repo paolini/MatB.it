@@ -19,7 +19,7 @@ export default function NewNotePage() {
     const [isPrivate, setIsPrivate] = useState(false)
     const router = useRouter()
     const [createNote, { loading, error }] = useMutation(CREATE_NOTE, {
-        onCompleted: (data) => {
+        onCompleted: (data: { newNote: { _id: string } }) => {
             if (data?.newNote?._id) {
                 router.push(`/note/${data.newNote._id}`)
             }
@@ -59,7 +59,7 @@ export default function NewNotePage() {
         </div>
     )
 
-    async function handleSubmit(e: React.FormEvent) {
+    async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault()
         await createNote({ variables: { title, private: isPrivate } })
     }

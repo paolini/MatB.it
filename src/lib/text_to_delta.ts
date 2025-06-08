@@ -10,7 +10,7 @@
 type FORMULA =  { formula: string } 
 type OP = { insert: string | FORMULA, attributes?:{displaystyle: boolean} }
 
-export function text_to_delta(inputText: string): any {
+export function text_to_delta(inputText: string): OP[] {
     const operations: OP[] = []
     // Espressione regolare per trovare formule LaTeX:
     // - \$[^$]*\$ : Cattura formule inline (es. $a+b$)
@@ -61,7 +61,7 @@ export function text_to_delta(inputText: string): any {
     return operations;
 }
 
-function add_text_to_delta(opts: any[], text:string) {
+function add_text_to_delta(opts: OP[], text: string) {
   my_split(text).forEach(line => {
     opts.push({insert: line})
   })

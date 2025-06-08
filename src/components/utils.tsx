@@ -1,6 +1,17 @@
 import { SyncLoader } from "react-spinners"
 import { ApolloError } from "@apollo/client"
 
+interface GraphQLErrorExtension {
+  code?: string;
+  stacktrace?: string[];
+}
+
+interface GraphQLError {
+  message: string;
+  extensions?: GraphQLErrorExtension;
+  locations?: { line: number; column: number }[];
+}
+
 export function Loading() {
     return <SyncLoader />
 }
@@ -8,12 +19,12 @@ export function Loading() {
 export function Error({ error }: { error: ApolloError }) {
     let causeDetails = null
     // Try to extract GraphQL error details if present
-    const cause = error.cause as any
-    const gqlErrors = cause && typeof cause === 'object' && cause.result && Array.isArray(cause.result.errors)
+    const cause = error.cause as { result?: { errors?: GraphQLError[] } } | undefined
+    const gqlErrors = cause && cause.result && Array.isArray(cause.result.errors)
         ? cause.result.errors
         : null
     if (gqlErrors) {
-        causeDetails = gqlErrors.map((err: any, idx: number) => (
+        causeDetails = gqlErrors.map((err, idx) => (
             <div key={idx} className="mb-2">
                 <div className="font-bold">{err.message}</div>
                 {err.extensions?.code && <div className="text-xs">Codice: {err.extensions.code}</div>}

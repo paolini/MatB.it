@@ -1,8 +1,8 @@
 "use client"
 
-import { Delta, QuillEditor } from '@/lib/myquill'
+import { Delta, QuillEditor, Quill } from '@/lib/myquill'
 import 'katex/dist/katex.min.css';
-import { useMemo, useRef, useEffect } from 'react';
+import { useRef } from 'react';
 
 const config = {
     theme: "snow",
@@ -28,7 +28,7 @@ export default function MyQuill({readOnly, content, onSave}: {
     content?: Delta
     onSave?: (delta: Delta) => void
 }) {
-    const quillInstance = useRef<any>(null)
+    const quillInstance = useRef<InstanceType<typeof Quill> | null>(null)
     return <div>
         <QuillEditor
             readOnly={readOnly}

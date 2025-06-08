@@ -18,6 +18,7 @@ export type MongoUser = {
     image: string
     pro: boolean
     createdAt: Date
+    _id?: ObjectId
 }
 
 export function getNotesCollection(db: Db) {

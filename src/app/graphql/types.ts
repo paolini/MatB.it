@@ -39,6 +39,7 @@ export const ObjectIdType = new GraphQLScalarType({
   }
 });
 
+/*
 const Timestamp = new GraphQLScalarType({
   name: "Timestamp",
   description: "A custom scalar for Date",  
@@ -59,12 +60,13 @@ const Timestamp = new GraphQLScalarType({
   },
 
   parseLiteral(ast: ValueNode): Date {
-    if (ast.kind === 'StringValue') {
+    if (ast.kind === Kind.STRING) {
       return new Date(ast.value)
     }
     throw new Error("Timestamp must be a string");
   }
 })
+*/
 
 export const JSONType = new GraphQLScalarType({
   name: "JSON",
@@ -78,9 +80,9 @@ export const JSONType = new GraphQLScalarType({
     return value; // Ritorna il valore così com'è
   },
   
-  parseLiteral(ast: ValueNode): unknown {   
+  parseLiteral(ast: ValueNode): Record<string, unknown> {   
     if (ast.kind === Kind.OBJECT) {
-      const obj: any = {};
+      const obj: Record<string, unknown> = {};
       ast.fields.forEach((field) => {
         obj[field.name.value] = field.value;
       });

@@ -66,7 +66,7 @@ export const resolvers = {
       if (notes.length === 0) throw new Error('Note not found')
       if (notes.length > 1) throw new Error('Multiple notes found')
       const note = notes[0]
-      return note
+      return note as Note
     },
 
     profile: async (_parent: unknown, _args: unknown, context: Context) => {
@@ -112,7 +112,7 @@ export const resolvers = {
       
       if (!note.author_id.equals(context.user._id)) throw new Error('Not authorized')
       
-      const update: any = {}
+      const update: Partial<Note> = {}
       if (typeof title === 'string') update.title = title
       if (delta) update.delta = delta
       if (typeof isPrivate === 'boolean') update.private = isPrivate
