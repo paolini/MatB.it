@@ -160,15 +160,17 @@ class FormulaEditorModule {
     const toolbar = quill.getModule('toolbar');
     if (toolbar) {
       const formulaButton = toolbar.container.querySelector('.ql-formula');
-
-      // Aggiungi handler al click per mostrare il formula editor
+      let lastRange = null;
       if (formulaButton) {
+        formulaButton.addEventListener('mousedown', (e) => {
+          lastRange = this.quill.getSelection();
+        });
         formulaButton.addEventListener('click', () => {
-          const range = this.quill.getSelection();
+          const range = lastRange || this.quill.getSelection();
+          lastRange = null;
           if (range) {
             this.quill.insertEmbed(range.index, 'formula', '', 'user');
             this.quill.setSelection(range.index + 1, 0, 'silent');
-        
             const [blot] = this.quill.getLeaf(range.index + 1);
             this.showFormulaEditor(blot);
           }
@@ -188,9 +190,10 @@ class FormulaEditorModule {
 
   showFormulaEditor(blot) {
     let editor = document.getElementById('matbit-formula-editor');
-  
+    console.log('showFormulaEditor', blot, editor);
     // Crea il widget se non esiste
     if (!editor) {
+      console.log('Creating formula editor widget');
       editor = document.createElement('div');
       editor.id = 'matbit-formula-editor';
       editor.style.position = 'absolute';
@@ -199,15 +202,25 @@ class FormulaEditorModule {
       editor.style.border = '1px solid #ccc';
       editor.style.padding = '8px';
       editor.style.zIndex = '1000';
+      // Forza la rimozione del contenuto precedente per evitare residui
+      while (editor.firstChild) editor.removeChild(editor.firstChild);
       editor.innerHTML = `
         <input type="text" id="matbit-formula-input" style="width: 300px;">
-        <button id="matbit-formula-save">Salva</button>
+        <label style="margin-left:8px;">
+          <input type="checkbox" id="matbit-formula-display" style="vertical-align:middle;"> Display mode
+        </label>
+        <button id="matbit-formula-save" style="margin-left:8px;">Salva</button>
       `;
       document.body.appendChild(editor);
+    } else {
+      // Se il widget esiste già, aggiorna il testo del pulsante per sicurezza
+      const button = editor.querySelector('#matbit-formula-save');
+      if (button) button.textContent = 'Salva';
     }
   
     const input = editor.querySelector('#matbit-formula-input');
     const button = editor.querySelector('#matbit-formula-save');
+    const displayCheckbox = editor.querySelector('#matbit-formula-display');
 
     const rect = blot.domNode.getBoundingClientRect();
     editor.style.top = `${window.scrollY + rect.bottom}px`;
@@ -215,17 +228,28 @@ class FormulaEditorModule {
     editor.style.display = 'block';
   
     input.value = blot.domNode.getAttribute('data-value');
+    displayCheckbox.checked = blot.domNode.classList.contains('tex-displaystyle');
   
     const quill = this.quill;
 
     const update = () => {
       // indice della posizione di inizio del blot
       const index = quill.getIndex(blot);
-      quill.updateContents([
-        { retain: index },
-        { delete: 1 },
-        { insert: { formula: input.value } }
-      ], 'user');
+      const formulaValue = input.value;
+      const displaystyle = displayCheckbox.checked;
+      if (displaystyle) {
+        quill.updateContents([
+          { retain: index },
+          { delete: 1 },
+          { insert: { formula: formulaValue }, attributes: { displaystyle: true } }
+        ], 'user');
+      } else {
+        quill.updateContents([
+          { retain: index },
+          { delete: 1 },
+          { insert: { formula: formulaValue } }
+        ], 'user');
+      }
       // restituisce il blot a sinistra dell'indice
       // per questo serve il +1:
       blot = quill.getLeaf(index+1)[0];
@@ -238,12 +262,15 @@ class FormulaEditorModule {
   
     input.removeEventListener('input', liveUpdate); // per evitare duplicazioni
     input.addEventListener('input', liveUpdate);
+    displayCheckbox.removeEventListener('change', liveUpdate);
+    displayCheckbox.addEventListener('change', liveUpdate);
   
     const saveHandler = () => {
       editor.style.display = 'none';
   
       button.removeEventListener('click', saveHandler);
       input.removeEventListener('input', liveUpdate);
+      displayCheckbox.removeEventListener('change', liveUpdate);
     };
   
     button.removeEventListener('click', saveHandler);
