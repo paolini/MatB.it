@@ -156,6 +156,24 @@ class FormulaEditorModule {
     this.quill = quill;
     this.quill.root.addEventListener('click', this.handleClick.bind(this));
 
+    // Shortcut: apri editor formula quando viene inserito il carattere $ (input event, non keydown)
+    this.quill.root.addEventListener('input', (e) => {
+      const selection = this.quill.getSelection();
+      if (!selection || selection.length !== 0) return;
+      const index = selection.index;
+      // Controlla il carattere appena inserito
+      const text = this.quill.getText(Math.max(0, index - 1), 1);
+      if (text === '$') {
+        // Rimuovi il carattere $ appena inserito
+        this.quill.deleteText(index - 1, 1, 'user');
+        // Inserisci formula
+        this.quill.insertEmbed(index - 1, 'formula', '', 'user');
+        this.quill.setSelection(index, 0, 'silent');
+        const [blot] = this.quill.getLeaf(index);
+        this.showFormulaEditor(blot);
+      }
+    });
+
     // Cerca il pulsante formula nella toolbar
     const toolbar = quill.getModule('toolbar');
     if (toolbar) {
@@ -231,8 +249,29 @@ class FormulaEditorModule {
     positionEditor();
     editor.style.display = 'block';
 
+    // Focus automatico sull'input formula dopo apertura/riutilizzo popup
+    setTimeout(() => {
+      input.focus();
+      input.select();
+    }, 0);
+
     input.value = blot.domNode.getAttribute('data-value');
     displayCheckbox.checked = blot.domNode.classList.contains('tex-displaystyle');
+
+    // Focus automatico sull'input formula editor
+    setTimeout(() => {
+      input.focus();
+      input.select();
+    }, 0);
+
+    // Shortcut: chiudi editor formula con $ nell'input
+    const closeOnDollar = (e) => {
+      if (e.key === '$') {
+        e.preventDefault();
+        saveHandler(e); // Salva e chiudi
+      }
+    };
+    input.addEventListener('keydown', closeOnDollar);
 
     const quill = this.quill;
 
@@ -276,11 +315,14 @@ class FormulaEditorModule {
 
     const saveHandler = () => {
       editor.style.display = 'none';
+      input.removeEventListener('keydown', closeOnDollar);
       button.removeEventListener('click', saveHandler);
       input.removeEventListener('input', liveUpdate);
       displayCheckbox.removeEventListener('change', liveUpdate);
       window.removeEventListener('scroll', positionEditor);
       window.removeEventListener('resize', positionEditor);
+      // Riporta il focus all'editor Quill
+      this.quill.focus();
     };
 
     button.removeEventListener('click', saveHandler);
