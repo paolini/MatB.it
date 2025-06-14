@@ -222,14 +222,18 @@ class FormulaEditorModule {
     const button = editor.querySelector('#matbit-formula-save');
     const displayCheckbox = editor.querySelector('#matbit-formula-display');
 
-    const rect = blot.domNode.getBoundingClientRect();
-    editor.style.top = `${window.scrollY + rect.bottom}px`;
-    editor.style.left = `${window.scrollX + rect.left}px`;
+    function positionEditor() {
+      const rect = blot.domNode.getBoundingClientRect();
+      editor.style.top = `${window.scrollY + rect.bottom}px`;
+      editor.style.left = `${window.scrollX + rect.left}px`;
+    }
+
+    positionEditor();
     editor.style.display = 'block';
-  
+
     input.value = blot.domNode.getAttribute('data-value');
     displayCheckbox.checked = blot.domNode.classList.contains('tex-displaystyle');
-  
+
     const quill = this.quill;
 
     const update = () => {
@@ -253,26 +257,32 @@ class FormulaEditorModule {
       // restituisce il blot a sinistra dell'indice
       // per questo serve il +1:
       blot = quill.getLeaf(index+1)[0];
+      positionEditor(); // riposiziona dopo ogni update
     };
 
     // Preview live mentre si scrive
     const liveUpdate = () => {
       update();
     };
-  
+
     input.removeEventListener('input', liveUpdate); // per evitare duplicazioni
     input.addEventListener('input', liveUpdate);
     displayCheckbox.removeEventListener('change', liveUpdate);
     displayCheckbox.addEventListener('change', liveUpdate);
-  
+
+    // Riposiziona anche su scroll e resize
+    window.addEventListener('scroll', positionEditor);
+    window.addEventListener('resize', positionEditor);
+
     const saveHandler = () => {
       editor.style.display = 'none';
-  
       button.removeEventListener('click', saveHandler);
       input.removeEventListener('input', liveUpdate);
       displayCheckbox.removeEventListener('change', liveUpdate);
+      window.removeEventListener('scroll', positionEditor);
+      window.removeEventListener('resize', positionEditor);
     };
-  
+
     button.removeEventListener('click', saveHandler);
     button.addEventListener('click', saveHandler);
   }
