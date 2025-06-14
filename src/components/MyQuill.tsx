@@ -2,7 +2,7 @@
 
 import { Delta, QuillEditor, Quill } from '@/lib/myquill'
 import 'katex/dist/katex.min.css';
-import { useRef } from 'react';
+import { useRef, useEffect } from 'react';
 
 const config = {
     theme: "snow",
@@ -29,6 +29,17 @@ export default function MyQuill({readOnly, content, onSave}: {
     onSave?: (delta: Delta) => void
 }) {
     const quillInstance = useRef<InstanceType<typeof Quill> | null>(null)
+
+    // Cleanup dell'editor delle formule al dismount
+    useEffect(() => {
+        return () => {
+            const formulaEditor = document.getElementById('matbit-formula-editor');
+            if (formulaEditor) {
+                formulaEditor.remove();
+            }
+        };
+    }, []);
+
     return <div>
         <QuillEditor
             readOnly={readOnly}

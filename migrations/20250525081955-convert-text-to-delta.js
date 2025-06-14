@@ -23,7 +23,12 @@ function text_to_delta(inputText) {
         .replace(/^\s+|\s+$/g, '') // rimuove spazi dall'inizio e dalla fine
 
       // Determina se la formula è di tipo "display" (racchiusa tra $$)
-      const isDisplayFormula = formulaContent.startsWith('$$') && formulaContent.endsWith('$$');
+      let isDisplayFormula = formulaContent.startsWith('$$') && formulaContent.endsWith('$$');
+      // Se la formula è all'inizio del testo o preceduta solo da whitespace, forza display
+      const before = inputText.substring(lastIndex, offset);
+      if (!isDisplayFormula && (offset === 0 || /^\s*$/.test(before))) {
+        isDisplayFormula = true;
+      }
   
       // Crea l'oggetto embed per la formula
       const formulaEmbed = { formula: cleanFormula };
@@ -85,7 +90,7 @@ module.exports = {
       const note = await cursor.next();
       const delta = text_to_delta(note.text);
 
-      console.log(JSON.stringify({_id: note._id, text: note.text, delta}, null, 2))
+      // console.log(JSON.stringify({_id: note._id, text: note.text, delta}, null, 2))
 
       await db.collection('notes').updateOne(
         { _id: note._id },
