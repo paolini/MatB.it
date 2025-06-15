@@ -7,7 +7,7 @@ const Container = MyQuill.import('blots/container');
 const Parchment = MyQuill.import('parchment');
 
 // Blot per la singola riga di environment
-export class MyEnvironmentLine extends Block {
+class MyEnvironmentLine extends Block {
   static blotName = 'environment';
   static tagName = 'DIV';
   static className = 'ql-environment';
@@ -41,13 +41,13 @@ export class MyEnvironmentLine extends Block {
         this.domNode.removeAttribute('data-title');
       }
     } else {
-      super.format && super.format(name, value);
+      if (super.format) super.format(name, value);
     }
   }
 }
 
 // Blot contenitore per le righe di environment
-export class MyEnvironmentContainer extends Container {
+class MyEnvironmentContainer extends Container {
   static blotName = 'environment-container';
   static tagName = 'DIV';
   static className = 'ql-environment-container';

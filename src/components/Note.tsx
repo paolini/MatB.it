@@ -96,9 +96,6 @@ function NoteInner({
                     setEditMode(false)
                     refetch()
                 }}
-                onDelete={async () => {
-                    // handled in NoteEditInner
-                }}
                 deleteNote={deleteNote}
                 deleteError={deleteError}
                 isAuthor={note?.author?._id === profile?._id}
@@ -131,7 +128,6 @@ function NoteEditInner({
     onSave,
     onCancel,
     saveError,
-    onDelete,
     deleteNote,
     deleteError,
     isAuthor,
@@ -141,7 +137,6 @@ function NoteEditInner({
     onSave: (title: string, delta: Delta, isPrivate: boolean) => void,
     onCancel: () => void,
     saveError: Error | undefined,
-    onDelete: () => void,
     deleteNote: (options: { variables: { _id: string } }) => Promise<unknown>,
     deleteError: Error | undefined,
     isAuthor: boolean,
