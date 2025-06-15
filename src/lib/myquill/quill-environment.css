@@ -27,3 +27,97 @@
 .ql-snow .ql-picker.ql-environment .ql-picker-label {
   padding-right: 2ex; /* aggiunge spazio a destra della label per evitare sovrapposizione con i triangolini */
 }
+
+/* Evidenzia il container dei teoremi con uno sfondo colorato */
+.ql-environment-container .ql-environment.ql-env-theorem {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  border-radius: 0;
+}
+.ql-environment-container {
+  background: #f7f3d1;
+  border-left: 4px solid #e6c200;
+  padding: 0.75em 1em;
+  margin: 0.5em 0;
+  border-radius: 4px;
+}
+
+/* Evidenzia diversi environment con colori diversi */
+.ql-environment-container .ql-environment {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  border-radius: 0;
+}
+
+.ql-environment-container.ql-env-theorem {
+  background: #f7f3d1;
+  border-left: 4px solid #e6c200;
+}
+.ql-environment-container.ql-env-lemma {
+  background: #e1f3fa;
+  border-left: 4px solid #1ca3c7;
+}
+.ql-environment-container.ql-env-proof {
+  background: #e8e8e8;
+  border-left: 4px solid #888;
+}
+.ql-environment-container.ql-env-remark {
+  background: #f3e1fa;
+  border-left: 4px solid #a31cc7;
+}
+.ql-environment-container.ql-env-exercise {
+  background: #e1fae6;
+  border-left: 4px solid #1cc76a;
+}
+.ql-environment-container.ql-env-test {
+  background: #fae1e1;
+  border-left: 4px solid #c71c1c;
+}
+
+/* Label visibile per ogni tipo di environment */
+.ql-environment-container.ql-env-theorem::before {
+  content: "Teorema";
+  font-weight: bold;
+  margin-right: 1em;
+  color: #b59a00;
+  display: inline-block;
+}
+.ql-environment-container.ql-env-lemma::before {
+  content: "Lemma";
+  font-weight: bold;
+  margin-right: 1em;
+  color: #1ca3c7;
+  display: inline-block;
+}
+.ql-environment-container.ql-env-proof::before {
+  content: "Dimostrazione";
+  font-weight: bold;
+  margin-right: 1em;
+  color: #888;
+  display: inline-block;
+}
+.ql-environment-container.ql-env-remark::before {
+  content: "Osservazione";
+  font-weight: bold;
+  margin-right: 1em;
+  color: #a31cc7;
+  display: inline-block;
+}
+.ql-environment-container.ql-env-exercise::before {
+  content: "Esercizio";
+  font-weight: bold;
+  margin-right: 1em;
+  color: #1cc76a;
+  display: inline-block;
+}
+.ql-environment-container.ql-env-test::before {
+  content: "Test";
+  font-weight: bold;
+  margin-right: 1em;
+  color: #c71c1c;
+  display: inline-block;
+}

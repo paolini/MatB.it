@@ -24,11 +24,11 @@ export class MyEnvironmentLine extends Block {
     return node;
   }
 
+  static value(domNode) {
+    return domNode.getAttribute('data-env') || 'theorem';
+  }
   static formats(domNode) {
-    return {
-      type: domNode.getAttribute('data-env'),
-      title: domNode.getAttribute('data-title') || ''
-    };
+    return this.value(domNode);
   }
 
   format(name, value) {
@@ -53,6 +53,46 @@ export class MyEnvironmentContainer extends Container {
   static className = 'ql-environment-container';
   static allowedChildren = [MyEnvironmentLine];
   static scope = Parchment.Scope.BLOCK_BLOT;
+
+  static value(domNode) {
+    const firstLine = domNode.querySelector('.ql-environment[data-env]');
+    if (firstLine) {
+      return firstLine.getAttribute('data-env') || 'theorem';
+    } else {
+      return 'theorem';
+    }
+  }
+  static formats(domNode) {
+    return this.value(domNode);
+  }
+
+  optimize(context) {
+    // Aggiorna la classe del container in base al tipo di environment della prima riga
+    let desiredClass = this.statics.className;
+    const firstLine = this.domNode.querySelector('.ql-environment[data-env]');
+    if (firstLine) {
+      const envType = firstLine.getAttribute('data-env');
+      if (envType) {
+        desiredClass += ' ql-env-' + envType;
+      }
+    }
+    if (this.domNode.className !== desiredClass) {
+      this.domNode.className = desiredClass;
+    }
+    if (super.optimize) super.optimize(context);
+  }
+
+  checkMerge() {
+    if (!this.next || this.next.statics.blotName !== this.statics.blotName) return false;
+    // Confronta il tipo di environment della prima riga figlia di ciascun container
+    const getEnvType = (container) => {
+      const firstLine = container.domNode.querySelector('.ql-environment[data-env]');
+      return firstLine ? firstLine.getAttribute('data-env') : 'theorem';
+    };
+    const myType = getEnvType(this);
+    const nextType = getEnvType(this.next);
+    return myType === nextType;
+  }
 }
 
 // Imposta requiredContainer dopo la dichiarazione delle classi
