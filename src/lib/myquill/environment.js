@@ -3,15 +3,18 @@ import MyQuill from 'quill-next'
 // Prova di BlockBlot per environment LaTeX (theorem, lemma, proof, ...)
 // NOTA: BlockBlot va importato da quill-next o parchment, qui simulato come base class generica
 const Block = MyQuill.import('blots/block');
+const Container = MyQuill.import('blots/container');
+const Parchment = MyQuill.import('parchment');
 
-export class MyEnvironment extends Block {
+// Blot per la singola riga di environment
+export class MyEnvironmentLine extends Block {
   static blotName = 'environment';
   static tagName = 'DIV';
   static className = 'ql-environment';
+  static parent = 'environment-container';
 
   static create(value) {
     const node = super.create();
-    // value può essere 'theorem', 'lemma', 'proof', ...
     node.setAttribute('data-env', value && value.type ? value.type : (typeof value === 'string' ? value : 'theorem'));
     if (value && value.title) {
       node.setAttribute('data-title', value.title);
@@ -41,10 +44,24 @@ export class MyEnvironment extends Block {
       super.format && super.format(name, value);
     }
   }
-
-  optimize(context) {
-    // Puoi aggiungere logica per unire blocchi adiacenti dello stesso tipo
-    super.optimize && super.optimize(context);
-  }
 }
+
+// Blot contenitore per le righe di environment
+export class MyEnvironmentContainer extends Container {
+  static blotName = 'environment-container';
+  static tagName = 'DIV';
+  static className = 'ql-environment-container';
+  static allowedChildren = [MyEnvironmentLine];
+  static scope = Parchment.Scope.BLOCK_BLOT;
+}
+
+// Imposta requiredContainer dopo la dichiarazione delle classi
+MyEnvironmentLine.requiredContainer = MyEnvironmentContainer;
+
+// Registrazione delle blot (solo queste, rimuovi la vecchia MyEnvironment)
+MyQuill.register('formats/environment', MyEnvironmentLine, true);
+MyQuill.register('formats/environment-container', MyEnvironmentContainer, true);
+
+// Non esportare più MyEnvironment, esporta solo le nuove classi se servono
+export { MyEnvironmentLine, MyEnvironmentContainer };
 
