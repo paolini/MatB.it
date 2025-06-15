@@ -1,6 +1,7 @@
 "use client"
 import { gql, useQuery, useMutation } from '@apollo/client'
 import { useState } from 'react';
+import { useRouter } from "next/navigation"
 
 import { Note, Profile } from '@/app/graphql/generated'
 import { Loading, Error } from '@/components/utils'
@@ -40,18 +41,28 @@ mutation UpdateNote($_id: ObjectId!, $title: String, $delta: JSON, $private: Boo
   }
 }`
 
+const DeleteNoteMutation = gql`
+mutation DeleteNote($_id: ObjectId!) {
+  deleteNote(_id: $_id) {
+    _id
+  }
+}`
+
 export default function NoteWrapper({_id}: {_id: string}) {
     const { loading, error, data, refetch } = useQuery<{note: Note, profile: Profile}>(
         NoteQuery, {variables: { _id }})
     const [updateNote, { loading: saving, error: saveError }] = useMutation(UpdateNoteMutation)
+    const [deleteNote, { loading: deleting, error: deleteError }] = useMutation(DeleteNoteMutation)
     if (error) return <Error error={error} />    
-    if (loading || saving || !data) return <Loading />
+    if (loading || saving || deleting || !data) return <Loading />
     return <NoteInner 
         note={data.note} 
         profile={data.profile} 
         updateNote={updateNote} 
         saveError={saveError} 
         refetch={refetch} 
+        deleteNote={deleteNote}
+        deleteError={deleteError}
     />
 }
 
@@ -60,16 +71,20 @@ function NoteInner({
     profile,
     updateNote,
     saveError,
-    refetch
+    refetch,
+    deleteNote,
+    deleteError
 }: {
     note: Note,
     profile: Profile,
     updateNote: (options: { variables: { _id: string, title?: string, delta?: Delta, private?: boolean } }) => Promise<unknown>,
     saveError: Error | undefined,
-    refetch: () => void
+    refetch: () => void,
+    deleteNote: (options: { variables: { _id: string } }) => Promise<unknown>,
+    deleteError: Error | undefined
 }) {
     const [editMode, setEditMode] = useState(false)
-
+    const router = useRouter()
     return <div>
         {editMode ? (
             <NoteEditInner
@@ -81,6 +96,13 @@ function NoteInner({
                     setEditMode(false)
                     refetch()
                 }}
+                onDelete={async () => {
+                    // handled in NoteEditInner
+                }}
+                deleteNote={deleteNote}
+                deleteError={deleteError}
+                isAuthor={note?.author?._id === profile?._id}
+                router={router}
             />
         ) : (
             <>
@@ -108,15 +130,26 @@ function NoteEditInner({
     note,
     onSave,
     onCancel,
-    saveError
+    saveError,
+    onDelete,
+    deleteNote,
+    deleteError,
+    isAuthor,
+    router
 }: {
     note: Note,
     onSave: (title: string, delta: Delta, isPrivate: boolean) => void,
     onCancel: () => void,
-    saveError: Error | undefined
+    saveError: Error | undefined,
+    onDelete: () => void,
+    deleteNote: (options: { variables: { _id: string } }) => Promise<unknown>,
+    deleteError: Error | undefined,
+    isAuthor: boolean,
+    router: ReturnType<typeof useRouter>
 }) {
     const [title, setTitle] = useState(note.title)
     const [isPrivate, setIsPrivate] = useState(note.private)
+    const [showConfirm, setShowConfirm] = useState(false)
     return (
         <>
             <input className="text-2xl font-bold w-full mb-2" value={title} onChange={e => setTitle(e.target.value)} />
@@ -133,9 +166,40 @@ function NoteEditInner({
                 <button className="px-4 py-2 bg-gray-300 text-gray-800 rounded hover:bg-gray-400 transition-colors" onClick={onCancel}>
                     Annulla
                 </button>
+                {isAuthor && (
+                  <>
+                    <button className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors" onClick={() => setShowConfirm(true)}>
+                      Cancella nota
+                    </button>
+                    {showConfirm && (
+                      <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 z-50">
+                        <div className="bg-white p-6 rounded shadow-lg flex flex-col items-center">
+                          <p className="mb-4">Sei sicuro di voler cancellare questa nota?</p>
+                          <div className="flex gap-2">
+                            <button className="px-4 py-2 bg-gray-300 text-gray-800 rounded hover:bg-gray-400" onClick={() => setShowConfirm(false)}>
+                              Annulla
+                            </button>
+                            <button 
+                                className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600" 
+                                onClick={handleDelete}>
+                              Conferma cancellazione
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </>
+                )}
                 {saveError && <span className="text-red-500 ml-2">Errore: {saveError.message}</span>}
+                {deleteError && <span className="text-red-500 ml-2">Errore cancellazione: {deleteError.message}</span>}
             </div>
         </>
     )
+
+    async function handleDelete() {
+        setShowConfirm(false); 
+        await deleteNote({ variables: { _id: note._id } }); 
+        router.push('/')
+    }
 }
 

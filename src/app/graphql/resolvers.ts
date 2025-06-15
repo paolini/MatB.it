@@ -125,6 +125,20 @@ export const resolvers = {
       ]).toArray()
       return notes[0] || null
     },
+    deleteNote: async (
+      _parent: unknown,
+      args: { _id: ObjectId },
+      context: Context
+    ) => {
+      const { _id } = args
+      const collection = getNotesCollection(context.db)
+      const note = await collection.findOne({ _id })
+      if (!note) throw new Error('Note not found')
+      if (!context.user) throw new Error('Not authenticated')
+      if (!note.author_id.equals(context.user._id)) throw new Error('Not authorized')
+      await collection.deleteOne({ _id })
+      // restituisci la nota cancellata (come fa updateNote)
+    },
   }
 } satisfies Partial<Resolvers<Context>>
 
