@@ -20,6 +20,10 @@
 
 /* Default label for environment picker */
 .ql-snow .ql-picker.ql-environment .ql-picker-label::before {
-  content: "Environment";
+  content: "Thm";
   color: #888;
+}
+
+.ql-snow .ql-picker.ql-environment .ql-picker-label {
+  padding-right: 2ex; /* aggiunge spazio a destra della label per evitare sovrapposizione con i triangolini */
 }
