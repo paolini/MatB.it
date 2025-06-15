@@ -1,0 +1,25 @@
+/* Quill environment picker labels (editor-specific) */
+.ql-snow .ql-picker.ql-environment .ql-picker-item[data-value="theorem"]::before {
+  content: "Theorem";
+}
+.ql-snow .ql-picker.ql-environment .ql-picker-item[data-value="lemma"]::before {
+  content: "Lemma";
+}
+.ql-snow .ql-picker.ql-environment .ql-picker-item[data-value="proof"]::before {
+  content: "Proof";
+}
+.ql-snow .ql-picker.ql-environment .ql-picker-item[data-value="remark"]::before {
+  content: "Remark";
+}
+.ql-snow .ql-picker.ql-environment .ql-picker-item[data-value="exercise"]::before {
+  content: "Exercise";
+}
+.ql-snow .ql-picker.ql-environment .ql-picker-item[data-value="test"]::before {
+  content: "Test";
+}
+
+/* Default label for environment picker */
+.ql-snow .ql-picker.ql-environment .ql-picker-label::before {
+  content: "Environment";
+  color: #888;
+}

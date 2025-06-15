@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "./quill-environment.css";
 
 :root {
   --background: #ffffff;
