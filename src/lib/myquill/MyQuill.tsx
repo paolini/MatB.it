@@ -1,6 +1,6 @@
 "use client"
 
-import { Delta, QuillEditor, Quill } from '@/lib/myquill'
+import { Delta, QuillEditor, Quill } from './myquill.js'
 import 'katex/dist/katex.min.css';
 import { useRef, useEffect } from 'react';
 

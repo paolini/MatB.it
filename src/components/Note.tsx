@@ -5,9 +5,9 @@ import { useState } from 'react';
 import { Note, Profile } from '@/app/graphql/generated'
 import { Loading, Error } from '@/components/utils'
 import dynamic from "next/dynamic"
-import { Delta } from '@/lib/myquill'
+import { Delta } from '@/lib/myquill/myquill.js'
 
-const MyQuill = dynamic(() => import('@/components/MyQuill'), { ssr: false });
+const MyQuill = dynamic(() => import('@/lib/myquill/MyQuill'), { ssr: false });
 
 const NoteQuery = gql`
 query Note($_id: ObjectId!) {
