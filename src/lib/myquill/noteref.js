@@ -13,6 +13,8 @@ export class NoteRefBlot extends EmbedBlot {
     if (noteId) {
       node.setAttribute('data-note-id', noteId);
       node.setAttribute('contenteditable', 'false');
+      
+      // Stili iniziali (saranno modificati se è un environment)
       node.style.cssText = `
         display: inline-block;
         padding: 4px 8px;
@@ -29,6 +31,8 @@ export class NoteRefBlot extends EmbedBlot {
         white-space: nowrap;
       `;
       
+      node.className = 'ql-note-ref';
+      
       // Inizialmente mostra l'ID mentre carica
       node.textContent = `[Note: ${noteId}]`;
       
@@ -36,6 +40,30 @@ export class NoteRefBlot extends EmbedBlot {
       NoteRefBlot.loadNoteData(node, noteId);
     }
     return node;
+  }
+
+  // Rendering semplice per modalità editor (solo titolo)
+
+  // Fallback semplice per il rendering senza DeltaRenderer
+  static renderSimpleFallback(delta) {
+    if (!delta || !delta.ops) return '<p>Contenuto non disponibile</p>';
+    
+    let html = '';
+    for (const op of delta.ops) {
+      if (op.insert && typeof op.insert === 'string') {
+        let text = op.insert.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        text = text.replace(/\n/g, '<br>');
+        
+        if (op.attributes) {
+          if (op.attributes.bold) text = `<strong>${text}</strong>`;
+          if (op.attributes.italic) text = `<em>${text}</em>`;
+        }
+        
+        html += text;
+      }
+    }
+    
+    return html || '<p>Contenuto vuoto</p>';
   }
 
   static async loadNoteData(node, noteId) {
@@ -51,6 +79,7 @@ export class NoteRefBlot extends EmbedBlot {
               note(_id: $_id) {
                 _id
                 title
+                variant
                 author {
                   name
                 }
@@ -66,11 +95,9 @@ export class NoteRefBlot extends EmbedBlot {
       
       if (result.data?.note) {
         const note = result.data.note;
-        // Aggiorna il contenuto con il titolo della nota
-        node.innerHTML = `
-          <span style="font-weight: 500;">${note.title}</span>
-          <span style="font-size: 0.8em; color: #666; margin-left: 4px;">by ${note.author.name}</span>
-        `;
+        
+        // In modalità editor, mostra solo titolo e info (no contenuto completo)
+        this.renderSimpleReference(node, note);
         node.title = `Note: ${note.title} (ID: ${noteId})`;
       } else {
         // Nota non trovata o non accessibile
@@ -87,6 +114,86 @@ export class NoteRefBlot extends EmbedBlot {
       node.style.borderColor = '#ff9800';
       node.style.color = '#ef6c00';
     }
+  }
+
+  // Rendering semplice per modalità editor (solo titolo)
+  static renderSimpleReference(node, note) {
+    // Rimuovi gli stili inline precedenti
+    node.style.cssText = '';
+    
+    // Usa "default" come fallback se non c'è variant
+    const variant = note.variant || 'default';
+    const title = variant === 'lemma' ? `[${note.title}]` : note.title;
+    
+    // Applica stili inline per il riferimento semplice
+    node.style.cssText = `
+      display: inline-block;
+      padding: 4px 8px;
+      margin: 0 2px;
+      background-color: ${this.getVariantColor(variant)};
+      border: 2px solid ${this.getVariantBorderColor(variant)};
+      border-radius: 6px;
+      color: ${this.getVariantTextColor(variant)};
+      cursor: pointer;
+      font-size: 0.9em;
+      font-weight: bold;
+    `;
+    
+    node.className = 'ql-note-ref';
+    node.textContent = `${this.getVariantLabel(variant)}: ${title}`;
+  }
+
+  // Helper per colori delle varianti
+  static getVariantColor(variant) {
+    const colors = {
+      theorem: '#f7f3d1',
+      lemma: '#e1f3fa', 
+      proof: '#e8e8e8',
+      remark: '#f3e1fa',
+      exercise: '#e1fae6',
+      test: '#fae1e1',
+      default: '#f5f5f5'
+    };
+    return colors[variant] || colors.default;
+  }
+
+  static getVariantBorderColor(variant) {
+    const colors = {
+      theorem: '#e6c200',
+      lemma: '#1ca3c7',
+      proof: '#888',
+      remark: '#a31cc7', 
+      exercise: '#1cc76a',
+      test: '#c71c1c',
+      default: '#666'
+    };
+    return colors[variant] || colors.default;
+  }
+
+  static getVariantTextColor(variant) {
+    const colors = {
+      theorem: '#b59a00',
+      lemma: '#1ca3c7',
+      proof: '#888',
+      remark: '#a31cc7',
+      exercise: '#1cc76a', 
+      test: '#c71c1c',
+      default: '#666'
+    };
+    return colors[variant] || colors.default;
+  }
+
+  static getVariantLabel(variant) {
+    const labels = {
+      theorem: 'Teorema',
+      lemma: 'Lemma',
+      proof: 'Dimostrazione',
+      remark: 'Osservazione',
+      exercise: 'Esercizio',
+      test: 'Test',
+      default: 'Nota'
+    };
+    return labels[variant] || labels.default;
   }
 
   static value(node) {

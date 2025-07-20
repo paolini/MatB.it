@@ -35,7 +35,8 @@ const NOTES_PIPELINE = [
   },
   {
     $addFields: {
-      updated_on: '$version.created_on' // L'ultima modifica è quando è stata creata l'ultima versione
+      updated_on: '$version.created_on', // L'ultima modifica è quando è stata creata l'ultima versione
+      variant: '$version.variant' // Includiamo la variant dalla note_version
     }
   }
 ]

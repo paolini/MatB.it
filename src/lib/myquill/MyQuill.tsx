@@ -2,6 +2,7 @@
 
 import { Delta, QuillEditor, Quill } from './myquill.js'
 import 'katex/dist/katex.min.css';
+import './quill-environment.css';
 import { useRef, useEffect } from 'react';
 
 const config = {

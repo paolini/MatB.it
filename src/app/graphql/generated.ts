@@ -56,6 +56,7 @@ export type Note = {
   private: Scalars['Boolean']['output'];
   title: Scalars['String']['output'];
   updated_on: Scalars['Timestamp']['output'];
+  variant: Maybe<Scalars['String']['output']>;
 };
 
 export type Profile = {
@@ -202,6 +203,7 @@ export type NoteResolvers<ContextType = Context, ParentType extends ResolversPar
   private: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   title: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   updated_on: Resolver<ResolversTypes['Timestamp'], ParentType, ContextType>;
+  variant: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 

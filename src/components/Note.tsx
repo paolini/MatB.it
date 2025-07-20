@@ -1,12 +1,13 @@
 "use client"
 import { gql, useQuery, useMutation } from '@apollo/client'
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from "next/navigation"
 
 import { Note, Profile } from '@/app/graphql/generated'
 import { Loading, Error } from '@/components/utils'
 import dynamic from "next/dynamic"
 import { Delta } from '@/lib/myquill/myquill.js'
+import { DeltaRenderer } from '@/lib/deltaRenderer.js'
 
 const MyQuill = dynamic(() => import('@/lib/myquill/MyQuill'), { ssr: false });
 
@@ -16,6 +17,7 @@ query Note($_id: ObjectId!) {
         _id
         title
         delta
+        variant
         author {
             _id
             name
@@ -84,7 +86,60 @@ function NoteInner({
     deleteError: Error | undefined
 }) {
     const [editMode, setEditMode] = useState(false)
+    const [renderedContent, setRenderedContent] = useState('')
     const router = useRouter()
+    
+    // Crea il noteResolver per caricare note embedded
+    const noteResolver = async (noteId: string) => {
+        try {
+          const response = await fetch('/graphql', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              query: `
+                query Note($_id: ObjectId!) {
+                  note(_id: $_id) {
+                    _id
+                    title
+                    delta
+                    variant
+                    author { name }
+                  }
+                }
+              `,
+              variables: { _id: noteId }
+            })
+          });
+          const result = await response.json();
+          return result.data?.note || null;
+        } catch (error) {
+          console.error('Error loading note:', error);
+          return null;
+        }
+    };
+    
+    // Renderizza il contenuto quando cambia la nota
+    useEffect(() => {
+        console.log('useEffect called with:', { editMode, noteDelta: note.delta });
+        if (!editMode && note.delta) {
+            console.log('Starting async render...');
+            const renderContent = async () => {
+                try {
+                    console.log('DeltaRenderer object:', DeltaRenderer);
+                    console.log('DeltaRenderer.render function:', DeltaRenderer.render);
+                    console.log('Calling DeltaRenderer.render...');
+                    const html = await (DeltaRenderer as any).render(note.delta, { noteResolver });
+                    console.log('DeltaRenderer returned:', html);
+                    setRenderedContent(html);
+                } catch (error) {
+                    console.error('Error rendering content:', error);
+                    setRenderedContent('<p>Error rendering content</p>');
+                }
+            };
+            renderContent();
+        }
+    }, [note.delta, editMode]);
+    
     return <div>
         {editMode ? (
             <NoteEditInner
@@ -105,11 +160,17 @@ function NoteInner({
                 router={router}
             />
         ) : (
-            <>
-                <h1>{note.title}</h1>
-                <MyQuill readOnly={true} content={note.delta}/>
+            // Rendering come variant per tutte le note, usando "default" se non c'è variant
+            <div className={`ql-variant-container ql-var-${note.variant || 'default'}`}>
+                <h1>
+                    {note.variant === 'lemma' ? `[${note.title}]` : note.title}
+                </h1>
+                <div 
+                    className="ql-editor" 
+                    dangerouslySetInnerHTML={{ __html: renderedContent }}
+                />
                 {note.private && <span className="text-sm text-gray-500">Nota privata</span>}
-            </>
+            </div>
         )}
         { note.author &&
             <>

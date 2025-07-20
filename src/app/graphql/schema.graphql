@@ -12,6 +12,7 @@ type Note {
   _id: ObjectId!
   title: String!
   delta: JSON
+  variant: String
   author: User!
   private: Boolean!
   created_on: Timestamp!
