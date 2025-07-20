@@ -64,6 +64,7 @@ export class DeltaRenderer {
    * Applica formattazione del testo
    */
   static async applyTextFormatting(text, attributes, options = {}) {
+    if (!text) return '';
     const { noteResolver, maxDepth, currentDepth } = options;
     
     if (!attributes) return this.escapeHtml(text);
@@ -87,14 +88,17 @@ export class DeltaRenderer {
             currentDepth: currentDepth + 1,
             embedded: true
           });
-          const title = note.variant === 'lemma' ? `[${note.title}]` : note.title;
           result = `
-            <div class="ql-variant-container ql-var-${note.variant || 'default'}" style="margin: 0.5em 0; padding: 0.5em;">
+            <div class="ql-variant-container ql-var-${note.variant || 'default'}" style="margin: 0.5em 0; padding: 0.5em; position: relative;">
               <div class="embedded-note-header">
-                <h4 style="margin: 0 0 0.3em 0; font-size: 1em;">${title}</h4>
-                <span style="font-size: 0.8em; color: #666;">by ${note.author.name}</span>
+                <h4 style="margin: 0 0 0.3em 0; font-size: 1em;">${this.escapeHtml(note.title)}</h4>
               </div>
               <div class="embedded-note-content">${embeddedContent}</div>
+              <div class="note-info-icon" onclick="showNoteInfo('${attributes.note_id}')" title="Informazioni nota" style="position: absolute; bottom: 0.5em; right: 0.5em; cursor: pointer; opacity: 0.6; hover: opacity: 1;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
+                </svg>
+              </div>
             </div>
           `;
         } else {
@@ -136,14 +140,17 @@ export class DeltaRenderer {
             currentDepth: currentDepth + 1,
             embedded: true
           });
-          const title = note.variant === 'lemma' ? `[${note.title}]` : note.title;
           return `
-            <div class="ql-variant-container ql-var-${note.variant || 'default'}" style="margin: 0.5em 0; padding: 0.5em;">
+            <div class="ql-variant-container ql-var-${note.variant || 'default'}" style="margin: 0.5em 0; padding: 0.5em; position: relative;">
               <div class="embedded-note-header">
-                <h4 style="margin: 0 0 0.3em 0; font-size: 1em;">${title}</h4>
-                <span style="font-size: 0.8em; color: #666;">by ${note.author.name}</span>
+                <h4 style="margin: 0 0 0.3em 0; font-size: 1em;">${this.escapeHtml(note.title)}</h4>
               </div>
               <div class="embedded-note-content">${embeddedContent}</div>
+              <div class="note-info-icon" onclick="showNoteInfo('${embed.note_id}')" title="Informazioni nota" style="position: absolute; bottom: 0.5em; right: 0.5em; cursor: pointer; opacity: 0.6; hover: opacity: 1;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
+                </svg>
+              </div>
             </div>
           `;
         } else {

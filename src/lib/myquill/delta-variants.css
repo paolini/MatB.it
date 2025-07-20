@@ -78,59 +78,116 @@
   border-left: 4px solid #c71c1c;
 }
 .ql-variant-container.ql-var-default {
-  background: #f5f5f5;
-  border-left: 4px solid #666;
+  background: transparent;
+  border-left: none;
+  padding: 0;
+  margin: 0.5em 0;
 }
 
-/* Label visibile per ogni tipo di variant */
-.ql-variant-container.ql-var-theorem::before {
-  content: "Teorema";
-  font-weight: bold;
-  margin-right: 1em;
+/* Label visibile per ogni tipo di variant sui titoli */
+.ql-variant-container.ql-var-theorem h1,
+.ql-variant-container.ql-var-theorem h4 {
   color: #b59a00;
-  display: inline-block;
-}
-.ql-variant-container.ql-var-lemma::before {
-  content: "Lemma";
   font-weight: bold;
-  margin-right: 0.5em;
+}
+.ql-variant-container.ql-var-theorem h1::before,
+.ql-variant-container.ql-var-theorem h4::before {
+  content: "Teorema [";
+}
+.ql-variant-container.ql-var-theorem h1::after,
+.ql-variant-container.ql-var-theorem h4::after {
+  content: "]";
+}
+
+.ql-variant-container.ql-var-lemma h1,
+.ql-variant-container.ql-var-lemma h4 {
   color: #1ca3c7;
-  display: inline-block;
-}
-.ql-variant-container.ql-var-proof::before {
-  content: "Dimostrazione";
   font-weight: bold;
-  margin-right: 1em;
+}
+.ql-variant-container.ql-var-lemma h1::before,
+.ql-variant-container.ql-var-lemma h4::before {
+  content: "Lemma [";
+}
+.ql-variant-container.ql-var-lemma h1::after,
+.ql-variant-container.ql-var-lemma h4::after {
+  content: "]";
+}
+
+.ql-variant-container.ql-var-proof h1,
+.ql-variant-container.ql-var-proof h4 {
   color: #888;
-  display: inline-block;
-}
-.ql-variant-container.ql-var-remark::before {
-  content: "Osservazione";
   font-weight: bold;
-  margin-right: 1em;
+}
+.ql-variant-container.ql-var-proof h1::before,
+.ql-variant-container.ql-var-proof h4::before {
+  content: "Dimostrazione [";
+}
+.ql-variant-container.ql-var-proof h1::after,
+.ql-variant-container.ql-var-proof h4::after {
+  content: "]";
+}
+
+.ql-variant-container.ql-var-remark h1,
+.ql-variant-container.ql-var-remark h4 {
   color: #a31cc7;
-  display: inline-block;
-}
-.ql-variant-container.ql-var-exercise::before {
-  content: "Esercizio";
   font-weight: bold;
-  margin-right: 1em;
+}
+.ql-variant-container.ql-var-remark h1::before,
+.ql-variant-container.ql-var-remark h4::before {
+  content: "Osservazione [";
+}
+.ql-variant-container.ql-var-remark h1::after,
+.ql-variant-container.ql-var-remark h4::after {
+  content: "]";
+}
+
+.ql-variant-container.ql-var-exercise h1,
+.ql-variant-container.ql-var-exercise h4 {
   color: #1cc76a;
-  display: inline-block;
-}
-.ql-variant-container.ql-var-test::before {
-  content: "Test";
   font-weight: bold;
-  margin-right: 1em;
+}
+.ql-variant-container.ql-var-exercise h1::before,
+.ql-variant-container.ql-var-exercise h4::before {
+  content: "Esercizio [";
+}
+.ql-variant-container.ql-var-exercise h1::after,
+.ql-variant-container.ql-var-exercise h4::after {
+  content: "]";
+}
+
+.ql-variant-container.ql-var-test h1,
+.ql-variant-container.ql-var-test h4 {
   color: #c71c1c;
-  display: inline-block;
-}
-.ql-variant-container.ql-var-default::before {
-  content: "Nota";
   font-weight: bold;
-  margin-right: 1em;
-  color: #666;
-  display: inline-block;
+}
+.ql-variant-container.ql-var-test h1::before,
+.ql-variant-container.ql-var-test h4::before {
+  content: "Test [";
+}
+.ql-variant-container.ql-var-test h1::after,
+.ql-variant-container.ql-var-test h4::after {
+  content: "]";
+}
+
+/* Note info icon per le note embedded */
+.note-info-icon {
+  position: absolute;
+  bottom: 0.5em;
+  right: 0.5em;
+  cursor: pointer;
+  opacity: 0.6;
+  transition: opacity 0.2s ease;
+  color: currentColor;
+}
+
+.note-info-icon:hover {
+  opacity: 1;
+}
+
+.note-info-icon svg {
+  width: 16px;
+  height: 16px;
+  fill: currentColor;
 }
 
 /* Note reference container for embedded notes */

@@ -120,16 +120,54 @@ function NoteInner({
     
     // Renderizza il contenuto quando cambia la nota
     useEffect(() => {
-        console.log('useEffect called with:', { editMode, noteDelta: note.delta });
+        // Aggiungi la funzione globale per mostrare info nota
+        (window as any).showNoteInfo = async (noteId: string) => {
+            try {
+                const response = await fetch('/graphql', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        query: `
+                            query Note($_id: ObjectId!) {
+                                note(_id: $_id) {
+                                    _id
+                                    title
+                                    variant
+                                    author { name }
+                                    created_on
+                                    updated_on
+                                    private
+                                }
+                            }
+                        `,
+                        variables: { _id: noteId }
+                    })
+                });
+                const result = await response.json();
+                const noteData = result.data?.note;
+                
+                if (noteData) {
+                    const createdDate = new Date(noteData.created_on).toLocaleDateString();
+                    const updatedDate = new Date(noteData.updated_on).toLocaleDateString();
+                    const variantLabel = noteData.variant ? 
+                        `${noteData.variant.charAt(0).toUpperCase()}${noteData.variant.slice(1)}` : 
+                        'Nota';
+                    const privacyText = noteData.private ? '\nPrivata' : '';
+                    
+                    alert(`${variantLabel}: ${noteData.title}\n\nAutore: ${noteData.author.name}\nCreata: ${createdDate}\nUltima modifica: ${updatedDate}${privacyText}`);
+                } else {
+                    alert('Impossibile caricare le informazioni della nota');
+                }
+            } catch (error) {
+                console.error('Error loading note info:', error);
+                alert('Errore nel caricamento delle informazioni');
+            }
+        };
+        
         if (!editMode && note.delta) {
-            console.log('Starting async render...');
             const renderContent = async () => {
                 try {
-                    console.log('DeltaRenderer object:', DeltaRenderer);
-                    console.log('DeltaRenderer.render function:', DeltaRenderer.render);
-                    console.log('Calling DeltaRenderer.render...');
                     const html = await (DeltaRenderer as any).render(note.delta, { noteResolver });
-                    console.log('DeltaRenderer returned:', html);
                     setRenderedContent(html);
                 } catch (error) {
                     console.error('Error rendering content:', error);
@@ -138,6 +176,11 @@ function NoteInner({
             };
             renderContent();
         }
+        
+        // Cleanup: rimuovi la funzione globale quando il componente viene smontato
+        return () => {
+            delete (window as any).showNoteInfo;
+        };
     }, [note.delta, editMode]);
     
     return <div>
@@ -163,10 +206,10 @@ function NoteInner({
             // Rendering come variant per tutte le note, usando "default" se non c'è variant
             <div className={`ql-variant-container ql-var-${note.variant || 'default'}`}>
                 <h1>
-                    {note.variant === 'lemma' ? `[${note.title}]` : note.title}
+                    {note.title}
                 </h1>
                 <div 
-                    className="ql-editor" 
+                    className="delta" 
                     dangerouslySetInnerHTML={{ __html: renderedContent }}
                 />
                 {note.private && <span className="text-sm text-gray-500">Nota privata</span>}

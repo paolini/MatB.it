@@ -46,16 +46,24 @@ MatBit is a **collaborative note-taking web application** built with Next.js and
 - **LaTeX formula support** (inline: `$formula$`, display: `$$formula$$`)
 - Text formatting (bold, italic, underline)
 - Headers, lists, and code blocks
-- Mathematical environments (theorem, lemma, proof, etc.)
-- **Note references** - embed links to other notes within content
+- **Mathematical environments (theorem, lemma, proof, etc.) as separate Note entities**
+- **Note references** - embed links to other notes within content with full recursive rendering
+- **Delta variants system** - visual styling for different note types with CSS-based labels
 - Image and link insertion
 
 ### 4. Content Storage & Versioning
 - Notes stored as **Quill Delta format** (JSON) for rich text
 - Automatic migration from legacy text format to Delta
 - **Git-like versioning system** with branches (Notes) and commits (NoteVersions)
+- **Note variants system** for mathematical environments (theorem, lemma, proof, etc.)
 
-### 5. Git-like Versioning System
+### 5. Delta Rendering & Note Embedding
+- **DeltaRenderer** for converting Delta format to HTML with embedded note support
+- **Recursive note embedding** with depth control and async note resolution
+- **Visual variants** with CSS-based styling (colored backgrounds, borders, labels)
+- **Note information system** with clickable icons showing metadata (author, dates, privacy)
+
+### 6. Git-like Versioning System
 - **Note** acts as a Git-like branch pointing to the latest version (HEAD)
 - **NoteVersion** acts as immutable commits storing the complete history
 - **Denormalized data** in Note (title, delta) for performance optimization
@@ -84,13 +92,14 @@ src/
 ├── lib/                  # Utility libraries
 │   ├── models.ts         # MongoDB type definitions & note reference types
 │   ├── mongodb.ts        # Database connection
+│   ├── deltaRenderer.js  # Centralized Delta-to-HTML renderer with note embedding
 │   └── myquill/          # Custom Quill.js integration
 │       ├── MyQuill.tsx   # Quill wrapper component
 │       ├── myquill.js    # Quill configuration and blot registration
 │       ├── noteref.js    # Note reference blot implementation
-│       ├── environment.js # Mathematical environment blots
+│       ├── environment.js # Mathematical environment blots (legacy)
 │       ├── formula.js    # LaTeX formula blots
-│       └── quill-environment.css # Custom styling for Quill editor
+│       └── delta-variants.css   # Styling for Delta variants (theorem, lemma, etc.)
 migrations/               # Database migration scripts
 ```
 
@@ -137,7 +146,7 @@ type NoteVersion = {
     _id: ObjectId
     title: string
     delta: object                // Contenuto in formato Quill Delta (JSON flessibile)
-    variant?: string            // Tipo di contenuto opzionale (es: teorema, dimostrazione, esercizio, etc.)
+    variant?: string            // Tipo di contenuto (theorem, lemma, proof, remark, exercise, test, default)
     author_id: ObjectId         // Chi ha creato questa versione
     parent_version_id?: ObjectId          // Primo parent (catena principale)
     second_parent_version_id?: ObjectId   // Secondo parent (per merge)
@@ -198,10 +207,19 @@ Complex component handling:
 ### MyQuill Custom Editor
 - Extended Quill.js with mathematical features
 - LaTeX formula insertion and rendering
-- Mathematical environments (theorem, proof, etc.)
-- **Note reference system** with visual embedding and click navigation
+- **Note reference system** with visual embedding and recursive content rendering
+- **DeltaRenderer integration** for view mode with full embedded note display
+- **Edit mode note references** display as styled badges with variant information
 - Custom toolbar configuration with note reference button (※)
 - Delta format content handling
+- **Variant-aware styling** with CSS-based labels and color coding
+
+### DeltaRenderer System
+- **Centralized Delta-to-HTML conversion** with async note resolution
+- **Recursive note embedding** with configurable depth limits
+- **Variant styling** using CSS classes for visual distinction
+- **Note information icons** for metadata access (author, dates, privacy)
+- **Separation of concerns** between edit mode (simple badges) and view mode (full content)
 
 ## Development Workflow
 
@@ -253,8 +271,10 @@ npm run codegen            # Generate TypeScript types from GraphQL schema
 - Notes stored as Quill Delta JSON (structured, parseable)
 - LaTeX formulas preserved and identifiable
 - **Note references** embedded as structured data with note IDs
+- **Variant system** for mathematical content classification
 - Rich metadata (author, timestamps, privacy, versioning)
 - Complete version history available for analysis
+- **Recursive embedding structure** enables content relationship analysis
 
 ### API Access
 - GraphQL endpoint provides structured data access
@@ -268,5 +288,7 @@ npm run codegen            # Generate TypeScript types from GraphQL schema
 - Component-based architecture allows easy feature additions
 - Migration system supports schema evolution
 - **Versioning system** enables content timeline analysis and collaboration insights
+- **DeltaRenderer** extensible for new content types and rendering modes
+- **Variant system** supports new mathematical environment types
 
-This application demonstrates a modern full-stack approach with strong typing, real-time editing capabilities, mathematical content support, and **Git-like versioning for collaborative research scenarios**.
+This application demonstrates a modern full-stack approach with strong typing, real-time editing capabilities, mathematical content support, **recursive note embedding**, **visual variant system**, and **Git-like versioning for collaborative research scenarios**.

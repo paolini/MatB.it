@@ -1,5 +1,5 @@
 @import "tailwindcss";
-@import "../lib/myquill/quill-environment.css";
+@import "../lib/myquill/delta-variants.css";
 
 :root {
   --background: #ffffff;

@@ -91,7 +91,6 @@ export class NoteRefBlot extends EmbedBlot {
       });
 
       const result = await response.json();
-      console.log('GraphQL response for note:', noteId, result);
       
       if (result.data?.note) {
         const note = result.data.note;
@@ -101,7 +100,6 @@ export class NoteRefBlot extends EmbedBlot {
         node.title = `Note: ${note.title} (ID: ${noteId})`;
       } else {
         // Nota non trovata o non accessibile
-        console.log('Note not found or not accessible:', noteId, result.errors);
         node.textContent = `[Note not found: ${noteId}]`;
         node.style.backgroundColor = '#ffebee';
         node.style.borderColor = '#f44336';
@@ -123,7 +121,6 @@ export class NoteRefBlot extends EmbedBlot {
     
     // Usa "default" come fallback se non c'è variant
     const variant = note.variant || 'default';
-    const title = variant === 'lemma' ? `[${note.title}]` : note.title;
     
     // Applica stili inline per il riferimento semplice
     node.style.cssText = `
@@ -140,7 +137,7 @@ export class NoteRefBlot extends EmbedBlot {
     `;
     
     node.className = 'ql-note-ref';
-    node.textContent = `${this.getVariantLabel(variant)}: ${title}`;
+    node.textContent = note.title;
   }
 
   // Helper per colori delle varianti
@@ -183,19 +180,6 @@ export class NoteRefBlot extends EmbedBlot {
     return colors[variant] || colors.default;
   }
 
-  static getVariantLabel(variant) {
-    const labels = {
-      theorem: 'Teorema',
-      lemma: 'Lemma',
-      proof: 'Dimostrazione',
-      remark: 'Osservazione',
-      exercise: 'Esercizio',
-      test: 'Test',
-      default: 'Nota'
-    };
-    return labels[variant] || labels.default;
-  }
-
   static value(node) {
     return node.getAttribute('data-note-id');  // Restituisce direttamente l'ID
   }
@@ -212,7 +196,6 @@ export class NoteRefBlot extends EmbedBlot {
       e.preventDefault();
       e.stopPropagation();
       const noteId = this.domNode.getAttribute('data-note-id');
-      console.log('Note reference clicked:', noteId);
       // TODO: Implementare navigazione alla nota
     });
   }
