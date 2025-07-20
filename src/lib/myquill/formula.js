@@ -153,7 +153,7 @@ export class FormulaEditorModule {
     this.quill.root.addEventListener('click', this.handleClick.bind(this));
 
     // Shortcut: apri editor formula quando viene inserito il carattere $ (input event, non keydown)
-    this.quill.root.addEventListener('input', () => {
+    this.quill.root.addEventListener('input', (e) => {
       const selection = this.quill.getSelection();
       if (!selection || selection.length !== 0) return;
       const index = selection.index;
@@ -176,7 +176,7 @@ export class FormulaEditorModule {
       const formulaButton = toolbar.container.querySelector('.ql-formula');
       let lastRange = null;
       if (formulaButton) {
-        formulaButton.addEventListener('mousedown', () => {
+        formulaButton.addEventListener('mousedown', (e) => {
           lastRange = this.quill.getSelection();
         });
         formulaButton.addEventListener('click', () => {
@@ -264,7 +264,7 @@ export class FormulaEditorModule {
     const closeOnDollar = (e) => {
       if (e.key === '$') {
         e.preventDefault();
-        saveHandler(); // Salva e chiudi
+        saveHandler(e); // Salva e chiudi
       }
     };
     input.addEventListener('keydown', closeOnDollar);

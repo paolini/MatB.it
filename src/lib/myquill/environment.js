@@ -41,7 +41,7 @@ class MyEnvironmentLine extends Block {
         this.domNode.removeAttribute('data-title');
       }
     } else {
-      if (super.format) super.format(name, value);
+      super.format && super.format(name, value);
     }
   }
 }
