@@ -33,7 +33,7 @@ type Query {
 }
 
 type Mutation {
-  newNote(title: String!, description: String, private: Boolean): Note
+  newNote(title: String!, delta: JSON, private: Boolean): Note
   updateNote(_id: ObjectId!, title: String, delta: JSON, private: Boolean): Note
-  deleteNote(_id: ObjectId!): Note
+  deleteNote(_id: ObjectId!): Boolean
 }

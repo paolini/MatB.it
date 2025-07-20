@@ -22,13 +22,19 @@ export type Scalars = {
 
 export type Mutation = {
   __typename?: 'Mutation';
+  deleteNote: Maybe<Scalars['Boolean']['output']>;
   newNote: Maybe<Note>;
   updateNote: Maybe<Note>;
 };
 
 
+export type MutationDeleteNoteArgs = {
+  _id: Scalars['ObjectId']['input'];
+};
+
+
 export type MutationNewNoteArgs = {
-  description: InputMaybe<Scalars['String']['input']>;
+  delta: InputMaybe<Scalars['JSON']['input']>;
   private: InputMaybe<Scalars['Boolean']['input']>;
   title: Scalars['String']['input'];
 };
@@ -183,6 +189,7 @@ export interface JsonScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes
 }
 
 export type MutationResolvers<ContextType = Context, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = ResolversObject<{
+  deleteNote: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType, RequireFields<MutationDeleteNoteArgs, '_id'>>;
   newNote: Resolver<Maybe<ResolversTypes['Note']>, ParentType, ContextType, RequireFields<MutationNewNoteArgs, 'title'>>;
   updateNote: Resolver<Maybe<ResolversTypes['Note']>, ParentType, ContextType, RequireFields<MutationUpdateNoteArgs, '_id'>>;
 }>;

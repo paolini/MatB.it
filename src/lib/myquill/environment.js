@@ -40,8 +40,8 @@ class MyEnvironmentLine extends Block {
       } else {
         this.domNode.removeAttribute('data-title');
       }
-    } else {
-      super.format && super.format(name, value);
+    } else if (super.format) {
+      super.format(name, value);
     }
   }
 }

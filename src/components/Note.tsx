@@ -131,7 +131,7 @@ function NoteEditInner({
     onSave,
     onCancel,
     saveError,
-    onDelete,
+    onDelete: _onDelete,
     deleteNote,
     deleteError,
     isAuthor,

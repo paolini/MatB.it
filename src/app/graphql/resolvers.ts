@@ -5,7 +5,7 @@ import type { MutationNewNoteArgs } from './generated'
 import { Context } from './types'
 import { ObjectIdType, JSONType } from './types'
 import { Resolvers, Note } from './generated'
-import { getNotesCollection } from '@/lib/models'
+import { getNotesCollection, getNoteVersionsCollection } from '@/lib/models'
 
 const NOTES_PIPELINE = [
   { $sort: { updated_on: -1 } },
@@ -81,18 +81,35 @@ export const resolvers = {
       context: Context
     ): Promise<Note | null> => {
       if (!context.user) throw new Error('Not authenticated')
-      const collection = getNotesCollection(context.db)
+      const notesCollection = getNotesCollection(context.db)
+      const versionsCollection = getNoteVersionsCollection(context.db)
       const now = new Date()
-      const note = {
-        author_id: context.user._id,
+      
+      // Prima crea la versione con il contenuto
+      const noteVersion = {
         title: args.title,
-        text: args.description || '',
-        private: typeof args.private === 'boolean' ? args.private : false,
-        created_on: now,
-        updated_on: now
+        delta: args.delta || { ops: [{ insert: '\n' }] }, // Delta passato o vuoto
+        author_id: context.user._id,
+        created_on: now
       }
-      const result = await collection.insertOne(note)
-      const notes = await collection.aggregate<Note>([
+      const versionResult = await versionsCollection.insertOne(noteVersion)
+      
+      // Poi crea la nota che punta alla versione
+      const note = {
+        name: args.title, // name è il nome del branch
+        author_id: context.user._id,
+        note_version_id: versionResult.insertedId,
+        contributors: [{
+          user_id: context.user._id,
+          contribution_count: 1,
+          first_contribution: now,
+          last_contribution: now
+        }],
+        private: typeof args.private === 'boolean' ? args.private : false,
+        created_on: now
+      }
+      const result = await notesCollection.insertOne(note)
+      const notes = await notesCollection.aggregate<Note>([
         { $match: { _id: result.insertedId } },
         ...NOTES_PIPELINE
       ]).toArray()
@@ -129,15 +146,16 @@ export const resolvers = {
       _parent: unknown,
       args: { _id: ObjectId },
       context: Context
-    ) => {
+    ): Promise<boolean> => {
       const { _id } = args
       const collection = getNotesCollection(context.db)
       const note = await collection.findOne({ _id })
       if (!note) throw new Error('Note not found')
       if (!context.user) throw new Error('Not authenticated')
       if (!note.author_id.equals(context.user._id)) throw new Error('Not authorized')
+      
       await collection.deleteOne({ _id })
-      // restituisci la nota cancellata (come fa updateNote)
+      return true
     },
   }
 } satisfies Partial<Resolvers<Context>>
