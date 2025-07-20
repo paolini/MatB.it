@@ -121,3 +121,11 @@
   color: #c71c1c;
   display: inline-block;
 }
+
+/* Note reference button icon */
+.ql-toolbar.ql-snow button.ql-note_id::before {
+  content: "※";
+  font-size: 14px;
+  display: inline-block;
+  line-height: 22px;
+}

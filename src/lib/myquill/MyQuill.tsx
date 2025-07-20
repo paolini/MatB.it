@@ -12,6 +12,7 @@ const config = {
             ['bold', 'italic', 'underline'],
             ['code-block'],
             ['formula'],
+            ['note_id'], // Cambiato da 'note-ref' a 'note_id'
             [{ 'environment': ['theorem', 
                 'lemma', 'proof', 'remark', 
                 'exercise', 'test'  ] }],
@@ -48,7 +49,24 @@ export default function MyQuill({readOnly, content, onSave}: {
             readOnly={readOnly}
             config={readOnly ? readonlyConfig : config}
             defaultValue={content || new Delta()}
-            onReady={quill => { quillInstance.current = quill }}
+            onReady={quill => { 
+                quillInstance.current = quill 
+                
+                // Aggiungi handler per il pulsante note-ref
+                if (!readOnly) {
+                    const toolbar = quill.getModule('toolbar') as { addHandler: (name: string, handler: () => void) => void };
+                    toolbar.addHandler('note_id', () => {
+                        const noteId = prompt('Inserisci l\'ID della nota da referenziare:');
+                        if (noteId) {
+                            const range = quill.getSelection();
+                            if (range) {
+                                quill.insertEmbed(range.index, 'note_id', noteId);
+                                quill.setSelection(range.index + 1);
+                            }
+                        }
+                    });
+                }
+            }}
         />
         {!readOnly && onSave && (
             <button

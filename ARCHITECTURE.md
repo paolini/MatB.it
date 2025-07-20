@@ -47,6 +47,7 @@ MatBit is a **collaborative note-taking web application** built with Next.js and
 - Text formatting (bold, italic, underline)
 - Headers, lists, and code blocks
 - Mathematical environments (theorem, lemma, proof, etc.)
+- **Note references** - embed links to other notes within content
 - Image and link insertion
 
 ### 4. Content Storage & Versioning
@@ -81,13 +82,34 @@ src/
 │   ├── NavBar.tsx        # Navigation with auth
 │   └── Providers.tsx     # App-wide providers
 ├── lib/                  # Utility libraries
-│   ├── models.ts         # MongoDB type definitions
+│   ├── models.ts         # MongoDB type definitions & note reference types
 │   ├── mongodb.ts        # Database connection
 │   └── myquill/          # Custom Quill.js integration
+│       ├── MyQuill.tsx   # Quill wrapper component
+│       ├── myquill.js    # Quill configuration and blot registration
+│       ├── noteref.js    # Note reference blot implementation
+│       ├── environment.js # Mathematical environment blots
+│       ├── formula.js    # LaTeX formula blots
+│       └── quill-environment.css # Custom styling for Quill editor
 migrations/               # Database migration scripts
 ```
 
 ## Database Schema
+
+### Note Reference Types
+```typescript
+// Types for Note Reference in Quill Delta
+type NoteRef = {
+    note_id: ObjectId           // Points to Note (HEAD)
+}
+
+// Extended Delta operation types
+type DeltaInsert = string | { "note-ref": NoteRef } | object
+
+// Helper functions for note references
+function isNoteRef(insert: unknown): insert is { "note-ref": NoteRef }
+function extractNoteRef(insert: unknown): NoteRef | null
+```
 
 ### Notes Collection (Git-like Branches)
 ```typescript
@@ -177,7 +199,8 @@ Complex component handling:
 - Extended Quill.js with mathematical features
 - LaTeX formula insertion and rendering
 - Mathematical environments (theorem, proof, etc.)
-- Custom toolbar configuration
+- **Note reference system** with visual embedding and click navigation
+- Custom toolbar configuration with note reference button (※)
 - Delta format content handling
 
 ## Development Workflow
@@ -229,6 +252,7 @@ npm run codegen            # Generate TypeScript types from GraphQL schema
 ### Content Format
 - Notes stored as Quill Delta JSON (structured, parseable)
 - LaTeX formulas preserved and identifiable
+- **Note references** embedded as structured data with note IDs
 - Rich metadata (author, timestamps, privacy, versioning)
 - Complete version history available for analysis
 

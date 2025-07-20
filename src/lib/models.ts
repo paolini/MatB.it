@@ -1,5 +1,22 @@
 import { Db, ObjectId, OptionalId } from 'mongodb'
 
+// Types for Note Reference in Quill Delta
+export type NoteRef = {
+    note_id: ObjectId           // Points to Note (HEAD)
+}
+
+// Extended Delta operation types
+export type DeltaInsert = string | { "note-ref": NoteRef } | object
+
+// Helper functions for note references
+export function isNoteRef(insert: unknown): insert is { "note-ref": NoteRef } {
+    return typeof insert === 'object' && insert !== null && 'note-ref' in insert
+}
+
+export function extractNoteRef(insert: unknown): NoteRef | null {
+    return isNoteRef(insert) ? insert["note-ref"] : null
+}
+
 export type MongoNote = {
     _id: ObjectId
     title: string               // Title dell'ultima versione (HEAD)
