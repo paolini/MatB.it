@@ -49,10 +49,19 @@ MatBit is a **collaborative note-taking web application** built with Next.js and
 - Mathematical environments (theorem, lemma, proof, etc.)
 - Image and link insertion
 
-### 4. Content Storage
+### 4. Content Storage & Versioning
 - Notes stored as **Quill Delta format** (JSON) for rich text
 - Automatic migration from legacy text format to Delta
-- Version tracking with created_on/updated_on timestamps
+- **Git-like versioning system** with branches (Notes) and commits (NoteVersions)
+
+### 5. Git-like Versioning System
+- **Note** acts as a Git-like branch pointing to the latest version (HEAD)
+- **NoteVersion** acts as immutable commits storing the complete history
+- **Denormalized data** in Note (title, delta) for performance optimization
+- **Soft deletion** - deleted notes moved to `deleted_notes` collection
+- **Shared versions** - multiple Notes can reference the same NoteVersion
+- **Contributors tracking** - denormalized list of users who contributed to each Note
+- **Version history** - complete audit trail of all changes with authorship
 
 ## Project Structure
 
@@ -80,16 +89,47 @@ migrations/               # Database migration scripts
 
 ## Database Schema
 
-### Notes Collection
+### Notes Collection (Git-like Branches)
 ```typescript
 type MongoNote = {
     _id: ObjectId
-    author_id: ObjectId      // Reference to users collection
-    title: string
-    delta: JSON              // Quill Delta format content
-    private: boolean         // Privacy setting
+    title: string               // Title dell'ultima versione (HEAD)
+    delta: object               // Contenuto dell'ultima versione (HEAD) in formato Quill Delta
+    author_id: ObjectId         // Chi controlla questo branch (può spostare il tip)
+    note_version_id: ObjectId   // Punta alla versione corrente (HEAD)
+    contributors: {             // Lista denormalizzata dei contributori
+        user_id: ObjectId
+        contribution_count: number
+        first_contribution: Date
+        last_contribution: Date
+    }[]
+    private: boolean            // Controllo visibilità
     created_on: Date
-    updated_on: Date
+    description?: string        // Descrizione del branch
+}
+```
+
+### Note Versions Collection (Git-like Commits)
+```typescript
+type NoteVersion = {
+    _id: ObjectId
+    title: string
+    delta: object                // Contenuto in formato Quill Delta (JSON flessibile)
+    variant?: string            // Tipo di contenuto opzionale (es: teorema, dimostrazione, esercizio, etc.)
+    author_id: ObjectId         // Chi ha creato questa versione
+    parent_version_id?: ObjectId          // Primo parent (catena principale)
+    second_parent_version_id?: ObjectId   // Secondo parent (per merge)
+    created_on: Date
+    message?: string            // Messaggio di commit
+}
+```
+
+### Deleted Notes Collection
+```typescript
+// Same structure as MongoNote plus:
+type MongoDeletedNote = MongoNote & {
+    deleted_on: Date
+    deleted_by: ObjectId
 }
 ```
 
@@ -116,9 +156,9 @@ type MongoUser = {
 - `profile`: Get current user profile
 
 ### Mutations
-- `newNote(title, private)`: Create new note
-- `updateNote(_id, title, delta, private)`: Update existing note
-- `deleteNote(_id)`: Delete note (author only)
+- `newNote(title, delta, private)`: Create new note with versioning
+- `updateNote(_id, title, delta, private)`: Update existing note (creates new version)
+- `deleteNote(_id)`: Move note to deleted_notes collection (preserves history)
 
 ## Key Components
 
@@ -189,17 +229,20 @@ npm run codegen            # Generate TypeScript types from GraphQL schema
 ### Content Format
 - Notes stored as Quill Delta JSON (structured, parseable)
 - LaTeX formulas preserved and identifiable
-- Rich metadata (author, timestamps, privacy)
+- Rich metadata (author, timestamps, privacy, versioning)
+- Complete version history available for analysis
 
 ### API Access
 - GraphQL endpoint provides structured data access
 - Type-safe operations with generated TypeScript types
 - Authentication context available for user-specific operations
+- Version history accessible for content evolution analysis
 
 ### Extension Points
 - Custom Quill modules for additional features
 - GraphQL schema extensible for new functionality
 - Component-based architecture allows easy feature additions
 - Migration system supports schema evolution
+- **Versioning system** enables content timeline analysis and collaboration insights
 
-This application demonstrates a modern full-stack approach with strong typing, real-time editing capabilities, and mathematical content support, making it suitable for educational or research collaboration scenarios.
+This application demonstrates a modern full-stack approach with strong typing, real-time editing capabilities, mathematical content support, and **Git-like versioning for collaborative research scenarios**.

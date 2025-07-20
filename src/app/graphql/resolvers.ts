@@ -5,10 +5,10 @@ import type { MutationNewNoteArgs } from './generated'
 import { Context } from './types'
 import { ObjectIdType, JSONType } from './types'
 import { Resolvers, Note } from './generated'
-import { getNotesCollection, getNoteVersionsCollection } from '@/lib/models'
+import { getNotesCollection, getDeletedNotesCollection, getNoteVersionsCollection } from '@/lib/models'
 
 const NOTES_PIPELINE = [
-  { $sort: { updated_on: -1 } },
+  { $sort: { created_on: -1 } }, // Ordina per data di creazione della Note
   {
     $lookup: {
       from: 'users',
@@ -21,6 +21,23 @@ const NOTES_PIPELINE = [
     // da array a oggetto singolo
     $unwind: '$author'
   },
+  {
+    // Aggiungiamo updated_on basato sulla versione corrente
+    $lookup: {
+      from: 'note_versions',
+      localField: 'note_version_id',
+      foreignField: '_id',
+      as: 'version'
+    }
+  },
+  {
+    $unwind: '$version'
+  },
+  {
+    $addFields: {
+      updated_on: '$version.created_on' // L'ultima modifica è quando è stata creata l'ultima versione
+    }
+  }
 ]
 
 export const resolvers = {
@@ -96,7 +113,8 @@ export const resolvers = {
       
       // Poi crea la nota che punta alla versione
       const note = {
-        name: args.title, // name è il nome del branch
+        title: args.title, // title dell'ultima versione
+        delta: args.delta || { ops: [{ insert: '\n' }] }, // delta dell'ultima versione
         author_id: context.user._id,
         note_version_id: versionResult.insertedId,
         contributors: [{
@@ -148,13 +166,22 @@ export const resolvers = {
       context: Context
     ): Promise<boolean> => {
       const { _id } = args
-      const collection = getNotesCollection(context.db)
-      const note = await collection.findOne({ _id })
+      const notesCollection = getNotesCollection(context.db)
+      const note = await notesCollection.findOne({ _id })
       if (!note) throw new Error('Note not found')
       if (!context.user) throw new Error('Not authenticated')
       if (!note.author_id.equals(context.user._id)) throw new Error('Not authorized')
       
-      await collection.deleteOne({ _id })
+      // Sposta la nota nella collection deletedNotes
+      const deletedNotesCollection = getDeletedNotesCollection(context.db)
+      const deletedNote = {
+        ...note,
+        deleted_on: new Date(),
+        deleted_by: context.user._id
+      }
+      
+      await deletedNotesCollection.insertOne(deletedNote)
+      await notesCollection.deleteOne({ _id })
       return true
     },
   }

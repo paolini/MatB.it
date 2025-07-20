@@ -2,7 +2,8 @@ import { Db, ObjectId, OptionalId } from 'mongodb'
 
 export type MongoNote = {
     _id: ObjectId
-    name: string                // Nome del branch 
+    title: string               // Title dell'ultima versione (HEAD)
+    delta: object               // Contenuto dell'ultima versione (HEAD) in formato Quill Delta
     author_id: ObjectId         // Chi controlla questo branch (può spostare il tip)
     note_version_id: ObjectId   // Punta alla versione corrente (HEAD)
     contributors: {             // Lista denormalizzata dei contributori
@@ -45,6 +46,10 @@ export type MongoUser = {
 
 export function getNotesCollection(db: Db) {
     return db.collection<OptionalId<MongoNote>>('notes')
+}
+
+export function getDeletedNotesCollection(db: Db) {
+    return db.collection<OptionalId<MongoNote>>('deleted_notes')
 }
 
 export function getNoteVersionsCollection(db: Db) {
