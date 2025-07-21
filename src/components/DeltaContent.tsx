@@ -12,8 +12,8 @@ declare global {
 }
 
 const NOTE_QUERY = gql`
-  query Note($_id: ObjectId!) {
-    note(_id: $_id) {
+  query Note($id: ObjectId!) {
+    note(_id: $id) {
       _id
       title
       delta
@@ -115,7 +115,7 @@ function NoteEmbed({ note, maxDepth }: NoteEmbedProps) {
 
 export function DeltaContent({ 
   delta, 
-  maxDepth = 2, 
+  maxDepth = 3, 
   embedded = false 
 }: DeltaContentProps) {
   // Rendering sincrono diretto - molto più semplice!
@@ -208,13 +208,11 @@ export function DeltaContent({
     // Per note embedded, mostriamo un placeholder che verrà sostituito da un componente asincrono
     if (embed.note_id || attributes?.note_id) {
       const noteId = embed.note_id || attributes.note_id;
-      return (
-        <AsyncNoteEmbed
+      return <AsyncNoteEmbed
           key={key}
           noteId={noteId}
-          maxDepth={maxDepth - 1}
+          maxDepth={maxDepth}
         />
-      );
     }
 
     return null;
@@ -236,7 +234,7 @@ export function DeltaContent({
             <AsyncNoteEmbed
               key={keyCounter++}
               noteId={op.attributes.note_id}
-              maxDepth={maxDepth - 1}
+              maxDepth={maxDepth}
             />
           );
           continue;

@@ -30,9 +30,12 @@ MatBit is a **collaborative note-taking web application** built with Next.js and
 
 ### 1. User Authentication
 - OAuth login via GitHub and Google providers
+- **Email authentication** with magic link (passwordless)
+- Support for SMTP and modern email services (Resend)
 - Session management with JWT tokens
 - User profile management
 - Legacy user migration support
+- Custom sign-in page with multiple authentication options
 
 ### 2. Note Management
 - **Create** new notes with titles and rich content
@@ -252,9 +255,11 @@ npm run codegen            # Generate TypeScript types from GraphQL schema
 ## Security & Privacy
 
 ### Authentication
-- OAuth-based authentication (no passwords stored)
+- OAuth-based authentication (GitHub, Google)
+- **Passwordless email authentication** with magic links
 - JWT tokens for session management
 - User sessions persisted in MongoDB
+- Email verification through trusted providers (SMTP/Resend)
 
 ### Authorization
 - Users can only edit/delete their own notes
