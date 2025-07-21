@@ -76,7 +76,7 @@ export default function SignInForm() {
                   setEmail("");
                 }}
               >
-                Usa un'altra email
+                Usa un&apos;altra email
               </button>
             </div>
           </div>

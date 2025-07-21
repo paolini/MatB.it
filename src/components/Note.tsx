@@ -32,11 +32,12 @@ query Note($_id: ObjectId!) {
 }`
 
 const UpdateNoteMutation = gql`
-mutation UpdateNote($_id: ObjectId!, $title: String, $delta: JSON, $private: Boolean) {
-  updateNote(_id: $_id, title: $title, delta: $delta, private: $private) {
+mutation UpdateNote($_id: ObjectId!, $title: String, $delta: JSON, $private: Boolean, $variant: String) {
+  updateNote(_id: $_id, title: $title, delta: $delta, private: $private, variant: $variant) {
     _id
     title
     delta
+    variant
     private
     updated_on
     author { _id name }
@@ -79,7 +80,7 @@ function NoteInner({
 }: {
     note: Note,
     profile: Profile,
-    updateNote: (options: { variables: { _id: string, title?: string, delta?: Delta, private?: boolean } }) => Promise<unknown>,
+    updateNote: (options: { variables: { _id: string, title?: string, delta?: Delta, private?: boolean, variant?: string } }) => Promise<unknown>,
     saveError: Error | undefined,
     refetch: () => void,
     deleteNote: (options: { variables: { _id: string } }) => Promise<unknown>,
@@ -88,46 +89,14 @@ function NoteInner({
     const [editMode, setEditMode] = useState(false)
     const router = useRouter()
     
-    // Crea il noteResolver per caricare note embedded
-    const noteResolver = async (noteId: string) => {
-        try {
-          const response = await fetch('/graphql', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              query: `
-                query Note($_id: ObjectId!) {
-                  note(_id: $_id) {
-                    _id
-                    title
-                    delta
-                    variant
-                    author { name }
-                    created_on
-                    updated_on
-                    private
-                  }
-                }
-              `,
-              variables: { _id: noteId }
-            })
-          });
-          const result = await response.json();
-          return result.data?.note || null;
-        } catch (error) {
-          console.error('Error loading note:', error);
-          return null;
-        }
-    };
-    
     return <div>
         {editMode ? (
             <NoteEditInner
                 note={note}
                 saveError={saveError}
                 onCancel={() => setEditMode(false)}
-                onSave={async (title, delta, isPrivate) => {
-                    await updateNote({ variables: { _id: note._id, title, delta, private: isPrivate } })
+                onSave={async (title, delta, isPrivate, variant) => {
+                    await updateNote({ variables: { _id: note._id, title, delta, private: isPrivate, variant } })
                     setEditMode(false)
                     refetch()
                 }}
@@ -182,7 +151,7 @@ function NoteEditInner({
     router
 }: {
     note: Note,
-    onSave: (title: string, delta: Delta, isPrivate: boolean) => void,
+    onSave: (title: string, delta: Delta, isPrivate: boolean, variant: string) => void,
     onCancel: () => void,
     saveError: Error | undefined,
     onDelete: () => void,
@@ -193,14 +162,31 @@ function NoteEditInner({
 }) {
     const [title, setTitle] = useState(note.title)
     const [isPrivate, setIsPrivate] = useState(note.private)
+    const [variant, setVariant] = useState(note.variant || 'default')
     const [showConfirm, setShowConfirm] = useState(false)
     return (
         <>
             <input className="text-2xl font-bold w-full mb-2" value={title} onChange={e => setTitle(e.target.value)} />
+            <div className="mb-2">
+                <label className="block text-sm font-medium text-gray-700 mb-1">Tipo di nota:</label>
+                <select
+                    className="border rounded px-3 py-2 w-full max-w-xs"
+                    value={variant}
+                    onChange={e => setVariant(e.target.value)}
+                >
+                    <option value="default">Default</option>
+                    <option value="theorem">Theorem</option>
+                    <option value="lemma">Lemma</option>
+                    <option value="proof">Proof</option>
+                    <option value="remark">Remark</option>
+                    <option value="exercise">Exercise</option>
+                    <option value="test">Test</option>
+                </select>
+            </div>
             <MyQuill
                 readOnly={false}
                 content={note.delta}
-                onSave={delta => onSave(title, delta, isPrivate)}
+                onSave={delta => onSave(title, delta, isPrivate, variant)}
             />
             <div className="mt-2 flex gap-2 items-center">
                 <label className="flex items-center gap-1">

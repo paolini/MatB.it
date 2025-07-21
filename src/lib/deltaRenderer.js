@@ -11,8 +11,7 @@ export class DeltaRenderer {
     const { 
       noteResolver = null, 
       maxDepth = 2, 
-      currentDepth = 0,
-      embedded = false 
+      currentDepth = 0
     } = options;
     
     if (!delta || !delta.ops) return '<p></p>';

@@ -5,11 +5,12 @@ import { gql, useMutation } from "@apollo/client"
 import { Loading, Error } from "@/components/utils"
 
 const CREATE_NOTE = gql`
-    mutation NewNote($title: String!, $private: Boolean) {
-        newNote(title: $title, private: $private) {
+    mutation NewNote($title: String!, $private: Boolean, $variant: String) {
+        newNote(title: $title, private: $private, variant: $variant) {
             _id
             title
             private
+            variant
         }
     }
 `
@@ -17,12 +18,18 @@ const CREATE_NOTE = gql`
 export default function NewNotePage() {
     const [title, setTitle] = useState("")
     const [isPrivate, setIsPrivate] = useState(false)
+    const [variant, setVariant] = useState("default")
+    const [isRedirecting, setIsRedirecting] = useState(false)
     const router = useRouter()
     const [createNote, { loading, error }] = useMutation(CREATE_NOTE, {
         onCompleted: (data: { newNote: { _id: string } }) => {
             if (data?.newNote?._id) {
+                setIsRedirecting(true)
                 router.push(`/note/${data.newNote._id}`)
             }
+        },
+        onError: () => {
+            setIsRedirecting(false)
         }
     })
 
@@ -36,24 +43,43 @@ export default function NewNotePage() {
                     placeholder="Titolo della nota"
                     value={title}
                     onChange={e => setTitle(e.target.value)}
+                    disabled={loading || isRedirecting}
                     required
                 />
+                <div className="flex flex-col gap-2">
+                    <label className="text-sm font-medium text-gray-700">Tipo di nota:</label>
+                    <select
+                        className="border rounded px-3 py-2"
+                        value={variant}
+                        onChange={e => setVariant(e.target.value)}
+                        disabled={loading || isRedirecting}
+                    >
+                        <option value="default">Default</option>
+                        <option value="theorem">Theorem</option>
+                        <option value="lemma">Lemma</option>
+                        <option value="proof">Proof</option>
+                        <option value="remark">Remark</option>
+                        <option value="exercise">Exercise</option>
+                        <option value="test">Test</option>
+                    </select>
+                </div>
                 <label className="flex items-center gap-2">
                     <input
                         type="checkbox"
                         checked={isPrivate}
                         onChange={e => setIsPrivate(e.target.checked)}
+                        disabled={loading || isRedirecting}
                     />
                     Privata
                 </label>
                 <button
                     type="submit"
                     className="bg-blue-500 text-white px-4 py-2 rounded-md disabled:opacity-50"
-                    disabled={loading}
+                    disabled={loading || isRedirecting}
                 >
-                    Crea Nota
+                    {isRedirecting ? "Apertura nota..." : loading ? "Creazione..." : "Crea Nota"}
                 </button>
-                {loading && <Loading />}
+                {(loading || isRedirecting) && <Loading />}
                 {error && <Error error={error} />}
             </form>
         </div>
@@ -61,7 +87,7 @@ export default function NewNotePage() {
 
     async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault()
-        await createNote({ variables: { title, private: isPrivate } })
+        await createNote({ variables: { title, private: isPrivate, variant } })
     }
 
 }

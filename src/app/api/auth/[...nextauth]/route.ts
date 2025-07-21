@@ -38,7 +38,14 @@ if (process.env.EMAIL_SERVER_HOST) {
   }
   
   // Build server configuration - auth is optional for local servers
-  const serverConfig: any = {
+  const serverConfig: {
+    host: string;
+    port: number;
+    secure?: boolean;
+    requireTLS?: boolean;
+    tls?: { rejectUnauthorized: boolean };
+    auth?: { user: string; pass: string };
+  } = {
     host: process.env.EMAIL_SERVER_HOST,
     port: parseInt(process.env.EMAIL_SERVER_PORT),
   };
@@ -132,14 +139,14 @@ const handler = NextAuth({
     signIn: '/auth/signin',
   },
   callbacks: {
-    async signIn({ user, account, profile }) {
+    async signIn({ user }) {
       // Set name to email if not already set (especially for email provider)
       if (!user.name && user.email) {
         user.name = user.email;
       }
       return true;
     },
-    async session({ session, token }) {
+    async session({ session }) {
       // Ensure name is set to email if not already set
       if (!session.user?.name && session.user?.email) {
         session.user.name = session.user.email;

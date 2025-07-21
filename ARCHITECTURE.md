@@ -38,10 +38,11 @@ MatBit is a **collaborative note-taking web application** built with Next.js and
 - Custom sign-in page with multiple authentication options
 
 ### 2. Note Management
-- **Create** new notes with titles and rich content
-- **Edit** notes with real-time WYSIWYG editor
+- **Create** new notes with titles, rich content, and variant types
+- **Edit** notes with real-time WYSIWYG editor and variant modification
 - **Delete** notes (author-only with confirmation)
 - **Privacy control** - notes can be public or private
+- **Variant selection** - categorize notes as theorems, lemmas, proofs, exercises, etc.
 - **Author attribution** - notes display creator information
 
 ### 3. Rich Text Editing
@@ -72,7 +73,7 @@ MatBit is a **collaborative note-taking web application** built with Next.js and
 ### 6. Git-like Versioning System
 - **Note** acts as a Git-like branch pointing to the latest version (HEAD)
 - **NoteVersion** acts as immutable commits storing the complete history
-- **Denormalized data** in Note (title, delta) for performance optimization
+- **Denormalized data** in Note (title, delta, variant) for performance optimization
 - **Soft deletion** - deleted notes moved to `deleted_notes` collection
 - **Shared versions** - multiple Notes can reference the same NoteVersion
 - **Contributors tracking** - denormalized list of users who contributed to each Note
@@ -133,6 +134,7 @@ type MongoNote = {
     _id: ObjectId
     title: string               // Title dell'ultima versione (HEAD)
     delta: object               // Contenuto dell'ultima versione (HEAD) in formato Quill Delta
+    variant?: string            // Tipo di contenuto dell'ultima versione (HEAD) - denormalizzato da NoteVersion
     author_id: ObjectId         // Chi controlla questo branch (può spostare il tip)
     note_version_id: ObjectId   // Punta alla versione corrente (HEAD)
     contributors: {             // Lista denormalizzata dei contributori
@@ -194,8 +196,8 @@ type MongoUser = {
 - `profile`: Get current user profile
 
 ### Mutations
-- `newNote(title, delta, private)`: Create new note with versioning
-- `updateNote(_id, title, delta, private)`: Update existing note (creates new version)
+- `newNote(title, delta, private, variant)`: Create new note with versioning and variant type
+- `updateNote(_id, title, delta, private, variant)`: Update existing note (creates new version) with variant modification
 - `deleteNote(_id)`: Move note to deleted_notes collection (preserves history)
 
 ## Key Components
@@ -206,6 +208,7 @@ Complex component handling:
 - **NoteInner**: Display/edit mode switching with DeltaContent integration
 - **NoteEditInner**: Rich editing interface with:
   - Title editing
+  - **Variant selection** - dropdown for choosing note type (theorem, lemma, proof, etc.)
   - Quill editor integration
   - Privacy toggle
   - Save/cancel/delete actions
@@ -270,6 +273,7 @@ npm run codegen            # Generate TypeScript types from GraphQL schema
 - Automatic migration system for schema changes
 - Legacy user account consolidation
 - Text-to-Delta content format migration
+- **Variant field migration** - copying variant from NoteVersion to Note for denormalization
 
 ## Deployment
 - Dockerized application with multi-stage builds

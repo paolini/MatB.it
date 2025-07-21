@@ -7,7 +7,9 @@ import 'katex/dist/katex.min.css';
 // Dichiarazione di tipo per KaTeX
 declare global {
   interface Window {
-    katex: any;
+    katex: {
+      renderToString: (input: string, options?: Record<string, unknown>) => string;
+    };
   }
 }
 
@@ -33,7 +35,16 @@ interface DeltaContentProps {
 }
 
 interface NoteEmbedProps {
-  note: any;
+  note: {
+    _id: string;
+    title: string;
+    delta: Delta;
+    variant?: string;
+    author: { name: string };
+    created_on?: string;
+    updated_on?: string;
+    private?: boolean;
+  };
   maxDepth: number;
 }
 
@@ -115,8 +126,7 @@ function NoteEmbed({ note, maxDepth }: NoteEmbedProps) {
 
 export function DeltaContent({ 
   delta, 
-  maxDepth = 3, 
-  embedded = false 
+  maxDepth = 3 
 }: DeltaContentProps) {
   // Rendering sincrono diretto - molto più semplice!
   if (!delta || !delta.ops) {
@@ -127,9 +137,7 @@ export function DeltaContent({
     return <p><em>Max embedding depth reached</em></p>;
   }
 
-  const renderTextWithFormatting = (text: string, attributes: any) => {
-    if (!attributes) return text;
-
+  const renderTextWithFormatting = (text: string, attributes: Record<string, unknown> = {}) => {
     let result: React.ReactNode = text;
     
     if (attributes.bold) result = <strong>{result}</strong>;
@@ -137,23 +145,24 @@ export function DeltaContent({
     if (attributes.underline) result = <u>{result}</u>;
     if (attributes.strike) result = <s>{result}</s>;
     if (attributes.code) result = <code>{result}</code>;
-    if (attributes.color) result = <span style={{ color: attributes.color }}>{result}</span>;
-    if (attributes.background) result = <span style={{ backgroundColor: attributes.background }}>{result}</span>;
-    if (attributes.link) result = <a href={attributes.link} target="_blank" rel="noopener noreferrer">{result}</a>;
+    if (attributes.color) result = <span style={{ color: attributes.color as string }}>{result}</span>;
+    if (attributes.background) result = <span style={{ backgroundColor: attributes.background as string }}>{result}</span>;
+    if (attributes.link) result = <a href={attributes.link as string} target="_blank" rel="noopener noreferrer">{result}</a>;
 
     return result;
   };
 
-  const renderEmbed = (embed: any, attributes: any, key: string) => {
+  const renderEmbed = (embed: Record<string, unknown>, attributes: Record<string, unknown>, key: string) => {
     // Gestisci formule
     if (embed.formula) {
       let formulaValue: string;
       let displayMode = false;
       
       // Se è un oggetto con value e displaystyle, estraiamo i valori
-      if (typeof embed.formula === 'object' && embed.formula.value) {
-        formulaValue = embed.formula.value;
-        displayMode = embed.formula.displaystyle || false;
+      if (typeof embed.formula === 'object' && embed.formula && 'value' in embed.formula) {
+        const formula = embed.formula as { value: string; displaystyle?: boolean };
+        formulaValue = formula.value;
+        displayMode = formula.displaystyle || false;
       } else if (typeof embed.formula === 'string') {
         // Se è già una stringa, la usiamo direttamente
         formulaValue = embed.formula;
@@ -208,11 +217,13 @@ export function DeltaContent({
     // Per note embedded, mostriamo un placeholder che verrà sostituito da un componente asincrono
     if (embed.note_id || attributes?.note_id) {
       const noteId = embed.note_id || attributes.note_id;
-      return <AsyncNoteEmbed
-          key={key}
-          noteId={noteId}
-          maxDepth={maxDepth}
-        />
+      if (typeof noteId === 'string') {
+        return <AsyncNoteEmbed
+            key={key}
+            noteId={noteId}
+            maxDepth={maxDepth}
+          />
+      }
     }
 
     return null;
@@ -226,7 +237,7 @@ export function DeltaContent({
     if (op.insert) {
       // Gestisce inserti di testo
       if (typeof op.insert === 'string') {
-        let text = op.insert;
+        const text = op.insert;
         
         // Gestisce note_id come attributo di testo
         if (op.attributes?.note_id && typeof op.attributes.note_id === 'string') {
@@ -247,7 +258,7 @@ export function DeltaContent({
             if (parts[i]) {
               currentParagraph.push(
                 <span key={keyCounter++}>
-                  {renderTextWithFormatting(parts[i], op.attributes)}
+                  {renderTextWithFormatting(parts[i], op.attributes || {})}
                 </span>
               );
             }
@@ -265,14 +276,14 @@ export function DeltaContent({
         } else {
           currentParagraph.push(
             <span key={keyCounter++}>
-              {renderTextWithFormatting(text, op.attributes)}
+              {renderTextWithFormatting(text, op.attributes || {})}
             </span>
           );
         }
       }
       // Gestisce embed (formule, note references, etc.)
       else if (typeof op.insert === 'object') {
-        const embedElement = renderEmbed(op.insert, op.attributes, `embed-${keyCounter++}`);
+        const embedElement = renderEmbed(op.insert, op.attributes || {}, `embed-${keyCounter++}`);
         if (embedElement) {
           currentParagraph.push(embedElement);
         }

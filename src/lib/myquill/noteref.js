@@ -195,7 +195,6 @@ export class NoteRefBlot extends EmbedBlot {
     this.domNode.addEventListener('click', (e) => {
       e.preventDefault();
       e.stopPropagation();
-      const noteId = this.domNode.getAttribute('data-note-id');
       // TODO: Implementare navigazione alla nota
     });
   }
