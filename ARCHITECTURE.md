@@ -58,8 +58,11 @@ MatBit is a **collaborative note-taking web application** built with Next.js and
 - **Note variants system** for mathematical environments (theorem, lemma, proof, etc.)
 
 ### 5. Delta Rendering & Note Embedding
-- **DeltaRenderer** for converting Delta format to HTML with embedded note support
-- **Recursive note embedding** with depth control and async note resolution
+- **DeltaContent React component** for converting Delta format to React components with embedded note support
+- **Replaced HTML string generation** with direct React component rendering for better performance and security
+- **Apollo GraphQL integration** for direct note fetching instead of prop drilling
+- **Synchronous KaTeX rendering** using renderToString for mathematical formulas
+- **Recursive note embedding** with depth control and async note resolution via useQuery
 - **Visual variants** with CSS-based styling (colored backgrounds, borders, labels)
 - **Note information system** with clickable icons showing metadata (author, dates, privacy)
 
@@ -88,11 +91,12 @@ src/
 │   ├── Note.tsx          # Note display/edit component
 │   ├── Notes.tsx         # Notes list component
 │   ├── NavBar.tsx        # Navigation with auth
+│   ├── DeltaContent.tsx  # React component for Delta rendering with Apollo GraphQL
 │   └── Providers.tsx     # App-wide providers
 ├── lib/                  # Utility libraries
 │   ├── models.ts         # MongoDB type definitions & note reference types
 │   ├── mongodb.ts        # Database connection
-│   ├── deltaRenderer.js  # Centralized Delta-to-HTML renderer with note embedding
+│   ├── deltaRenderer.js  # Legacy Delta-to-HTML renderer (being replaced by DeltaContent.tsx)
 │   └── myquill/          # Custom Quill.js integration
 │       ├── MyQuill.tsx   # Quill wrapper component
 │       ├── myquill.js    # Quill configuration and blot registration
@@ -196,7 +200,7 @@ type MongoUser = {
 ### Note.tsx
 Complex component handling:
 - **NoteWrapper**: Data fetching and mutation setup
-- **NoteInner**: Display/edit mode switching
+- **NoteInner**: Display/edit mode switching with DeltaContent integration
 - **NoteEditInner**: Rich editing interface with:
   - Title editing
   - Quill editor integration
@@ -208,18 +212,21 @@ Complex component handling:
 - Extended Quill.js with mathematical features
 - LaTeX formula insertion and rendering
 - **Note reference system** with visual embedding and recursive content rendering
-- **DeltaRenderer integration** for view mode with full embedded note display
+- **DeltaContent React component integration** for view mode with full embedded note display
 - **Edit mode note references** display as styled badges with variant information
 - Custom toolbar configuration with note reference button (※)
 - Delta format content handling
 - **Variant-aware styling** with CSS-based labels and color coding
 
-### DeltaRenderer System
-- **Centralized Delta-to-HTML conversion** with async note resolution
-- **Recursive note embedding** with configurable depth limits
+### DeltaContent React Component
+- **Modern React component** replacing legacy HTML string generation
+- **Apollo GraphQL integration** with useQuery for direct note fetching
+- **Synchronous KaTeX rendering** using renderToString for mathematical formulas
+- **Recursive note embedding** with configurable depth limits and loading states
 - **Variant styling** using CSS classes for visual distinction
-- **Note information icons** for metadata access (author, dates, privacy)
-- **Separation of concerns** between edit mode (simple badges) and view mode (full content)
+- **Note information popups** for metadata access (author, dates, privacy)
+- **TypeScript support** with proper type definitions for better development experience
+- **Security improvements** with controlled dangerouslySetInnerHTML only for KaTeX-rendered content
 
 ## Development Workflow
 
@@ -288,7 +295,8 @@ npm run codegen            # Generate TypeScript types from GraphQL schema
 - Component-based architecture allows easy feature additions
 - Migration system supports schema evolution
 - **Versioning system** enables content timeline analysis and collaboration insights
-- **DeltaRenderer** extensible for new content types and rendering modes
+- **DeltaContent React component** extensible for new content types and rendering modes
 - **Variant system** supports new mathematical environment types
+- **Apollo GraphQL integration** enables real-time data fetching and caching
 
-This application demonstrates a modern full-stack approach with strong typing, real-time editing capabilities, mathematical content support, **recursive note embedding**, **visual variant system**, and **Git-like versioning for collaborative research scenarios**.
+This application demonstrates a modern full-stack approach with strong typing, real-time editing capabilities, mathematical content support, **recursive note embedding**, **visual variant system**, **Git-like versioning for collaborative research scenarios**, and **modern React patterns** with Apollo GraphQL integration.

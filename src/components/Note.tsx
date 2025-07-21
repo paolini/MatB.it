@@ -1,13 +1,13 @@
 "use client"
 import { gql, useQuery, useMutation } from '@apollo/client'
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useRouter } from "next/navigation"
 
 import { Note, Profile } from '@/app/graphql/generated'
 import { Loading, Error } from '@/components/utils'
 import dynamic from "next/dynamic"
 import { Delta } from '@/lib/myquill/myquill.js'
-import { DeltaRenderer } from '@/lib/deltaRenderer.js'
+import { DeltaContent } from '@/components/DeltaContent'
 
 const MyQuill = dynamic(() => import('@/lib/myquill/MyQuill'), { ssr: false });
 
@@ -86,7 +86,6 @@ function NoteInner({
     deleteError: Error | undefined
 }) {
     const [editMode, setEditMode] = useState(false)
-    const [renderedContent, setRenderedContent] = useState('')
     const router = useRouter()
     
     // Crea il noteResolver per caricare note embedded
@@ -104,6 +103,9 @@ function NoteInner({
                     delta
                     variant
                     author { name }
+                    created_on
+                    updated_on
+                    private
                   }
                 }
               `,
@@ -117,71 +119,6 @@ function NoteInner({
           return null;
         }
     };
-    
-    // Renderizza il contenuto quando cambia la nota
-    useEffect(() => {
-        // Aggiungi la funzione globale per mostrare info nota
-        (window as any).showNoteInfo = async (noteId: string) => {
-            try {
-                const response = await fetch('/graphql', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        query: `
-                            query Note($_id: ObjectId!) {
-                                note(_id: $_id) {
-                                    _id
-                                    title
-                                    variant
-                                    author { name }
-                                    created_on
-                                    updated_on
-                                    private
-                                }
-                            }
-                        `,
-                        variables: { _id: noteId }
-                    })
-                });
-                const result = await response.json();
-                const noteData = result.data?.note;
-                
-                if (noteData) {
-                    const createdDate = new Date(noteData.created_on).toLocaleDateString();
-                    const updatedDate = new Date(noteData.updated_on).toLocaleDateString();
-                    const variantLabel = noteData.variant ? 
-                        `${noteData.variant.charAt(0).toUpperCase()}${noteData.variant.slice(1)}` : 
-                        'Nota';
-                    const privacyText = noteData.private ? '\nPrivata' : '';
-                    
-                    alert(`${variantLabel}: ${noteData.title}\n\nAutore: ${noteData.author.name}\nCreata: ${createdDate}\nUltima modifica: ${updatedDate}${privacyText}`);
-                } else {
-                    alert('Impossibile caricare le informazioni della nota');
-                }
-            } catch (error) {
-                console.error('Error loading note info:', error);
-                alert('Errore nel caricamento delle informazioni');
-            }
-        };
-        
-        if (!editMode && note.delta) {
-            const renderContent = async () => {
-                try {
-                    const html = await (DeltaRenderer as any).render(note.delta, { noteResolver });
-                    setRenderedContent(html);
-                } catch (error) {
-                    console.error('Error rendering content:', error);
-                    setRenderedContent('<p>Error rendering content</p>');
-                }
-            };
-            renderContent();
-        }
-        
-        // Cleanup: rimuovi la funzione globale quando il componente viene smontato
-        return () => {
-            delete (window as any).showNoteInfo;
-        };
-    }, [note.delta, editMode]);
     
     return <div>
         {editMode ? (
@@ -208,10 +145,13 @@ function NoteInner({
                 <h1>
                     {note.title}
                 </h1>
-                <div 
-                    className="delta" 
-                    dangerouslySetInnerHTML={{ __html: renderedContent }}
-                />
+                <div className="delta">
+                    <DeltaContent 
+                        delta={note.delta} 
+                        maxDepth={2}
+                        embedded={false}
+                    />
+                </div>
                 {note.private && <span className="text-sm text-gray-500">Nota privata</span>}
             </div>
         )}
