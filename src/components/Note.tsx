@@ -148,7 +148,7 @@ function NoteInner({
                 <div className="delta">
                     <DeltaContent 
                         delta={note.delta} 
-                        maxDepth={2}
+                        maxDepth={3}
                         embedded={false}
                     />
                 </div>
