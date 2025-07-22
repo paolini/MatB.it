@@ -52,6 +52,7 @@ export default function MyQuill({
     const savedRange = useRef<any>(null) // Salva il range prima di aprire il modal
     const [showDelta, setShowDelta] = useState(false)
     const [showCreateModal, setShowCreateModal] = useState(false)
+    const [prefilledVariant, setPrefilledVariant] = useState<string>('default')
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
 
     // Cleanup dell'editor delle formule al dismount
@@ -84,22 +85,30 @@ export default function MyQuill({
         console.log('💾 MyQuill handleNoteCreated: savedRange.current:', savedRange.current)
         
         if (quillInstance.current) {
-            // Usa il range salvato invece di quello corrente
-            const range = savedRange.current || quillInstance.current.getSelection();
-            console.log('📍 MyQuill handleNoteCreated: range da usare:', range)
+            // Usa il range salvato, altrimenti prova a ottenere quello corrente, altrimenti usa la fine del testo
+            let range = savedRange.current || quillInstance.current.getSelection();
             
-            if (range) {
-                console.log('🔧 MyQuill handleNoteCreated: Inserimento embed con dati:', { note_id: noteId })
-                quillInstance.current.insertEmbed(range.index, 'note-ref', { note_id: noteId });
-                console.log('⬆️ MyQuill handleNoteCreated: Setting selezione a:', range.index + 1)
-                quillInstance.current.setSelection(range.index + 1);
-                console.log('✅ MyQuill handleNoteCreated: Embed inserito con successo')
-                
-                // Pulisci il range salvato
-                savedRange.current = null;
+            if (!range) {
+                // Se non c'è nessun range, inserisci alla fine del testo
+                const length = quillInstance.current.getLength();
+                range = { index: length - 1, length: 0 };
+                console.log('📍 MyQuill handleNoteCreated: Nessun range, usando fine testo:', range)
             } else {
-                console.log('❌ MyQuill handleNoteCreated: Nessun range selezionato e nessun range salvato')
+                console.log('📍 MyQuill handleNoteCreated: range da usare:', range)
             }
+            
+            console.log('🔧 MyQuill handleNoteCreated: Inserimento embed con dati:', { note_id: noteId })
+            quillInstance.current.insertEmbed(range.index, 'note-ref', { note_id: noteId });
+            console.log('⬆️ MyQuill handleNoteCreated: Setting selezione a:', range.index + 1)
+            quillInstance.current.setSelection(range.index + 1);
+            console.log('✅ MyQuill handleNoteCreated: Embed inserito con successo')
+            
+            // Pulisci il range salvato
+            savedRange.current = null;
+            
+            // Chiudi il modal dopo aver inserito la note-ref
+            console.log('🔒 MyQuill handleNoteCreated: Chiusura modal...')
+            setShowCreateModal(false);
         } else {
             console.log('❌ MyQuill handleNoteCreated: quillInstance.current è null')
         }
@@ -115,7 +124,7 @@ export default function MyQuill({
                 
                 // Aggiungi handler per il pulsante note-ref
                 if (!readOnly) {
-                    const toolbar = quill.getModule('toolbar') as { addHandler: (name: string, handler: () => void) => void };
+                    const toolbar = quill.getModule('toolbar') as { addHandler: (name: string, handler: (value?: any) => void) => void };
                     toolbar.addHandler('note-ref', () => {
                         console.log('🔘 MyQuill: Pulsante note-ref cliccato')
                         
@@ -124,10 +133,48 @@ export default function MyQuill({
                         console.log('💾 MyQuill: Salvataggio range corrente:', currentRange)
                         savedRange.current = currentRange;
                         
-                        // Apri il modal
+                        // Apri il modal con variant default
                         console.log('🪟 MyQuill: Apertura modal...')
+                        setPrefilledVariant('default');
                         setShowCreateModal(true);
                     });
+                    
+                    // Aggiungi event listener per la select environment
+                    setTimeout(() => {
+                        const toolbarModule = quill.getModule('toolbar') as any;
+                        const selectElement = toolbarModule.container?.querySelector('select.ql-environment') as HTMLSelectElement;
+                        
+                        if (selectElement) {
+                            console.log('🔧 MyQuill: Select environment trovata, aggiungendo listener')
+                            
+                            // Salva il range PRIMA che la select venga cliccata (quando perde il focus)
+                            selectElement.addEventListener('mousedown', () => {
+                                const currentRange = quill.getSelection();
+                                console.log('👆 MyQuill: Mousedown su select, salvataggio range:', currentRange)
+                                savedRange.current = currentRange;
+                            });
+                            
+                            selectElement.addEventListener('change', (event) => {
+                                const target = event.target as HTMLSelectElement;
+                                const value = target.value;
+                                
+                                console.log('🔘 MyQuill: Environment selezionato:', value)
+                                console.log('💾 MyQuill: Range salvato durante mousedown:', savedRange.current)
+                                
+                                if (value) {
+                                    // Apri il modal con la variant precompilata
+                                    console.log('🪟 MyQuill: Apertura modal con variant:', value)
+                                    setPrefilledVariant(value);
+                                    setShowCreateModal(true);
+                                    
+                                    // Reset della select
+                                    target.value = '';
+                                }
+                            });
+                        } else {
+                            console.log('❌ MyQuill: Select environment non trovata')
+                        }
+                    }, 100); // Piccolo delay per assicurarsi che la toolbar sia renderizzata
                 }
             }}
         />
@@ -206,6 +253,7 @@ export default function MyQuill({
             isOpen={showCreateModal}
             onClose={() => setShowCreateModal(false)}
             onNoteSelected={handleNoteCreated}
+            initialVariant={prefilledVariant}
         />
         
         {/* Modal di conferma cancellazione */}

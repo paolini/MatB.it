@@ -1,5 +1,5 @@
 "use client"
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { gql, useMutation, useQuery } from '@apollo/client'
 import { Note } from '@/app/graphql/generated'
 import NoteForm from './NoteForm'
@@ -36,23 +36,35 @@ interface NoteReferenceModalProps {
   isOpen: boolean
   onClose: () => void
   onNoteSelected: (noteId: string) => void
+  initialVariant?: string
 }
 
 type TabType = 'existing' | 'new'
 
-export default function NoteReferenceModal({ isOpen, onClose, onNoteSelected }: NoteReferenceModalProps) {
-  console.log('🔧 NoteReferenceModal: Render con props:', { isOpen, onNoteSelected: typeof onNoteSelected })
+export default function NoteReferenceModal({ isOpen, onClose, onNoteSelected, initialVariant = 'default' }: NoteReferenceModalProps) {
+  console.log('🔧 NoteReferenceModal: Render con props:', { isOpen, onNoteSelected: typeof onNoteSelected, initialVariant })
   
   const [activeTab, setActiveTab] = useState<TabType>('existing')
   
   // Stato per creazione nuova nota
   const [title, setTitle] = useState('')
-  const [variant, setVariant] = useState('default')
+  const [variant, setVariant] = useState(initialVariant)
   const [isPrivate, setIsPrivate] = useState(false)
   const [delta, setDelta] = useState<DeltaType>(null)
   
   // Stato per ricerca note esistenti
   const [searchTerm, setSearchTerm] = useState('')
+
+  // Aggiorna variant quando initialVariant cambia
+  useEffect(() => {
+    if (isOpen) {
+      setVariant(initialVariant)
+      // Se la variant è diversa da 'default', vai direttamente al tab "new"
+      if (initialVariant !== 'default') {
+        setActiveTab('new')
+      }
+    }
+  }, [isOpen, initialVariant])
   
   const [createNote, { loading: creating, error: createError }] = useMutation(NewNoteMutation)
   const { data: notesData, loading: loadingNotes, error: notesError } = useQuery<{notes: Note[]}>(NotesQuery)
@@ -85,8 +97,7 @@ export default function NoteReferenceModal({ isOpen, onClose, onNoteSelected }: 
         console.log('📞 handleCreateNote: Chiamata onNoteSelected con ID:', noteId)
         
         onNoteSelected(noteId)
-        console.log('🔒 handleCreateNote: Chiamata handleClose...')
-        handleClose()
+        // Non chiamiamo handleClose() qui - sarà gestito dal componente parent
         
         console.log('✨ handleCreateNote: Operazione completata, ritorno ID:', noteId)
         return noteId
@@ -111,7 +122,7 @@ export default function NoteReferenceModal({ isOpen, onClose, onNoteSelected }: 
 
   const handleClose = () => {
     setTitle('')
-    setVariant('default')
+    setVariant(initialVariant)
     setIsPrivate(false)
     setDelta(null)
     setSearchTerm('')
