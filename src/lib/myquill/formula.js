@@ -106,11 +106,23 @@ export class MyFormula extends Embed {
 
     console.log('Formula.render', value, displaystyle);
 
-    window.katex.render(value, node, {
-      throwOnError: false,
-      errorColor: '#f00',
-      displayMode: displaystyle,
-    });
+    // Verifica che KaTeX sia disponibile
+    if (typeof window !== 'undefined' && window.katex && window.katex.render) {
+      try {
+        window.katex.render(value, node, {
+          throwOnError: false,
+          errorColor: '#f00',
+          displayMode: displaystyle,
+        });
+      } catch (error) {
+        console.error('Error rendering formula:', error);
+        node.textContent = `[Formula: ${value}]`;
+      }
+    } else {
+      // Fallback se KaTeX non è disponibile
+      node.textContent = `[Formula: ${value}]`;
+      console.warn('KaTeX not available, using fallback rendering');
+    }
   }
 
   format(name, value) {
