@@ -214,13 +214,13 @@ export function DeltaContent({
       );
     }
 
-    // Per note embedded, mostriamo un placeholder che verrà sostituito da un componente asincrono
-    if (embed.note_id || attributes?.note_id) {
-      const noteId = embed.note_id || attributes.note_id;
-      if (typeof noteId === 'string') {
+    // Gestisce note references nel formato corretto
+    if (embed['note-ref']) {
+      const noteRef = embed['note-ref'] as { note_id?: string };
+      if (noteRef?.note_id) {
         return <AsyncNoteEmbed
             key={key}
-            noteId={noteId}
+            noteId={noteRef.note_id}
             maxDepth={maxDepth}
           />
       }
@@ -238,18 +238,6 @@ export function DeltaContent({
       // Gestisce inserti di testo
       if (typeof op.insert === 'string') {
         const text = op.insert;
-        
-        // Gestisce note_id come attributo di testo
-        if (op.attributes?.note_id && typeof op.attributes.note_id === 'string') {
-          currentParagraph.push(
-            <AsyncNoteEmbed
-              key={keyCounter++}
-              noteId={op.attributes.note_id}
-              maxDepth={maxDepth}
-            />
-          );
-          continue;
-        }
         
         // Gestisce i newline
         if (text.includes('\n')) {
@@ -285,7 +273,24 @@ export function DeltaContent({
       else if (typeof op.insert === 'object') {
         const embedElement = renderEmbed(op.insert, op.attributes || {}, `embed-${keyCounter++}`);
         if (embedElement) {
-          currentParagraph.push(embedElement);
+          // Se è una nota embedded (che contiene elementi block), chiudi il paragrafo corrente
+          // e inserisci la nota come elemento separato
+          if (op.insert['note-ref']) {
+            // Chiudi il paragrafo corrente se non è vuoto
+            if (currentParagraph.length > 0) {
+              elements.push(
+                <p key={keyCounter++}>
+                  {currentParagraph}
+                </p>
+              );
+              currentParagraph = [];
+            }
+            // Inserisci la nota embedded come elemento separato
+            elements.push(embedElement);
+          } else {
+            // Per altri embed (come formule), inserisci nel paragrafo corrente
+            currentParagraph.push(embedElement);
+          }
         }
       }
     }

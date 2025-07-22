@@ -13,7 +13,7 @@ MyQuill.register('modules/formulaEditor', FormulaEditorModule);
 MyQuill.register('formats/environment', MyEnvironmentLine, true);
 MyQuill.register('formats/environment-container', MyEnvironmentContainer, true);
 
-MyQuill.register('formats/note_id', NoteRefBlot, true);
+MyQuill.register('formats/note-ref', NoteRefBlot, true);
 
 export const Quill = MyQuill
 export const QuillEditor = MyQuillEditor

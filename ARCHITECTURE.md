@@ -69,6 +69,8 @@ MatBit is a **collaborative note-taking web application** built with Next.js and
 - **Recursive note embedding** with depth control and async note resolution via useQuery
 - **Visual variants** with CSS-based styling (colored backgrounds, borders, labels)
 - **Note information system** with clickable icons showing metadata (author, dates, privacy)
+- **Proper HTML structure** - embedded notes are rendered as block-level elements to avoid hydration errors
+- **Consistent note reference format** - all references use the standardized `{ "note-ref": { "note_id": "..." } }` format
 
 ### 6. Git-like Versioning System
 - **Note** acts as a Git-like branch pointing to the latest version (HEAD)
@@ -104,10 +106,10 @@ src/
 │   └── myquill/          # Custom Quill.js integration
 │       ├── MyQuill.tsx   # Quill wrapper component
 │       ├── myquill.js    # Quill configuration and blot registration
-│       ├── noteref.js    # Note reference blot implementation
+│       ├── noteref.js    # Note reference blot implementation (standardized format)
 │       ├── environment.js # Mathematical environment blots (legacy)
-│       ├── formula.js    # LaTeX formula blots
-│       └── delta-variants.css   # Styling for Delta variants (theorem, lemma, etc.)
+│       ├── formula.js    # LaTeX formula blots with improved cursor handling
+│       └── delta-variants.css   # Styling for Delta variants and note reference button
 migrations/               # Database migration scripts
 ```
 
@@ -216,13 +218,14 @@ Complex component handling:
 
 ### MyQuill Custom Editor
 - Extended Quill.js with mathematical features
-- LaTeX formula insertion and rendering
+- LaTeX formula insertion and rendering with proper cursor positioning
 - **Note reference system** with visual embedding and recursive content rendering
 - **DeltaContent React component integration** for view mode with full embedded note display
 - **Edit mode note references** display as styled badges with variant information
 - Custom toolbar configuration with note reference button (※)
-- Delta format content handling
+- Delta format content handling with consistent `note-ref` blot naming
 - **Variant-aware styling** with CSS-based labels and color coding
+- **Formula editor improvements** - proper cursor positioning after formula insertion and editing
 
 ### DeltaContent React Component
 - **Modern React component** replacing legacy HTML string generation
@@ -233,6 +236,8 @@ Complex component handling:
 - **Note information popups** for metadata access (author, dates, privacy)
 - **TypeScript support** with proper type definitions for better development experience
 - **Security improvements** with controlled dangerouslySetInnerHTML only for KaTeX-rendered content
+- **Proper HTML structure** - embedded notes rendered as block elements to prevent hydration errors
+- **Standardized note reference parsing** - consistent handling of `{ "note-ref": { "note_id": "..." } }` format
 
 ## Development Workflow
 
@@ -307,5 +312,6 @@ npm run codegen            # Generate TypeScript types from GraphQL schema
 - **DeltaContent React component** extensible for new content types and rendering modes
 - **Variant system** supports new mathematical environment types
 - **Apollo GraphQL integration** enables real-time data fetching and caching
+- **Standardized note references** with consistent Delta format across the entire system
 
-This application demonstrates a modern full-stack approach with strong typing, real-time editing capabilities, mathematical content support, **recursive note embedding**, **visual variant system**, **Git-like versioning for collaborative research scenarios**, and **modern React patterns** with Apollo GraphQL integration.
+This application demonstrates a modern full-stack approach with strong typing, real-time editing capabilities, mathematical content support, **recursive note embedding**, **visual variant system**, **Git-like versioning for collaborative research scenarios**, **modern React patterns** with Apollo GraphQL integration, and **robust content format consistency** for note references.
