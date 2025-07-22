@@ -98,6 +98,7 @@ src/
 │   ├── Notes.tsx         # Notes list component
 │   ├── NavBar.tsx        # Navigation with auth
 │   ├── DeltaContent.tsx  # React component for Delta rendering with Apollo GraphQL
+│   ├── NoteReferenceModal.tsx  # Modal for note reference insertion (select existing or create new)
 │   └── Providers.tsx     # App-wide providers
 ├── lib/                  # Utility libraries
 │   ├── models.ts         # MongoDB type definitions & note reference types
@@ -213,8 +214,8 @@ Complex component handling:
   - **Variant selection** - dropdown for choosing note type (theorem, lemma, proof, etc.)
   - Quill editor integration
   - Privacy toggle
-  - Save/cancel/delete actions
-  - Confirmation dialogs
+  - **Streamlined UI** - action buttons (Save/Cancel/Delete) managed by MyQuill component
+  - Confirmation dialogs handled by MyQuill
 
 ### MyQuill Custom Editor
 - Extended Quill.js with mathematical features
@@ -226,6 +227,9 @@ Complex component handling:
 - Delta format content handling with consistent `note-ref` blot naming
 - **Variant-aware styling** with CSS-based labels and color coding
 - **Formula editor improvements** - proper cursor positioning after formula insertion and editing
+- **Unified action button system** - all Save/Cancel/Delete buttons consolidated in MyQuill component
+- **NoteReferenceModal integration** with both existing note selection and new note creation workflows
+- **Selection range preservation** - automatically saves cursor position before opening modals to ensure accurate note insertion
 
 ### DeltaContent React Component
 - **Modern React component** replacing legacy HTML string generation

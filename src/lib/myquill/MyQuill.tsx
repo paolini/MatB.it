@@ -49,6 +49,7 @@ export default function MyQuill({
     deleteError?: Error
 }) {
     const quillInstance = useRef<InstanceType<typeof Quill> | null>(null)
+    const savedRange = useRef<any>(null) // Salva il range prima di aprire il modal
     const [showDelta, setShowDelta] = useState(false)
     const [showCreateModal, setShowCreateModal] = useState(false)
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
@@ -78,12 +79,29 @@ export default function MyQuill({
     }, []);
 
     const handleNoteCreated = (noteId: string) => {
+        console.log('🎯 MyQuill handleNoteCreated: Ricevuto ID nota:', noteId)
+        console.log('📝 MyQuill handleNoteCreated: quillInstance.current:', !!quillInstance.current)
+        console.log('💾 MyQuill handleNoteCreated: savedRange.current:', savedRange.current)
+        
         if (quillInstance.current) {
-            const range = quillInstance.current.getSelection();
+            // Usa il range salvato invece di quello corrente
+            const range = savedRange.current || quillInstance.current.getSelection();
+            console.log('📍 MyQuill handleNoteCreated: range da usare:', range)
+            
             if (range) {
+                console.log('🔧 MyQuill handleNoteCreated: Inserimento embed con dati:', { note_id: noteId })
                 quillInstance.current.insertEmbed(range.index, 'note-ref', { note_id: noteId });
+                console.log('⬆️ MyQuill handleNoteCreated: Setting selezione a:', range.index + 1)
                 quillInstance.current.setSelection(range.index + 1);
+                console.log('✅ MyQuill handleNoteCreated: Embed inserito con successo')
+                
+                // Pulisci il range salvato
+                savedRange.current = null;
+            } else {
+                console.log('❌ MyQuill handleNoteCreated: Nessun range selezionato e nessun range salvato')
             }
+        } else {
+            console.log('❌ MyQuill handleNoteCreated: quillInstance.current è null')
         }
     };
 
@@ -99,7 +117,15 @@ export default function MyQuill({
                 if (!readOnly) {
                     const toolbar = quill.getModule('toolbar') as { addHandler: (name: string, handler: () => void) => void };
                     toolbar.addHandler('note-ref', () => {
-                        // Apri sempre il modal
+                        console.log('🔘 MyQuill: Pulsante note-ref cliccato')
+                        
+                        // Salva il range corrente prima di aprire il modal
+                        const currentRange = quill.getSelection();
+                        console.log('💾 MyQuill: Salvataggio range corrente:', currentRange)
+                        savedRange.current = currentRange;
+                        
+                        // Apri il modal
+                        console.log('🪟 MyQuill: Apertura modal...')
                         setShowCreateModal(true);
                     });
                 }

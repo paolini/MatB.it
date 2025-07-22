@@ -41,6 +41,8 @@ interface NoteReferenceModalProps {
 type TabType = 'existing' | 'new'
 
 export default function NoteReferenceModal({ isOpen, onClose, onNoteSelected }: NoteReferenceModalProps) {
+  console.log('🔧 NoteReferenceModal: Render con props:', { isOpen, onNoteSelected: typeof onNoteSelected })
+  
   const [activeTab, setActiveTab] = useState<TabType>('existing')
   
   // Stato per creazione nuova nota
@@ -56,12 +58,16 @@ export default function NoteReferenceModal({ isOpen, onClose, onNoteSelected }: 
   const { data: notesData, loading: loadingNotes, error: notesError } = useQuery<{notes: Note[]}>(NotesQuery)
 
   const handleCreateNote = async () => {
+    console.log('🔄 handleCreateNote: Inizio creazione nota')
+    console.log('📝 handleCreateNote: Dati nota:', { title: title.trim(), variant, isPrivate, delta })
+    
     if (!title.trim()) {
-      alert('Il titolo è obbligatorio')
-      return
+      console.log('❌ handleCreateNote: Titolo mancante')
+      throw new Error('Il titolo è obbligatorio')
     }
 
     try {
+      console.log('🚀 handleCreateNote: Chiamata GraphQL createNote...')
       const result = await createNote({
         variables: {
           title: title.trim(),
@@ -71,18 +77,36 @@ export default function NoteReferenceModal({ isOpen, onClose, onNoteSelected }: 
         }
       })
 
+      console.log('✅ handleCreateNote: Risposta GraphQL:', result)
+
       if (result.data?.newNote) {
-        onNoteSelected(result.data.newNote._id)
+        const noteId = result.data.newNote._id
+        console.log('🎯 handleCreateNote: ID nota creata:', noteId)
+        console.log('📞 handleCreateNote: Chiamata onNoteSelected con ID:', noteId)
+        
+        onNoteSelected(noteId)
+        console.log('🔒 handleCreateNote: Chiamata handleClose...')
         handleClose()
+        
+        console.log('✨ handleCreateNote: Operazione completata, ritorno ID:', noteId)
+        return noteId
+      } else {
+        console.log('❌ handleCreateNote: Nessun dato nella risposta')
+        throw new Error('Errore nella creazione della nota')
       }
     } catch (err) {
-      console.error('Errore nella creazione della nota:', err)
+      console.error('💥 handleCreateNote: Errore:', err)
+      throw err
     }
   }
 
   const handleSelectExistingNote = (noteId: string) => {
+    console.log('🔗 handleSelectExistingNote: Selezione nota esistente con ID:', noteId)
+    console.log('📞 handleSelectExistingNote: Chiamata onNoteSelected...')
     onNoteSelected(noteId)
+    console.log('🔒 handleSelectExistingNote: Chiamata handleClose...')
     handleClose()
+    console.log('✅ handleSelectExistingNote: Operazione completata')
   }
 
   const handleClose = () => {
@@ -191,18 +215,21 @@ export default function NoteReferenceModal({ isOpen, onClose, onNoteSelected }: 
           ) : (
             /* Tab per creare nuova nota */
             <div>
-                        <NoteForm
-                            initialTitle={title}
-                            initialVariant={variant}
-                            initialPrivate={isPrivate}
-                            initialDelta={delta}
-                            showTitleAs="input"
-                            onTitleChange={setTitle}
-                            onVariantChange={setVariant}
-                            onPrivateChange={setIsPrivate}
-                            onDeltaChange={setDelta}
-                            showActions={false}
-                        />              {createError && (
+              <NoteForm
+                initialTitle={title}
+                initialVariant={variant}
+                initialPrivate={isPrivate}
+                initialDelta={delta}
+                showTitleAs="input"
+                onTitleChange={setTitle}
+                onVariantChange={setVariant}
+                onPrivateChange={setIsPrivate}
+                onDeltaChange={setDelta}
+                showActions={true}
+                onSave={handleCreateNote}
+                onCancel={handleClose}
+              />
+              {createError && (
                 <div className="text-red-600 text-sm mt-4">
                   Errore: {createError.message}
                 </div>
@@ -212,24 +239,16 @@ export default function NoteReferenceModal({ isOpen, onClose, onNoteSelected }: 
         </div>
 
         {/* Footer con pulsanti */}
-        <div className="p-6 border-t flex justify-end gap-3">
-          <button
-            onClick={handleClose}
-            className="px-4 py-2 text-gray-600 border border-gray-300 rounded hover:bg-gray-50 transition-colors"
-            disabled={creating}
-          >
-            Annulla
-          </button>
-          {activeTab === 'new' && (
+        {activeTab === 'existing' && (
+          <div className="p-6 border-t flex justify-end gap-3">
             <button
-              onClick={handleCreateNote}
-              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors disabled:opacity-50"
-              disabled={creating || !title.trim()}
+              onClick={handleClose}
+              className="px-4 py-2 text-gray-600 border border-gray-300 rounded hover:bg-gray-50 transition-colors"
             >
-              {creating ? 'Creando...' : 'Crea e Inserisci'}
+              Annulla
             </button>
-          )}
-        </div>
+          </div>
+        )}
       </div>
     </div>
   )
