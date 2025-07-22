@@ -1,6 +1,6 @@
 {
   "name": "matbit",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
@@ -20,17 +20,19 @@
     "@as-integrations/next": "^3.2.0",
     "@auth/mongodb-adapter": "^3.9.1",
     "@graphql-tools/load-files": "^7.0.1",
+    "@tailwindcss/postcss": "^4",
+    "@types/nodemailer": "^6.4.17",
     "graphql": "^16.11.0",
     "katex": "^0.16.22",
     "mongodb": "^6.16.0",
     "next": "15.3.1",
     "next-auth": "^4.24.11",
+    "nodemailer": "^6.10.1",
     "quill-next": "^2.0.5",
     "quill-next-react": "^1.0.5",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "react-spinners": "^0.17.0",
-    "@tailwindcss/postcss": "^4"
+    "react-spinners": "^0.17.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.1",

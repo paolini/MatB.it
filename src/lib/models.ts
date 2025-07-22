@@ -21,6 +21,7 @@ export type MongoNote = {
     _id: ObjectId
     title: string               // Title dell'ultima versione (HEAD)
     delta: object               // Contenuto dell'ultima versione (HEAD) in formato Quill Delta
+    variant?: string            // Tipo di contenuto dell'ultima versione (HEAD)
     author_id: ObjectId         // Chi controlla questo branch (può spostare il tip)
     note_version_id: ObjectId   // Punta alla versione corrente (HEAD)
     contributors: {             // Lista denormalizzata dei contributori

@@ -35,8 +35,7 @@ const NOTES_PIPELINE = [
   },
   {
     $addFields: {
-      updated_on: '$version.created_on', // L'ultima modifica è quando è stata creata l'ultima versione
-      variant: '$version.variant' // Includiamo la variant dalla note_version
+      updated_on: '$version.created_on' // L'ultima modifica è quando è stata creata l'ultima versione
     }
   }
 ]
@@ -107,6 +106,7 @@ export const resolvers = {
       const noteVersion = {
         title: args.title,
         delta: args.delta || { ops: [{ insert: '\n' }] }, // Delta passato o vuoto
+        variant: args.variant || 'default', // Variant passato o default
         author_id: context.user._id,
         created_on: now
       }
@@ -116,6 +116,7 @@ export const resolvers = {
       const note = {
         title: args.title, // title dell'ultima versione
         delta: args.delta || { ops: [{ insert: '\n' }] }, // delta dell'ultima versione
+        variant: args.variant || 'default', // variant dell'ultima versione
         author_id: context.user._id,
         note_version_id: versionResult.insertedId,
         contributors: [{
@@ -139,7 +140,7 @@ export const resolvers = {
       args: MutationUpdateNoteArgs,
       context: Context
     ): Promise<Note | null> => {
-      const { _id, title, delta, private: isPrivate } = args
+      const { _id, title, delta, private: isPrivate, variant } = args
       const collection = getNotesCollection(context.db)
       const note = await collection.findOne({ _id })
       if (!note) throw new Error('Note not found')
@@ -148,10 +149,16 @@ export const resolvers = {
       
       if (!note.author_id.equals(context.user._id)) throw new Error('Not authorized')
       
-      const update: Partial<Note> = {}
+      const update: Partial<{
+        title: string;
+        delta: object;
+        private: boolean;
+        variant: string;
+      }> = {}
       if (typeof title === 'string') update.title = title
       if (delta) update.delta = delta
       if (typeof isPrivate === 'boolean') update.private = isPrivate
+      if (typeof variant === 'string') update.variant = variant
       if (Object.keys(update).length === 0) throw new Error('No fields to update')
       await collection.updateOne({ _id }, { $set: update })
       // restituisci la nota aggiornata

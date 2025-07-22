@@ -37,6 +37,7 @@ export type MutationNewNoteArgs = {
   delta: InputMaybe<Scalars['JSON']['input']>;
   private: InputMaybe<Scalars['Boolean']['input']>;
   title: Scalars['String']['input'];
+  variant: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -45,6 +46,7 @@ export type MutationUpdateNoteArgs = {
   delta: InputMaybe<Scalars['JSON']['input']>;
   private: InputMaybe<Scalars['Boolean']['input']>;
   title: InputMaybe<Scalars['String']['input']>;
+  variant: InputMaybe<Scalars['String']['input']>;
 };
 
 export type Note = {

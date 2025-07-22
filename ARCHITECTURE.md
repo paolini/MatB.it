@@ -30,15 +30,19 @@ MatBit is a **collaborative note-taking web application** built with Next.js and
 
 ### 1. User Authentication
 - OAuth login via GitHub and Google providers
+- **Email authentication** with magic link (passwordless)
+- Support for SMTP and modern email services (Resend)
 - Session management with JWT tokens
 - User profile management
 - Legacy user migration support
+- Custom sign-in page with multiple authentication options
 
 ### 2. Note Management
-- **Create** new notes with titles and rich content
-- **Edit** notes with real-time WYSIWYG editor
+- **Create** new notes with titles, rich content, and variant types
+- **Edit** notes with real-time WYSIWYG editor and variant modification
 - **Delete** notes (author-only with confirmation)
 - **Privacy control** - notes can be public or private
+- **Variant selection** - categorize notes as theorems, lemmas, proofs, exercises, etc.
 - **Author attribution** - notes display creator information
 
 ### 3. Rich Text Editing
@@ -65,11 +69,13 @@ MatBit is a **collaborative note-taking web application** built with Next.js and
 - **Recursive note embedding** with depth control and async note resolution via useQuery
 - **Visual variants** with CSS-based styling (colored backgrounds, borders, labels)
 - **Note information system** with clickable icons showing metadata (author, dates, privacy)
+- **Proper HTML structure** - embedded notes are rendered as block-level elements to avoid hydration errors
+- **Consistent note reference format** - all references use the standardized `{ "note-ref": { "note_id": "..." } }` format
 
 ### 6. Git-like Versioning System
 - **Note** acts as a Git-like branch pointing to the latest version (HEAD)
 - **NoteVersion** acts as immutable commits storing the complete history
-- **Denormalized data** in Note (title, delta) for performance optimization
+- **Denormalized data** in Note (title, delta, variant) for performance optimization
 - **Soft deletion** - deleted notes moved to `deleted_notes` collection
 - **Shared versions** - multiple Notes can reference the same NoteVersion
 - **Contributors tracking** - denormalized list of users who contributed to each Note
@@ -92,6 +98,7 @@ src/
 │   ├── Notes.tsx         # Notes list component
 │   ├── NavBar.tsx        # Navigation with auth
 │   ├── DeltaContent.tsx  # React component for Delta rendering with Apollo GraphQL
+│   ├── NoteReferenceModal.tsx  # Modal for note reference insertion (select existing or create new)
 │   └── Providers.tsx     # App-wide providers
 ├── lib/                  # Utility libraries
 │   ├── models.ts         # MongoDB type definitions & note reference types
@@ -100,10 +107,10 @@ src/
 │   └── myquill/          # Custom Quill.js integration
 │       ├── MyQuill.tsx   # Quill wrapper component
 │       ├── myquill.js    # Quill configuration and blot registration
-│       ├── noteref.js    # Note reference blot implementation
+│       ├── noteref.js    # Note reference blot implementation (standardized format)
 │       ├── environment.js # Mathematical environment blots (legacy)
-│       ├── formula.js    # LaTeX formula blots
-│       └── delta-variants.css   # Styling for Delta variants (theorem, lemma, etc.)
+│       ├── formula.js    # LaTeX formula blots with improved cursor handling
+│       └── delta-variants.css   # Styling for Delta variants and note reference button
 migrations/               # Database migration scripts
 ```
 
@@ -130,6 +137,7 @@ type MongoNote = {
     _id: ObjectId
     title: string               // Title dell'ultima versione (HEAD)
     delta: object               // Contenuto dell'ultima versione (HEAD) in formato Quill Delta
+    variant?: string            // Tipo di contenuto dell'ultima versione (HEAD) - denormalizzato da NoteVersion
     author_id: ObjectId         // Chi controlla questo branch (può spostare il tip)
     note_version_id: ObjectId   // Punta alla versione corrente (HEAD)
     contributors: {             // Lista denormalizzata dei contributori
@@ -191,8 +199,8 @@ type MongoUser = {
 - `profile`: Get current user profile
 
 ### Mutations
-- `newNote(title, delta, private)`: Create new note with versioning
-- `updateNote(_id, title, delta, private)`: Update existing note (creates new version)
+- `newNote(title, delta, private, variant)`: Create new note with versioning and variant type
+- `updateNote(_id, title, delta, private, variant)`: Update existing note (creates new version) with variant modification
 - `deleteNote(_id)`: Move note to deleted_notes collection (preserves history)
 
 ## Key Components
@@ -203,20 +211,25 @@ Complex component handling:
 - **NoteInner**: Display/edit mode switching with DeltaContent integration
 - **NoteEditInner**: Rich editing interface with:
   - Title editing
+  - **Variant selection** - dropdown for choosing note type (theorem, lemma, proof, etc.)
   - Quill editor integration
   - Privacy toggle
-  - Save/cancel/delete actions
-  - Confirmation dialogs
+  - **Streamlined UI** - action buttons (Save/Cancel/Delete) managed by MyQuill component
+  - Confirmation dialogs handled by MyQuill
 
 ### MyQuill Custom Editor
 - Extended Quill.js with mathematical features
-- LaTeX formula insertion and rendering
+- LaTeX formula insertion and rendering with proper cursor positioning
 - **Note reference system** with visual embedding and recursive content rendering
 - **DeltaContent React component integration** for view mode with full embedded note display
 - **Edit mode note references** display as styled badges with variant information
 - Custom toolbar configuration with note reference button (※)
-- Delta format content handling
+- Delta format content handling with consistent `note-ref` blot naming
 - **Variant-aware styling** with CSS-based labels and color coding
+- **Formula editor improvements** - proper cursor positioning after formula insertion and editing
+- **Unified action button system** - all Save/Cancel/Delete buttons consolidated in MyQuill component
+- **NoteReferenceModal integration** with both existing note selection and new note creation workflows
+- **Selection range preservation** - automatically saves cursor position before opening modals to ensure accurate note insertion
 
 ### DeltaContent React Component
 - **Modern React component** replacing legacy HTML string generation
@@ -227,6 +240,8 @@ Complex component handling:
 - **Note information popups** for metadata access (author, dates, privacy)
 - **TypeScript support** with proper type definitions for better development experience
 - **Security improvements** with controlled dangerouslySetInnerHTML only for KaTeX-rendered content
+- **Proper HTML structure** - embedded notes rendered as block elements to prevent hydration errors
+- **Standardized note reference parsing** - consistent handling of `{ "note-ref": { "note_id": "..." } }` format
 
 ## Development Workflow
 
@@ -252,9 +267,11 @@ npm run codegen            # Generate TypeScript types from GraphQL schema
 ## Security & Privacy
 
 ### Authentication
-- OAuth-based authentication (no passwords stored)
+- OAuth-based authentication (GitHub, Google)
+- **Passwordless email authentication** with magic links
 - JWT tokens for session management
 - User sessions persisted in MongoDB
+- Email verification through trusted providers (SMTP/Resend)
 
 ### Authorization
 - Users can only edit/delete their own notes
@@ -265,6 +282,7 @@ npm run codegen            # Generate TypeScript types from GraphQL schema
 - Automatic migration system for schema changes
 - Legacy user account consolidation
 - Text-to-Delta content format migration
+- **Variant field migration** - copying variant from NoteVersion to Note for denormalization
 
 ## Deployment
 - Dockerized application with multi-stage builds
@@ -298,5 +316,6 @@ npm run codegen            # Generate TypeScript types from GraphQL schema
 - **DeltaContent React component** extensible for new content types and rendering modes
 - **Variant system** supports new mathematical environment types
 - **Apollo GraphQL integration** enables real-time data fetching and caching
+- **Standardized note references** with consistent Delta format across the entire system
 
-This application demonstrates a modern full-stack approach with strong typing, real-time editing capabilities, mathematical content support, **recursive note embedding**, **visual variant system**, **Git-like versioning for collaborative research scenarios**, and **modern React patterns** with Apollo GraphQL integration.
+This application demonstrates a modern full-stack approach with strong typing, real-time editing capabilities, mathematical content support, **recursive note embedding**, **visual variant system**, **Git-like versioning for collaborative research scenarios**, **modern React patterns** with Apollo GraphQL integration, and **robust content format consistency** for note references.

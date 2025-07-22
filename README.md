@@ -39,6 +39,65 @@ MONGODB_URI=mongodb://127.0.0.1:27017/matbit
 Environment variables can also be put in a `.env` file
 in the root directory.
 
+### Autenticazione
+
+MatBit supporta autenticazione tramite provider OAuth (GitHub, Google) e autenticazione tramite email (magic link).
+
+#### OAuth Providers
+
+Per GitHub:
+```bash
+GITHUB_ID=your-github-client-id
+GITHUB_SECRET=your-github-client-secret
+```
+
+Per Google:
+```bash
+GOOGLE_CLIENT_ID=your-google-client-id.googleusercontent.com
+GOOGLE_CLIENT_SECRET=your-google-client-secret
+```
+
+#### Autenticazione Email
+
+L'autenticazione tramite email utilizza "magic link" - non servono password, viene inviato un link sicuro via email.
+
+**Opzione 1: SMTP (Gmail raccomandato)**
+```bash
+EMAIL_SERVER_HOST=smtp.gmail.com
+EMAIL_SERVER_PORT=587
+EMAIL_SERVER_USER=your-email@gmail.com
+EMAIL_SERVER_PASSWORD=your-app-password
+EMAIL_FROM=noreply@yourdomain.com
+```
+
+Configurazione Gmail:
+1. Abilita l'autenticazione a due fattori
+2. Genera una "App Password" dedicata in [Google Account Security](https://myaccount.google.com/security)
+3. Usa la App Password come `EMAIL_SERVER_PASSWORD`
+
+**Opzione 2: Resend (servizio email per sviluppatori)**
+```bash
+RESEND_API_KEY=re_your-resend-api-key
+EMAIL_FROM=noreply@yourdomain.com
+```
+
+**NextAuth configurazione:**
+```bash
+NEXTAUTH_SECRET=your-nextauth-secret
+NEXTAUTH_URL=http://localhost:3000  # o il tuo dominio in produzione
+```
+
+#### Sviluppo Locale - Email Testing
+
+Per testare in locale senza inviare email reali, usa MailHog:
+```bash
+EMAIL_SERVER_HOST=localhost
+EMAIL_SERVER_PORT=1025
+EMAIL_SERVER_USER=""
+EMAIL_SERVER_PASSWORD=""
+EMAIL_FROM=test@localhost
+```
+
 ## migrations
 
 See also `package.json` for script shortcuts.

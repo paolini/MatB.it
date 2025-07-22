@@ -1,4 +1,5 @@
 import { TextBlot, EmbedBlot } from 'parchment';
+import MyQuill from 'quill-next';
 
 export { Delta } from 'quill-next'
 
@@ -105,11 +106,23 @@ export class MyFormula extends Embed {
 
     console.log('Formula.render', value, displaystyle);
 
-    window.katex.render(value, node, {
-      throwOnError: false,
-      errorColor: '#f00',
-      displayMode: displaystyle,
-    });
+    // Verifica che KaTeX sia disponibile
+    if (typeof window !== 'undefined' && window.katex && window.katex.render) {
+      try {
+        window.katex.render(value, node, {
+          throwOnError: false,
+          errorColor: '#f00',
+          displayMode: displaystyle,
+        });
+      } catch (error) {
+        console.error('Error rendering formula:', error);
+        node.textContent = `[Formula: ${value}]`;
+      }
+    } else {
+      // Fallback se KaTeX non è disponibile
+      node.textContent = `[Formula: ${value}]`;
+      console.warn('KaTeX not available, using fallback rendering');
+    }
   }
 
   format(name, value) {
@@ -164,8 +177,9 @@ export class FormulaEditorModule {
         this.quill.deleteText(index - 1, 1, 'user');
         // Inserisci formula
         this.quill.insertEmbed(index - 1, 'formula', '', 'user');
+        // Posiziona il cursore dopo la formula appena inserita
         this.quill.setSelection(index, 0, 'silent');
-        const [blot] = this.quill.getLeaf(index);
+        const [blot] = this.quill.getLeaf(index - 1);
         this.showFormulaEditor(blot);
       }
     });
@@ -184,8 +198,9 @@ export class FormulaEditorModule {
           lastRange = null;
           if (range) {
             this.quill.insertEmbed(range.index, 'formula', '', 'user');
+            // Posiziona il cursore dopo la formula
             this.quill.setSelection(range.index + 1, 0, 'silent');
-            const [blot] = this.quill.getLeaf(range.index + 1);
+            const [blot] = this.quill.getLeaf(range.index);
             this.showFormulaEditor(blot);
           }
         });
@@ -317,6 +332,11 @@ export class FormulaEditorModule {
       displayCheckbox.removeEventListener('change', liveUpdate);
       window.removeEventListener('scroll', positionEditor);
       window.removeEventListener('resize', positionEditor);
+      
+      // Posiziona il cursore dopo la formula
+      const index = quill.getIndex(blot);
+      quill.setSelection(index + 1, 0, 'silent');
+      
       // Riporta il focus all'editor Quill
       this.quill.focus();
     };

@@ -1,14 +1,14 @@
 import { EmbedBlot } from 'parchment';
 
 export class NoteRefBlot extends EmbedBlot {
-  static blotName = 'note_id';  // Cambiato da 'note-ref' a 'note_id'
+  static blotName = 'note-ref';  // Ripristinato al nome corretto
   static tagName = 'SPAN';
   static className = 'ql-note-ref';
 
   static create(data) {
     const node = super.create();
-    // data ora è direttamente l'ID della nota
-    const noteId = data;
+    // data dovrebbe essere nel formato { note_id: string }
+    const noteId = typeof data === 'object' && data?.note_id ? data.note_id : data;
     
     if (noteId) {
       node.setAttribute('data-note-id', noteId);
@@ -181,7 +181,9 @@ export class NoteRefBlot extends EmbedBlot {
   }
 
   static value(node) {
-    return node.getAttribute('data-note-id');  // Restituisce direttamente l'ID
+    const noteId = node.getAttribute('data-note-id');
+    // Restituisce nel formato corretto per il Delta
+    return noteId ? { "note-ref": { note_id: noteId } } : null;
   }
 
   value() {
@@ -195,7 +197,6 @@ export class NoteRefBlot extends EmbedBlot {
     this.domNode.addEventListener('click', (e) => {
       e.preventDefault();
       e.stopPropagation();
-      const noteId = this.domNode.getAttribute('data-note-id');
       // TODO: Implementare navigazione alla nota
     });
   }
