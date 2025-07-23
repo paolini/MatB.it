@@ -3,15 +3,9 @@ import ListItem from 'quill-next/dist/formats/list.js';
 // Blot per lista "choice" (multiple choice)
 class ChoiceListItem extends ListItem {
   static formats(domNode) {
-    // Riconosciamo il tipo "choice" e manteniamo gli altri attributi
-    let format = super.formats(domNode);
-    if (typeof format === 'string') {
-      format = { list: format };
-    } else if (!format) {
-      format = {};
-    }
+    // Se è una choice, restituisci oggetto con attributi custom
     if (domNode.getAttribute('data-list') === 'choice') {
-      format.list = 'choice';
+      const format = { list: 'choice' };
       if (domNode.hasAttribute('data-choice-id')) {
         format['choice-id'] = domNode.getAttribute('data-choice-id');
       }
@@ -24,8 +18,10 @@ class ChoiceListItem extends ListItem {
       if (domNode.hasAttribute('data-shuffle')) {
         format['shuffle'] = domNode.getAttribute('data-shuffle') === 'true';
       }
+      return format;
     }
-    return format;
+    // Altrimenti, usa il comportamento standard (stringa)
+    return super.formats(domNode);
   }
 
   format(name, value) {
