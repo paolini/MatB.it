@@ -24,9 +24,7 @@ mutation UpdateNote($_id: ObjectId!, $title: String, $delta: JSON, $private: Boo
 
 const DeleteNoteMutation = gql`
 mutation DeleteNote($_id: ObjectId!) {
-  deleteNote(_id: $_id) {
-    _id
-  }
+  deleteNote(_id: $_id)
 }`
 
 interface NoteFormProps {
