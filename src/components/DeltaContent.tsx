@@ -128,6 +128,13 @@ export function DeltaContent({
   delta, 
   maxDepth = 3 
 }: DeltaContentProps) {
+  // Stato per le risposte delle liste 'choice': { [blockIdx]: selectedIdx }
+  const [choiceSelections, setChoiceSelections] = useState<Record<string, number | null>>({});
+
+  // Handler per cambiare la selezione di una lista 'choice'
+  const handleChoiceChange = (blockIdx: string, idx: number) => {
+    setChoiceSelections(prev => ({ ...prev, [blockIdx]: idx }));
+  };
   // Rendering sincrono diretto - molto più semplice!
   if (!delta || !delta.ops) {
     return <p><br /></p>;
@@ -308,7 +315,8 @@ export function DeltaContent({
 
   // Rendering blocchi React
   const elements: React.ReactNode[] = [];
-  for (const block of blocks) {
+  for (const blockIdx in blocks) {
+    const block = blocks[blockIdx];
     if (block.type === 'paragraph') {
       elements.push(
         <p key={keyCounter++}>{block.content.length > 0 ? block.content : <br />}</p>
@@ -317,19 +325,42 @@ export function DeltaContent({
       let Tag: 'ul' | 'ol' = 'ul';
       if (block.listType === 'ordered') Tag = 'ol';
       if (block.listType === 'choice') Tag = 'ol';
-      elements.push(
-        <Tag key={keyCounter++} className={block.listType === 'choice' ? 'ql-choice-list' : undefined}>
-          {block.items.map((item: { content: React.ReactNode[]; attributes: Record<string, unknown> }, idx: number) => {
-            let liProps: any = {};
-            if (block.listType === 'choice') liProps['data-list'] = 'choice';
-            return (
-              <li key={keyCounter++} {...liProps}>
-                {item.content.length > 0 ? item.content : <br />}
-              </li>
-            );
-          })}
-        </Tag>
-      );
+      const radioName = `choice-list-${blockIdx}`;
+      if (block.listType === 'choice') {
+        // Racchiudi la lista choice in una form
+        elements.push(
+          <form key={keyCounter++} className="ql-choice-form" onSubmit={e => e.preventDefault()}>
+            <Tag className="ql-choice-list">
+              {block.items.map((item: { content: React.ReactNode[]; attributes: Record<string, unknown> }, idx: number) => {
+                let liProps: any = { 'data-list': 'choice' };
+                return (
+                  <li key={keyCounter++} {...liProps} style={{display: 'flex', alignItems: 'center', gap: '0.5em'}}>
+                    <input
+                      type="radio"
+                      name={radioName}
+                      value={idx}
+                      checked={choiceSelections[blockIdx] === idx}
+                      onChange={() => handleChoiceChange(blockIdx, idx)}
+                      style={{marginRight: '0.5em'}}
+                    />
+                    {/* Etichetta A, B, C... */}
+                    <span style={{fontWeight: 'bold', marginRight: '0.5em'}}>{String.fromCharCode(65 + idx)}.</span>
+                    {item.content.length > 0 ? item.content : <br />}
+                  </li>
+                );
+              })}
+            </Tag>
+          </form>
+        );
+      } else {
+        elements.push(
+          <Tag key={keyCounter++}>
+            {block.items.map((item: { content: React.ReactNode[]; attributes: Record<string, unknown> }, idx: number) => (
+              <li key={keyCounter++}>{item.content.length > 0 ? item.content : <br />}</li>
+            ))}
+          </Tag>
+        );
+      }
     } else if (block.type === 'embed') {
       elements.push(
         renderEmbed(block.embed, block.attributes, `embed-${keyCounter++}`)
