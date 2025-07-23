@@ -1,3 +1,51 @@
+/* Etichette A, B, C... per le liste multiple choice */
+.ql-editor ol {
+  counter-reset: choice-list;
+}
+.ql-editor ol li[data-list="choice"] {
+  counter-increment: choice-list;
+  list-style-type: none;
+  position: relative;
+  padding-left: 2em;
+}
+.ql-editor ol li[data-list="choice"] .ql-ui::before {
+  content: "\2610 "; /* Unicode: BALLOT BOX ☐ */
+  font-size: 1.1em;
+  margin-right: 0.5em;
+  color: #1976d2;
+  vertical-align: middle;
+}
+/* Etichette A., B., C., ... per le liste multiple choice (solo visuale, non nel Delta) */
+
+/* Etichette A., B., ... su .ql-ui per le liste multiple choice */
+.ql-editor li[data-list="choice"] {
+  list-style: none;
+}
+.ql-editor ol li[data-list="choice"] .ql-ui {
+  display: inline-block;
+  min-width: 2em;
+  width: 2em;
+  text-align: right;
+  margin-left: -2em;
+  margin-right: 0.5em;
+  font-weight: bold;
+  color: #1976d2;
+}
+/* Icona per il pulsante lista 'choice' nella toolbar Quill */
+.ql-toolbar .ql-list[value="choice"]::before {
+  content: "\1F5F9"; /* Unicode: BALLOT BOX WITH CHECK */
+  font-size: 16px;
+  margin-right: 2px;
+  vertical-align: middle;
+}
+/* Pulsante custom MC (multiple choice) per la toolbar Quill */
+.ql-toolbar .ql-mc-choice::before {
+  content: "MC";
+  font-weight: bold;
+  font-size: 14px;
+  display: inline-block;
+  line-height: 22px;
+}
 /* Quill environment picker labels (editor-specific) */
 .ql-snow .ql-picker.ql-environment .ql-picker-item[data-value="theorem"]::before {
   content: "Theorem";

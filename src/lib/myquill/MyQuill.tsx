@@ -14,11 +14,9 @@ const config = {
             ['bold', 'italic', 'underline'],
             ['code-block'],
             ['formula'],
-            ['note-ref'], // Ripristinato al nome corretto
-            [{ 'environment': ['theorem', 
-                'lemma', 'proof', 'remark', 
-                'exercise', 'test'  ] }],
-            [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+            ['note-ref'],
+            [{ 'environment': ['theorem', 'lemma', 'proof', 'remark', 'exercise', 'test' ] }],
+            [{ 'list': 'ordered' }, { 'list': 'bullet' }, { 'list': 'choice' }],
             ['link', 'image'],
             ['clean'],
         ],
@@ -122,21 +120,23 @@ export default function MyQuill({
             onReady={quill => { 
                 quillInstance.current = quill 
                 
-                // Aggiungi handler per il pulsante note-ref
+                // Aggiungi handler per il pulsante note-ref e MC
                 if (!readOnly) {
                     const toolbar = quill.getModule('toolbar') as { addHandler: (name: string, handler: (value?: any) => void) => void };
                     toolbar.addHandler('note-ref', () => {
                         console.log('🔘 MyQuill: Pulsante note-ref cliccato')
-                        
-                        // Salva il range corrente prima di aprire il modal
                         const currentRange = quill.getSelection();
-                        console.log('💾 MyQuill: Salvataggio range corrente:', currentRange)
                         savedRange.current = currentRange;
-                        
-                        // Apri il modal con variant default
-                        console.log('🪟 MyQuill: Apertura modal...')
                         setPrefilledVariant('default');
                         setShowCreateModal(true);
+                    });
+
+                    // Handler per il pulsante MC (multiple choice)
+                    toolbar.addHandler('mc-choice', () => {
+                        const range = quill.getSelection();
+                        if (!range) return;
+                        // Applica il formato list: 'choice' alla selezione corrente
+                        quill.formatLine(range.index, range.length, { list: 'choice' });
                     });
                     
                     // Aggiungi event listener per la select environment
