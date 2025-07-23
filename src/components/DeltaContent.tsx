@@ -229,80 +229,112 @@ export function DeltaContent({
     return null;
   };
 
-  const elements: React.ReactNode[] = [];
-  let currentParagraph: React.ReactNode[] = [];
+  // Nuovo parsing Quill-style: accoppia testo e marker di lista\n
+  const blocks: Array<any> = [];
+  let buffer: React.ReactNode[] = [];
+  let bufferAttr: Record<string, unknown> | null = null;
+  let listType: string | null = null;
+  let listItems: Array<{ content: React.ReactNode[]; attributes: Record<string, unknown> }> = [];
   let keyCounter = 0;
 
-  for (const op of delta.ops) {
-    if (op.insert) {
-      // Gestisce inserti di testo
-      if (typeof op.insert === 'string') {
-        const text = op.insert;
-        
-        // Gestisce i newline
-        if (text.includes('\n')) {
-          const parts = text.split('\n');
-          for (let i = 0; i < parts.length; i++) {
-            if (parts[i]) {
-              currentParagraph.push(
-                <span key={keyCounter++}>
-                  {renderTextWithFormatting(parts[i], op.attributes || {})}
-                </span>
-              );
-            }
-            
-            // Se non è l'ultima parte, chiudi il paragrafo
-            if (i < parts.length - 1) {
-              elements.push(
-                <p key={keyCounter++}>
-                  {currentParagraph.length > 0 ? currentParagraph : <br />}
-                </p>
-              );
-              currentParagraph = [];
-            }
-          }
-        } else {
-          currentParagraph.push(
-            <span key={keyCounter++}>
-              {renderTextWithFormatting(text, op.attributes || {})}
-            </span>
+  const flushList = () => {
+    if (listItems.length > 0 && listType) {
+      blocks.push({ type: 'list', listType, items: listItems });
+      listItems = [];
+      listType = null;
+    }
+  };
+
+  for (let opIdx = 0; opIdx < delta.ops.length; opIdx++) {
+    const op = delta.ops[opIdx];
+    if (typeof op.insert === 'string') {
+      let str = op.insert;
+      while (str.length > 0) {
+        const newlineIdx = str.indexOf('\n');
+        if (newlineIdx === -1) {
+          // Non c'è newline: accumula
+          buffer.push(
+            <span key={keyCounter++}>{renderTextWithFormatting(str, op.attributes || {})}</span>
           );
-        }
-      }
-      // Gestisce embed (formule, note references, etc.)
-      else if (typeof op.insert === 'object') {
-        const embedElement = renderEmbed(op.insert, op.attributes || {}, `embed-${keyCounter++}`);
-        if (embedElement) {
-          // Se è una nota embedded (che contiene elementi block), chiudi il paragrafo corrente
-          // e inserisci la nota come elemento separato
-          if (op.insert['note-ref']) {
-            // Chiudi il paragrafo corrente se non è vuoto
-            if (currentParagraph.length > 0) {
-              elements.push(
-                <p key={keyCounter++}>
-                  {currentParagraph}
-                </p>
-              );
-              currentParagraph = [];
+          bufferAttr = op.attributes || null;
+          str = '';
+        } else {
+          // C'è un newline: processa la riga
+          const lineText = str.slice(0, newlineIdx);
+          const attr = op.attributes || {};
+          let listAttr: string | undefined = undefined;
+          if (attr && attr.list != null) {
+            if (typeof attr.list === 'object' && attr.list !== null && 'list' in attr.list) {
+              // @ts-ignore
+              listAttr = attr.list.list;
+            } else {
+              listAttr = attr.list as string;
             }
-            // Inserisci la nota embedded come elemento separato
-            elements.push(embedElement);
-          } else {
-            // Per altri embed (come formule), inserisci nel paragrafo corrente
-            currentParagraph.push(embedElement);
           }
+          const isList = listAttr === 'ordered' || listAttr === 'bullet' || listAttr === 'choice';
+          const lineNodes = buffer.concat(
+            lineText ? [<span key={keyCounter++}>{renderTextWithFormatting(lineText, attr)}</span>] : []
+          );
+          if (isList) {
+            if (!listType || listType !== listAttr) {
+              flushList();
+            listType = listAttr ?? null;
+            }
+            listItems.push({ content: lineNodes, attributes: attr });
+          } else {
+            flushList();
+            blocks.push({ type: 'paragraph', content: lineNodes, attributes: attr });
+          }
+          buffer = [];
+          bufferAttr = null;
+          str = str.slice(newlineIdx + 1);
         }
       }
+    } else if (typeof op.insert === 'object') {
+      // Embed: flush list e buffer, poi aggiungi come blocco
+      flushList();
+      if (buffer.length > 0) {
+        blocks.push({ type: 'paragraph', content: buffer, attributes: bufferAttr });
+        buffer = [];
+        bufferAttr = null;
+      }
+      blocks.push({ type: 'embed', embed: op.insert, attributes: op.attributes || {} });
     }
   }
+  flushList();
+  if (buffer.length > 0) {
+    blocks.push({ type: 'paragraph', content: buffer, attributes: bufferAttr });
+  }
 
-  // Chiudi l'ultimo paragrafo se necessario
-  if (currentParagraph.length > 0) {
-    elements.push(
-      <p key={keyCounter++}>
-        {currentParagraph}
-      </p>
-    );
+  // Rendering blocchi React
+  const elements: React.ReactNode[] = [];
+  for (const block of blocks) {
+    if (block.type === 'paragraph') {
+      elements.push(
+        <p key={keyCounter++}>{block.content.length > 0 ? block.content : <br />}</p>
+      );
+    } else if (block.type === 'list') {
+      let Tag: 'ul' | 'ol' = 'ul';
+      if (block.listType === 'ordered') Tag = 'ol';
+      if (block.listType === 'choice') Tag = 'ol';
+      elements.push(
+        <Tag key={keyCounter++} className={block.listType === 'choice' ? 'ql-choice-list' : undefined}>
+          {block.items.map((item: { content: React.ReactNode[]; attributes: Record<string, unknown> }, idx: number) => {
+            let liProps: any = {};
+            if (block.listType === 'choice') liProps['data-list'] = 'choice';
+            return (
+              <li key={keyCounter++} {...liProps}>
+                {item.content.length > 0 ? item.content : <br />}
+              </li>
+            );
+          })}
+        </Tag>
+      );
+    } else if (block.type === 'embed') {
+      elements.push(
+        renderEmbed(block.embed, block.attributes, `embed-${keyCounter++}`)
+      );
+    }
   }
 
   return <>{elements.length > 0 ? elements : <p><br /></p>}</>;

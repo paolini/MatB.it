@@ -1,10 +1,14 @@
-/* Etichette A, B, C... per le liste multiple choice */
-.ql-editor ol {
-  counter-reset: choice-list;
+/* Ripristina numeri e bullet per le liste normali nell'editor Quill (annulla il reset di Tailwind) */
+.ql-variant-container ol,
+.ql-variant-container ul {
+  list-style: revert;
+  margin-left: 2em;
+  padding-left: 0;
 }
+/* Etichette A, B, C... per le liste multiple choice */
 .ql-editor ol li[data-list="choice"] {
   counter-increment: choice-list;
-  list-style-type: none;
+  list-style-type: none !important;
   position: relative;
   padding-left: 2em;
 }
@@ -19,7 +23,7 @@
 
 /* Etichette A., B., ... su .ql-ui per le liste multiple choice */
 .ql-editor li[data-list="choice"] {
-  list-style: none;
+  list-style: none !important;
 }
 .ql-editor ol li[data-list="choice"] .ql-ui {
   display: inline-block;
