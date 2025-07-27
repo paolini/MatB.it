@@ -124,30 +124,26 @@ rl.on('line', line => { input += line + '\n'; });
 rl.on('close', () => {
   const deltas = parseGiftToDelta(input);
   deltas.forEach(note => {
-    // Genera un ObjectId fittizio per la versione (in produzione lo genererebbe MongoDB)
-    const versionId = `ObjectId(\"${Math.floor(Math.random()*1e16).toString(16).padStart(24,'0')}\")`;
-    const noteId = `ObjectId(\"${Math.floor(Math.random()*1e16).toString(16).padStart(24,'0')}\")`;
-    // NoteVersion (commit)
-    const noteVersion = {
-      _id: versionId,
-      title: note.title,
-      delta: note.ops,
-      created_on: now,
-      author_id: author_id,
-    };
-    // Note (branch)
-    const noteDoc = {
-      _id: noteId,
-      title: note.title,
+    // Lascia che MongoDB generi l'ObjectId per la NoteVersion
+    // Costruisci manualmente la stringa per db.note_versions.insertOne, author_id letterale
+    const noteVersionStr = `{
+      title: ${JSON.stringify(note.title)},
+      delta: ${Array.isArray(note.ops) ? JSON.stringify({ops:note.ops}, null, 2) : note.ops},
+      created_on: ISODate(${JSON.stringify(now)}),
+      author_id: ${author_id}
+    }`;
+    // Inserisci la NoteVersion e salva l'_id generato
+    console.log(`const versionResult = db.note_versions.insertOne(${noteVersionStr});`);
+    // Costruisci manualmente la stringa per db.notes.insertOne, senza apici su versionResult.insertedId
+    const noteDocStr = `{
+      title: ${JSON.stringify(note.title)},
       variant: 'question',
-      delta: note.ops,
-      note_version_id: versionId,
-      created_on: now,
+      delta: ${Array.isArray(note.ops) ? JSON.stringify({ops:note.ops}, null, 2) : note.ops},
+      note_version_id: versionResult.insertedId,
+      created_on: ISODate(${JSON.stringify(now)}),
       private: false,
-      author_id: author_id,
-    };
-    // Stampa i comandi per inserire prima la versione, poi la nota
-    console.log(`db.note_versions.insertOne(${JSON.stringify(noteVersion)})`);
-    console.log(`db.notes.insertOne(${JSON.stringify(noteDoc)})`);
+      author_id: ${author_id}
+    }`;
+    console.log(`db.notes.insertOne(${noteDocStr})`);
   });
 });
