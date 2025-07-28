@@ -79,6 +79,7 @@ function parseGiftToDelta(input) {
     }
     if (line.startsWith('::')) {
       ops.push(...extractTextAndFormulas(line.split('[html]')[1].replace(/{$/, '').trim()));
+      ops.push({insert: "\n"})
     }
     if (line.startsWith('=') || line.startsWith('~')) {
       const isCorrect = line.startsWith('=');
