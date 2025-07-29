@@ -18,7 +18,7 @@ const CREATE_NOTE = gql`
 export default function NewNotePage() {
     const [title, setTitle] = useState("")
     const [isPrivate, setIsPrivate] = useState(false)
-    const [variant, setVariant] = useState("default")
+    const [variant, setVariant] = useState("")
     const [isRedirecting, setIsRedirecting] = useState(false)
     const router = useRouter()
     const [createNote, { loading, error }] = useMutation(CREATE_NOTE, {
@@ -54,7 +54,7 @@ export default function NewNotePage() {
                         onChange={e => setVariant(e.target.value)}
                         disabled={loading || isRedirecting}
                     >
-                        <option value="default">Default</option>
+                        <option value="">scegli variante</option>
                         <option value="theorem">Theorem</option>
                         <option value="lemma">Lemma</option>
                         <option value="proof">Proof</option>

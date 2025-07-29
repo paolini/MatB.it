@@ -205,191 +205,20 @@ function ListElement({list}:{list:List}) {
 }
 
 function ChoiceElement({choice}:{choice:Choice}) {
-  return <form>
+  return <>
     { choice.lines.map((line,i) => <li key={i} data-list="choice" style={{display: 'flex', alignItems: 'center', gap: '0.5em'}}>
         <input
           type="radio"
           style={{marginRight: '0.5em'}}
         />
-        {/* Etichetta A, B, C... */}
+        {/* Etichetta A, B, C... 
         <span style={{fontWeight: 'bold', marginRight: '0.5em'}}>{String.fromCharCode(65 + i)}.</span>
+        */}
         <LineElement line={line} />
       </li>
     )}
-  </form>
+  </>
 }
-/*
-  // Rendering blocchi React
-  const elements: React.ReactNode[] = [];
-  for (const blockIdx in blocks) {
-    const block = blocks[blockIdx];
-    if (block.type === 'paragraph') {
-      elements.push(<p key={keyCounter++}>
-          {block.items.length > 0 ? block.items : <br />}
-        </p>)
-    } else if (block.type === 'list') {
-      let Tag: 'ul' | 'ol' = 'ul'
-      if (block.listType === 'ordered') Tag = 'ol'
-      if (block.listType === 'choice') Tag = 'ol'
-      const radioName = `choice-list-${blockIdx}`
-      if (block.listType === 'choice') {
-        // Racchiudi la lista choice in una form
-        elements.push(
-          <form key={keyCounter++} className="ql-choice-form" onSubmit={e => e.preventDefault()}>
-            <Tag className="ql-choice-list">
-              {block.items.map((item, idx: number) => {
-                let liProps: any = { 'data-list': 'choice' };
-                return (
-                  <li key={keyCounter++} {...liProps} style={{display: 'flex', alignItems: 'center', gap: '0.5em'}}>
-                    <input
-                      type="radio"
-                      name={radioName}
-                      value={idx}
-                      checked={choiceSelections[blockIdx] === idx}
-                      onChange={() => handleChoiceChange(blockIdx, idx)}
-                      style={{marginRight: '0.5em'}}
-                    />
-                    <span style={{fontWeight: 'bold', marginRight: '0.5em'}}>{String.fromCharCode(65 + idx)}.</span>
-                    {item}
-                  </li>
-                );
-              })}
-            </Tag>
-          </form>
-        )
-      } else {
-        elements.push(
-          <Tag key={keyCounter++}>
-            {block.items.map((item, idx) => (
-              <li key={keyCounter++}>{item}</li>
-            ))}
-          </Tag>
-        );
-      }
-    } else if (block.type === 'embed') {
-      elements.push(renderEmbed(block.embed, `embed-${keyCounter++}`))
-    }
-  }
-  return <>{elements}</>
-
-  function flushBuffer(attributes: Attributes) {
-    console.log(`flushBuffer ${JSON.stringify(attributes)}`)
-    if (items.length === 0) return
-    if (attributes.listType) {
-      if (lastBlock && lastBlock.type === 'list' && lastBlock.listType === attributes.listType) {
-          console.log(`aggiungi buffer all'ultimo blocco`)
-          // Aggiungi al buffer della lista esistente
-          lastBlock.items.push(...items)
-        } else {
-          console.log(`nuovo blocco`)
-          lastBlock = { type: 'list', listType: attributes.listType, items: items } 
-          blocks.push(lastBlock)
-        }
-      } else {
-        console.log(`nuovo paragrafo`)
-        lastBlock = { type: 'paragraph', items: items}
-        blocks.push(lastBlock)
-      }
-    items = []
-  }
-
-  function getAttributes(attributes: Record<string, unknown> | undefined): Attributes {
-    if (!attributes) return {}
-    const attrs: Attributes = {}
-    if (attributes.bold) attrs.bold = true
-    if (attributes.italic) attrs.italic = true
-    if (attributes.underline) attrs.underline = true
-    if (attributes.strike) attrs.strike = true
-    if (attributes.code) attrs.code = true
-    if (attributes.color && typeof attributes.color === 'string') attrs.color = attributes.color
-    if (attributes.background && typeof attributes.background === 'string') attrs.background = attributes.background
-    if (attributes.link && typeof attributes.link === 'string') attrs.link = attributes.link
-    if (attributes.list === 'bullet' || attributes.list === 'ordered' || attributes.list === 'choice') {
-        attrs.listType = attributes.list
-    } 
-    if (attributes.list && typeof attributes.list === 'object' && 'list' in attributes.list && attributes.list.list==='choice') {
-        attrs.listType = 'choice'
-    }
-    return attrs
-  }
-
-  function renderTextWithFormatting(text: string, attributes: Record<string, unknown> = {}) {
-    let result: React.ReactNode = text;
-    
-    if (attributes.bold) result = <strong>{result}</strong>;
-    if (attributes.italic) result = <em>{result}</em>;
-    if (attributes.underline) result = <u>{result}</u>;
-    if (attributes.strike) result = <s>{result}</s>;
-    if (attributes.code) result = <code>{result}</code>;
-    if (attributes.color) result = <span style={{ color: attributes.color as string }}>{result}</span>;
-    if (attributes.background) result = <span style={{ backgroundColor: attributes.background as string }}>{result}</span>;
-    if (attributes.link) result = <a href={attributes.link as string} target="_blank" rel="noopener noreferrer">{result}</a>;
-
-    return result;
-  }
-
-  function renderEmbed(embed: Embed, key: string) {
-    // Gestisci formule
-    if (!embed) return "InvalidEmbed(0)"
-    if (typeof embed !== 'object') return "InvalidEmbed(1)"
-    if (embed.formula) {
-      let formulaValue: string;
-      let displayMode = false;
-      
-      // Se è un oggetto con value e displaystyle, estraiamo i valori
-      if (typeof embed.formula === 'object' && embed.formula && 'value' in embed.formula) {
-        const formula = embed.formula as { value: string; displaystyle?: boolean };
-        formulaValue = formula.value;
-        displayMode = formula.displaystyle || false;
-      } else if (typeof embed.formula === 'string') {
-        // Se è già una stringa, la usiamo direttamente
-        formulaValue = embed.formula;
-      } else {
-        // Fallback: convertiamo l'oggetto in stringa
-        formulaValue = JSON.stringify(embed.formula);
-      }
-      
-      // Se KaTeX è disponibile, renderizziamo direttamente
-      if (typeof window !== 'undefined' && window.katex) {
-        try {
-          const html = window.katex.renderToString(formulaValue, {
-            throwOnError: false,
-            errorColor: '#f00',
-            displayMode: displayMode,
-          });
-          
-          return <span 
-              key={key} 
-              className="ql-formula" 
-              dangerouslySetInnerHTML={{ __html: html }}
-          />
-        } catch (error) {
-          console.error('KaTeX rendering error:', error);
-          // In caso di errore, usa il fallback testuale
-          return <span key={key} className="ql-formula" data-value={formulaValue}>
-              {formulaValue}
-          </span>
-        }
-      }
-      
-      // Fallback se KaTeX non è disponibile
-      return <span key={key} className="ql-formula" data-value={formulaValue}>
-          {formulaValue}
-      </span>
-    }
-    
-    // Gestisce note references nel formato corretto
-    if (embed['note-ref']) {
-      const noteRef = embed['note-ref'] as { note_id?: string };
-      if (noteRef?.note_id) {
-        return <AsyncNoteEmbed key={key} noteId={noteRef.note_id} maxDepth={maxDepth} />
-      }
-    }
-
-    return null;
-  }
-}
-*/
 
 // Componente separato per gestire il caricamento asincrono delle note
 function AsyncNoteEmbed({ 
