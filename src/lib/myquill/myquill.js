@@ -6,7 +6,7 @@ import { NoteRefBlot } from './noteref.js'
 
 import { ChoiceListItem } from './choice-list.js'
 
-export { Delta } from 'quill-next'
+export { Delta, Op, AttributeMap } from 'quill-next'
 
 MyQuill.register('formats/formula', MyFormula, true);
 MyQuill.register('modules/formulaEditor', FormulaEditorModule);

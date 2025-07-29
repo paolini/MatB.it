@@ -116,7 +116,8 @@ if (false) {
 }
 
 const now = new Date().toISOString();
-const author_id = 'ObjectId("687cc301fd6ed5d69eebfbbb")';
+const author_id = `ObjectId('683fe820c25aac9b42af9327')`
+//'ObjectId("687cc301fd6ed5d69eebfbbb")'
 
 // Leggi tutto lo stdin
 let input = '';

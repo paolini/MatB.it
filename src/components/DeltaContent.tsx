@@ -1,9 +1,12 @@
 "use client"
-import React, { useState } from 'react';
-import { useQuery, gql } from '@apollo/client';
-import { Delta } from '@/lib/myquill/myquill.js';
-import 'katex/dist/katex.min.css';
-import { isTypeSystemDefinitionNode } from 'graphql';
+import React, { useState } from 'react'
+import { useQuery, gql } from '@apollo/client'
+import 'katex/dist/katex.min.css'
+
+import { Delta  } from '@/lib/myquill/myquill.js'
+import { Error } from './utils'
+import document_from_delta, {Document, Paragraph, Line, Node, Formula, List, Choice } from '@/lib/myquill/document_from_delta'
+import './note.css'
 
 // Dichiarazione di tipo per KaTeX
 declare global {
@@ -27,13 +30,7 @@ const NOTE_QUERY = gql`
       private
     }
   }
-`;
-
-interface DeltaContentProps {
-  delta: Delta;
-  maxDepth?: number;
-  embedded?: boolean;
-}
+`
 
 interface NoteEmbedProps {
   note: {
@@ -74,7 +71,6 @@ function NoteEmbed({ note, maxDepth }: NoteEmbedProps) {
       <div className="embedded-note-content">
         <DeltaContent 
           delta={note.delta} 
-          maxDepth={maxDepth - 1}
           embedded={true}
         />
       </div>
@@ -125,44 +121,10 @@ function NoteEmbed({ note, maxDepth }: NoteEmbedProps) {
   );
 }
 
-type ListType = 'bullet' | 'ordered' | 'choice' | ''
-
-type Attributes = {
-  bold?: boolean
-  italic?: boolean
-  underline?: boolean
-  strike?: boolean
-  code?: boolean
-  color?: string
-  background?: string
-  link?: string
-  listType?: ListType
-}
-
-type Block = ParagraphBlock | ListBlock | EmbedBlock
-
-interface ParagraphBlock {
-  type: 'paragraph'
-  items: React.ReactNode[]
-}
-
-interface ListBlock {
-  type: 'list'
-  listType: ListType
-  items: React.ReactNode[]
-}
-
-type Embed = string | Record<string, unknown> | undefined
-
-interface EmbedBlock {
-  type: 'embed'
-  embed: Embed
-}
-
-export function DeltaContent({ 
-  delta, 
-  maxDepth = 3 
-}: DeltaContentProps) {
+export function DeltaContent({ delta, embedded }: {
+  delta: Delta
+  embedded: boolean
+}) {
   // Stato per le risposte delle liste 'choice': { [blockIdx]: selectedIdx }
   const [choiceSelections, setChoiceSelections] = useState<Record<string, number | null>>({});
 
@@ -171,41 +133,92 @@ export function DeltaContent({
     setChoiceSelections(prev => ({ ...prev, [blockIdx]: idx }));
   };
 
-  if (!delta || !delta.ops) return <p><br /></p>
+  if (!delta || !delta.ops) return <></>
 
-  if (maxDepth <= 0) return <p><em>Max embedding depth reached</em></p>
-  
-  // Nuovo parsing Quill-style: accoppia testo e marker di lista\n
-  const blocks: Block[] = []
-  let lastBlock: Block | null = null
-  let items: React.ReactNode[] = []
-  let keyCounter = 0
+  const document = document_from_delta(delta)
 
-  for (let opIdx = 0; opIdx < delta.ops.length; opIdx++) {
-    const op = delta.ops[opIdx]
-    const insert = op.insert
-    const attributes = getAttributes(op.attributes)
+  return <>
+    <DocumentElement document={document} />
+    <pre>
+      {JSON.stringify({document},null,2)}
+    </pre>
+  </>
+}
 
-    if (typeof insert === 'string') {
-      const chunks = insert.split('\n');
-      for (let i = 0; i < chunks.length; i++) {
-        const chunk = chunks[i]
-        if (i>0) flushBuffer(attributes)
-        if (chunk) {
-          items.push(<span key={keyCounter++}>
-            {renderTextWithFormatting(chunk, attributes || {})}
-          </span>)
-        }
-      }
-    } else if (typeof insert === 'object') {
-      items.push(renderEmbed(op.insert, `embed-${keyCounter++}`))
-       // { type: 'embed', embed: op.insert })
+function DocumentElement({document}:{document: Document}) {
+  return document.paragraphs.map((paragraph,key) => <ParagraphElement key={key} paragraph={paragraph} />)
+}
+
+function ParagraphElement({paragraph}:{paragraph: Paragraph}) {
+  if (paragraph.attribute === 'h1') return <h1 className="note"><LineElement line={paragraph.line} /></h1>
+  if (paragraph.attribute === 'h2') return <h2 className="note"><LineElement line={paragraph.line} /></h2>
+  return <p><LineElement line={paragraph.line} /></p>
+}
+
+function LineElement({line}:{line: Line}) {
+  return line.nodes.map((node,key) => <NodeElement key={key} node={node} />)
+}
+
+function NodeElement({node}:{node: Node}) {
+  if (typeof node === 'string') return node
+  if (node && typeof node === 'object') {
+    if (node.type === 'span') {
+      const children = node.nodes.map((n,key) => <NodeElement key={key} node={n}/>)
+      if (node.attribute === 'bold') return <b>{children}</b>
+      if (node.attribute === 'italic') return <i>{children}</i>
+      if (node.attribute === 'underline') return <u>{children}</u>
+      if (node.attribute === 'strike') return <s>{children}</s>
+      return <span>{children}</span>
     }
+    if (node.type === 'formula') return <FormulaElement formula={node} />
+    if (node.type === 'list') return <ListElement list={node} />
   }
-  flushBuffer({})
+  return <Error error="invalid node"/>
+}
 
-  console.log('Parsed blocks:', blocks);
+function FormulaElement({formula}:{formula:Formula}) {
+    try {
+    const html = window.katex.renderToString(formula.value, {
+      throwOnError: false,
+      errorColor: '#f00',
+      displayMode: formula.displaystyle,
+    });
+    
+    return <span 
+        className="ql-formula" 
+        dangerouslySetInnerHTML={{ __html: html }}
+    />
+  } catch (error) {
+    console.error('KaTeX rendering error:', error)
+    // In caso di errore, usa il fallback testuale
+    return <span className="ql-formula" data-value={formula.value}>
+        {formula.value}
+    </span>
+  }
+}
 
+function ListElement({list}:{list:List}) {
+  if (list.attribute === 'choice') return <ChoiceElement choice={list} />
+  const children = list.lines.map((line,key) => <li key={key}><LineElement line={line} /></li>)
+  if (list.attribute === 'ordered') return <ol>{children}</ol>
+  return <ul>{children}</ul>
+}
+
+function ChoiceElement({choice}:{choice:Choice}) {
+  return <form>
+    { choice.lines.map((line,i) => <li key={i} data-list="choice" style={{display: 'flex', alignItems: 'center', gap: '0.5em'}}>
+        <input
+          type="radio"
+          style={{marginRight: '0.5em'}}
+        />
+        {/* Etichetta A, B, C... */}
+        <span style={{fontWeight: 'bold', marginRight: '0.5em'}}>{String.fromCharCode(65 + i)}.</span>
+        <LineElement line={line} />
+      </li>
+    )}
+  </form>
+}
+/*
   // Rendering blocchi React
   const elements: React.ReactNode[] = [];
   for (const blockIdx in blocks) {
@@ -215,10 +228,10 @@ export function DeltaContent({
           {block.items.length > 0 ? block.items : <br />}
         </p>)
     } else if (block.type === 'list') {
-      let Tag: 'ul' | 'ol' = 'ul';
-      if (block.listType === 'ordered') Tag = 'ol';
-      if (block.listType === 'choice') Tag = 'ol';
-      const radioName = `choice-list-${blockIdx}`;
+      let Tag: 'ul' | 'ol' = 'ul'
+      if (block.listType === 'ordered') Tag = 'ol'
+      if (block.listType === 'choice') Tag = 'ol'
+      const radioName = `choice-list-${blockIdx}`
       if (block.listType === 'choice') {
         // Racchiudi la lista choice in una form
         elements.push(
@@ -236,7 +249,6 @@ export function DeltaContent({
                       onChange={() => handleChoiceChange(blockIdx, idx)}
                       style={{marginRight: '0.5em'}}
                     />
-                    {/* Etichetta A, B, C... */}
                     <span style={{fontWeight: 'bold', marginRight: '0.5em'}}>{String.fromCharCode(65 + idx)}.</span>
                     {item}
                   </li>
@@ -261,20 +273,24 @@ export function DeltaContent({
   return <>{elements}</>
 
   function flushBuffer(attributes: Attributes) {
+    console.log(`flushBuffer ${JSON.stringify(attributes)}`)
     if (items.length === 0) return
     if (attributes.listType) {
       if (lastBlock && lastBlock.type === 'list' && lastBlock.listType === attributes.listType) {
+          console.log(`aggiungi buffer all'ultimo blocco`)
           // Aggiungi al buffer della lista esistente
           lastBlock.items.push(...items)
         } else {
+          console.log(`nuovo blocco`)
           lastBlock = { type: 'list', listType: attributes.listType, items: items } 
           blocks.push(lastBlock)
         }
       } else {
+        console.log(`nuovo paragrafo`)
         lastBlock = { type: 'paragraph', items: items}
         blocks.push(lastBlock)
       }
-      items = []
+    items = []
   }
 
   function getAttributes(attributes: Record<string, unknown> | undefined): Attributes {
@@ -373,6 +389,7 @@ export function DeltaContent({
     return null;
   }
 }
+*/
 
 // Componente separato per gestire il caricamento asincrono delle note
 function AsyncNoteEmbed({ 
