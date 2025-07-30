@@ -4,7 +4,7 @@ import { useState } from 'react';
 
 import { Note, Profile } from '@/app/graphql/generated'
 import { Loading, Error } from '@/components/utils'
-import { DeltaContent } from '@/components/DeltaContent'
+import DeltaContent from '@/components/DeltaContent'
 import NoteForm from '@/components/NoteForm'
 
 // Type definition per Delta (per evitare import diretto)
@@ -81,7 +81,6 @@ function NoteInner({
                 <div className="delta">
                     <DeltaContent 
                         delta={note.delta}
-                        embedded={false}
                     />
                 </div>
                 {note.private && <span className="text-sm text-gray-500">Nota privata</span>}
