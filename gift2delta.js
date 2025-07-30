@@ -10,6 +10,7 @@ test_input = `// question: 49382 name: controimmagine
 
 const readline = require('readline');
 const { createContext } = require('vm');
+const { MongoClient, ObjectId } = require('mongodb');
 
 function extractTextAndFormulas(html) {
   // Semplice estrattore: separa testo e formule LaTeX (\( ... \), $$ ... $$)
@@ -17,10 +18,11 @@ function extractTextAndFormulas(html) {
   const ops = [];
   let text = html
     .replace(/\\(.)/g, '$1') // unescape 
-    .replace(/<p>|<\/p>/g, '\n')
-    .replace(/<br\s*\/?>/g, '\n')
+    .replace(/<p[^>]*>/g, '') // rimuove solo il tag di apertura <p ...>
+    .replace(/<\/p>/g, '')   // rimuove solo il tag di chiusura </p>
+    .replace(/<br\s*\/?>(?![^<]*<\/p>)/g, '\n')
     .replace(/&nbsp;/g, ' ')
-    .replace(/^\n*|\n*$/g, '') // rimuove spazi all'inizio e alla fine
+    .replace(/^[\n]*|[\n]*$/g, '') // rimuove spazi all'inizio e alla fine
 //    .replace(/<[^>]+>/g, ''); // rimuove altri tag HTML
 
   // Regex per formule LaTeX
@@ -111,41 +113,71 @@ function parseGiftToDelta(input) {
   return deltas;
 }
 
-if (false) {
-  process.stdout.write(JSON.stringify(parseGiftToDelta(test_input), null, 2) + '\n');
-}
+const args = process.argv.slice(2);
+const doInsert = args.includes('--insert');
+const mongoUrl = process.env.MONGO_URL || 'mongodb://localhost:27017';
+const dbName = process.env.MONGO_DB || 'matbit';
 
 const now = new Date().toISOString();
-const author_id = `ObjectId('683fe820c25aac9b42af9327')`
-//'ObjectId("687cc301fd6ed5d69eebfbbb")'
+const author_id = new ObjectId('683fe820c25aac9b42af9327');
 
-// Leggi tutto lo stdin
 let input = '';
 const rl = readline.createInterface({ input: process.stdin });
 rl.on('line', line => { input += line + '\n'; });
-rl.on('close', () => {
+rl.on('close', async () => {
   const deltas = parseGiftToDelta(input);
-  deltas.forEach(note => {
-    // Lascia che MongoDB generi l'ObjectId per la NoteVersion
-    // Costruisci manualmente la stringa per db.note_versions.insertOne, author_id letterale
-    const noteVersionStr = `{
-      title: ${JSON.stringify(note.title)},
-      delta: ${Array.isArray(note.ops) ? JSON.stringify({ops:note.ops}, null, 2) : note.ops},
-      created_on: ISODate(${JSON.stringify(now)}),
-      author_id: ${author_id}
-    }`;
-    // Inserisci la NoteVersion e salva l'_id generato
-    console.log(`const versionResult = db.note_versions.insertOne(${noteVersionStr});`);
-    // Costruisci manualmente la stringa per db.notes.insertOne, senza apici su versionResult.insertedId
-    const noteDocStr = `{
-      title: ${JSON.stringify(note.title)},
-      variant: 'question',
-      delta: ${Array.isArray(note.ops) ? JSON.stringify({ops:note.ops}, null, 2) : note.ops},
-      note_version_id: versionResult.insertedId,
-      created_on: ISODate(${JSON.stringify(now)}),
-      private: false,
-      author_id: ${author_id}
-    }`;
-    console.log(`db.notes.insertOne(${noteDocStr})`);
-  });
+  if (doInsert) {
+    // Inserimento diretto su MongoDB
+    const client = new MongoClient(mongoUrl);
+    try {
+      await client.connect();
+      const db = client.db(dbName);
+      for (const note of deltas) {
+        const noteVersionDoc = {
+          title: note.title,
+          delta: Array.isArray(note.ops) ? { ops: note.ops } : note.ops,
+          created_on: new Date(now),
+          author_id: author_id
+        };
+        const versionResult = await db.collection('note_versions').insertOne(noteVersionDoc);
+        const noteDoc = {
+          title: note.title,
+          variant: 'question',
+          delta: Array.isArray(note.ops) ? { ops: note.ops } : note.ops,
+          note_version_id: versionResult.insertedId,
+          created_on: new Date(now),
+          private: false,
+          author_id: author_id
+        };
+        const noteResult = await db.collection('notes').insertOne(noteDoc);
+        console.log(`Inserted note_version _id: ${versionResult.insertedId}, note _id: ${noteResult.insertedId}`);
+      }
+    } catch (err) {
+      console.error('MongoDB insert error:', err);
+      process.exit(1);
+    } finally {
+      await client.close();
+    }
+  } else {
+    // Output comandi MongoDB
+    deltas.forEach(note => {
+      const noteVersionStr = `{
+        title: ${JSON.stringify(note.title)},
+        delta: ${Array.isArray(note.ops) ? JSON.stringify({ops:note.ops}, null, 2) : note.ops},
+        created_on: ISODate(${JSON.stringify(now)}),
+        author_id: ObjectId('683fe820c25aac9b42af9327')
+      }`;
+      console.log(`const versionResult = db.note_versions.insertOne(${noteVersionStr});`);
+      const noteDocStr = `{
+        title: ${JSON.stringify(note.title)},
+        variant: 'question',
+        delta: ${Array.isArray(note.ops) ? JSON.stringify({ops:note.ops}, null, 2) : note.ops},
+        note_version_id: versionResult.insertedId,
+        created_on: ISODate(${JSON.stringify(now)}),
+        private: false,
+        author_id: ObjectId('683fe820c25aac9b42af9327')
+      }`;
+      console.log(`db.notes.insertOne(${noteDocStr})`);
+    });
+  }
 });

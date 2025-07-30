@@ -139,9 +139,6 @@ export function DeltaContent({ delta, embedded }: {
 
   return <>
     <DocumentElement document={document} />
-    <pre>
-      {JSON.stringify({document},null,2)}
-    </pre>
   </>
 }
 
