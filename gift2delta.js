@@ -23,6 +23,8 @@ function extractTextAndFormulas(html) {
     .replace(/<br\s*\/?>(?![^<]*<\/p>)/g, '\n')
     .replace(/&nbsp;/g, ' ')
     .replace(/^[\n]*|[\n]*$/g, '') // rimuove spazi all'inizio e alla fine
+    .replace(/&lt;/g, '<') // unescape
+    .replace(/&gt;/g, '>') // unescape
 //    .replace(/<[^>]+>/g, ''); // rimuove altri tag HTML
 
   // Regex per formule LaTeX

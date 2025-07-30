@@ -6,12 +6,7 @@ export type Formula = {
   displaystyle: boolean
 }
 
-export type NoteRef = {
-  type: "note-ref"
-  note_id: string
-}
-
-export type Node = string | Formula | NoteRef | Span | List
+export type Node = string | Formula | Span | List
 
 export type Span = {
   type: "span"
@@ -47,13 +42,21 @@ export type Paragraph = {
   line: Line
 }
 
+export type NoteRef = {
+  type: "note-ref"
+  note_id: string
+}
+
 export type Document = {
-  paragraphs: Paragraph[]
+  paragraphs: (Paragraph|NoteRef)[]
 }
 
 function last_paragraph(document: Document): Paragraph {
   const l = document.paragraphs.length
-  if (l>0) return document.paragraphs[l - 1]
+  if (l>0) {
+    const last = document.paragraphs[l - 1]
+    if (last.type === "paragraph") return last
+  } 
   const paragraph: Paragraph = { type: "paragraph", attribute: "", line: {type: "line", nodes: []} }
   document.paragraphs.push(paragraph)
   return paragraph
@@ -149,12 +152,18 @@ function push_formula(line: Line, formula: object, attributes: AttributeMap | un
   }
 }
 
-function push_note_ref(line: Line, note_ref: object, attributes: AttributeMap | undefined) {
+function push_error_paragraph(document: Document, error: string) {
+  const line: Line = { type: 'line', nodes: [] }
+  push_error(line, error)
+  document.paragraphs.push({type: "paragraph", attribute: "", line})
+}
+
+function push_note_ref(document: Document, note_ref: object, attributes: AttributeMap | undefined) {
   if (note_ref && 'note_id' in note_ref && typeof note_ref.note_id === 'string') {
-    const node: NoteRef = {type:"note-ref", note_id: note_ref.note_id}
-    push_node(line.nodes, decorate_node(node, attributes))
+    const paragraph: NoteRef = {type:"note-ref", note_id: note_ref.note_id}
+    document.paragraphs.push(paragraph)    
   } else {
-    push_error(line, `invalid note reference ${JSON.stringify(note_ref)}`)
+    push_error_paragraph(document, `invalid note reference ${JSON.stringify(note_ref)}`)
   }
 }
 
@@ -172,9 +181,14 @@ export default function document_from_delta(delta: Delta): Document {
         push_text(line, chunks[i], op.attributes)
       }
     } else if (typeof insert === 'object') {
-      if (insert.formula) push_formula(line, insert.formula, op.attributes)
-      else if (insert["note-ref"]) push_note_ref(line, insert["note-ref"], op.attributes)
-      else push_error(line, `invalid insert object ${JSON.stringify(insert)}`)
+      if (insert.formula) {
+        push_formula(line, insert.formula, op.attributes)        
+      } else if (insert["note-ref"]) {
+        if (line.nodes.length > 0) push_newline(document, line, {})
+        push_note_ref(document, insert["note-ref"], op.attributes)
+      } else {
+        push_error(line, `invalid insert object ${JSON.stringify(insert)}`)
+      }
     }
 //    console.log(JSON.stringify({document,line}))
   }

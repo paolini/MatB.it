@@ -22,3 +22,36 @@ span.error {
   border-radius: 0.25rem;
   border: 1px solid #d32f2f; /* bordo rosso scuro */
 }
+
+.note-info-popup {
+  display: block;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: white;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  z-index: 1000;
+  font-size: 0.85em;
+}
+
+.note-info-icon {
+  position: absolute;
+  bottom: 0.5em;
+  right: 0.5em;
+  cursor: pointer;
+  opacity: 0.6;
+  transition: opacity 0.2s;
+}
+.note-info-icon:hover {
+  opacity: 1;
+}
+
+ul.delta-choice-list {
+  list-style: none;
+  padding: 0;
+  margin: 1em 0 0 0;
+}

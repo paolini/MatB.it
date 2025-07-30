@@ -125,11 +125,13 @@
   background: #e1fae6;
   border-left: 4px solid #1cc76a;
 }
-.ql-variant-container.ql-var-test {
-  background: #fae1e1;
-  border-left: 4px solid #c71c1c;
-}
 .ql-variant-container.ql-var-default {
+  background: transparent;
+  border-left: none;
+  padding: 0;
+  margin: 0.5em 0;
+}
+.ql-variant-container.ql-var-test {
   background: transparent;
   border-left: none;
   padding: 0;
@@ -208,17 +210,10 @@
 }
 
 .ql-variant-container.ql-var-test h1,
+.ql-variant-container.ql-var-test .embedded-note-title,
 .ql-variant-container.ql-var-test h4 {
   color: #c71c1c;
   font-weight: bold;
-}
-.ql-variant-container.ql-var-test h1::before,
-.ql-variant-container.ql-var-test h4::before {
-  content: "Test [";
-}
-.ql-variant-container.ql-var-test h1::after,
-.ql-variant-container.ql-var-test h4::after {
-  content: "]";
 }
 
 /* Note info icon per le note embedded */
