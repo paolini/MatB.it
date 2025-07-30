@@ -6,11 +6,16 @@ export type Formula = {
   displaystyle: boolean
 }
 
-export type Node = string | Formula | Span | List
+export type NoteRef = {
+  type: "note-ref"
+  note_id: string
+}
+
+export type Node = string | Formula | NoteRef | Span | List
 
 export type Span = {
   type: "span"
-  attribute: "bold" | "italic" | "underline" | "strike" 
+  attribute: "bold" | "italic" | "underline" | "strike" | "error"
   nodes: Node[]
 } | {
   type: "span"
@@ -125,6 +130,11 @@ function push_newline(document: Document, given_line: Line, attributes: Attribut
   }
 }
 
+function push_error(line: Line, error: string) {
+  const node: Node = { type: "span", attribute: "error", nodes: [error] }
+  push_node(line.nodes, node)
+}
+
 function push_formula(line: Line, formula: object, attributes: AttributeMap | undefined) {
   if (formula && 'value' in formula && typeof formula.value === 'string') {
     const value = formula.value
@@ -135,7 +145,16 @@ function push_formula(line: Line, formula: object, attributes: AttributeMap | un
     const node: Formula = {type:"formula", value, displaystyle}
     push_node(line.nodes, decorate_node(node, attributes))
   } else {
-    console.log(`invalid formula ${JSON.stringify(formula)}`)
+    push_error(line, `invalid formula ${JSON.stringify(formula)}`)
+  }
+}
+
+function push_note_ref(line: Line, note_ref: object, attributes: AttributeMap | undefined) {
+  if (note_ref && 'note_id' in note_ref && typeof note_ref.note_id === 'string') {
+    const node: NoteRef = {type:"note-ref", note_id: note_ref.note_id}
+    push_node(line.nodes, decorate_node(node, attributes))
+  } else {
+    push_error(line, `invalid note reference ${JSON.stringify(note_ref)}`)
   }
 }
 
@@ -145,7 +164,7 @@ export default function document_from_delta(delta: Delta): Document {
 
   for (const op of delta.ops) {
     const insert = op.insert
-    console.log(JSON.stringify({insert}))
+//    console.log(JSON.stringify({insert}))
     if (typeof insert === 'string') {
       const chunks = insert.split('\n')
       for (let i=0; i<chunks.length; i++) {
@@ -154,8 +173,10 @@ export default function document_from_delta(delta: Delta): Document {
       }
     } else if (typeof insert === 'object') {
       if (insert.formula) push_formula(line, insert.formula, op.attributes)
+      else if (insert["note-ref"]) push_note_ref(line, insert["note-ref"], op.attributes)
+      else push_error(line, `invalid insert object ${JSON.stringify(insert)}`)
     }
-    console.log(JSON.stringify({document,line}))
+//    console.log(JSON.stringify({document,line}))
   }
   if (line.nodes.length > 0) push_newline(document, line, {})
   return document

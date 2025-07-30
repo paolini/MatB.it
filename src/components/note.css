@@ -13,3 +13,12 @@ h2.note {
   color: #3949ab; /* blu medio */
   line-height: 1.25;
 }
+
+span.error {
+  color: #d32f2f; /* rosso scuro */
+  font-weight: bold;
+  background-color: #ffebee; /* rosso chiaro */
+  padding: 0.2rem 0.4rem;
+  border-radius: 0.25rem;
+  border: 1px solid #d32f2f; /* bordo rosso scuro */
+}

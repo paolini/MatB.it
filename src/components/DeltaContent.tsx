@@ -165,12 +165,14 @@ function NodeElement({node}:{node: Node}) {
       if (node.attribute === 'italic') return <i>{children}</i>
       if (node.attribute === 'underline') return <u>{children}</u>
       if (node.attribute === 'strike') return <s>{children}</s>
+      if (node.attribute === 'error') return <span className="error">{children}</span>
       return <span>{children}</span>
     }
     if (node.type === 'formula') return <FormulaElement formula={node} />
+    if (node.type === 'note-ref') return <AsyncNoteEmbed noteId={node.note_id} maxDepth={1} />
     if (node.type === 'list') return <ListElement list={node} />
   }
-  return <Error error="invalid node"/>
+  return <span className="error">invalid node</span>
 }
 
 function FormulaElement({formula}:{formula:Formula}) {
