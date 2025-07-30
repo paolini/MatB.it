@@ -169,11 +169,6 @@ export default function NoteForm({
     setDelta(newDelta)
     onDeltaChange?.(newDelta)
   }
-
-  // Azioni
-  const handleSave = async () => {
-    // Il delta viene ora passato da MyQuill
-  }
   
   const handleSaveWithDelta = async (currentDelta: DeltaType) => {
     if (mode === 'edit' && noteId) {
