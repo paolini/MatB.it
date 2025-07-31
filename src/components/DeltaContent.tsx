@@ -25,14 +25,6 @@ export default function DeltaContent({ delta, context }: {
   context?: Context
 }) {
   if (!context) context = { parents: [] }
-  const embedded = context.parents.length > 0
-  // Stato per le risposte delle liste 'choice': { [blockIdx]: selectedIdx }
-  const [choiceSelections, setChoiceSelections] = useState<Record<string, number | null>>({});
-
-  // Handler per cambiare la selezione di una lista 'choice'
-  const handleChoiceChange = (blockIdx: string, idx: number) => {
-    setChoiceSelections(prev => ({ ...prev, [blockIdx]: idx }));
-  };
 
   if (!delta || !delta.ops) return <></>
 
