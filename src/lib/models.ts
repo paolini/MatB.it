@@ -62,6 +62,17 @@ export type MongoUser = {
     createdAt: Date
 }
 
+export type MongoTest = {
+    _id: ObjectId
+    note_id: ObjectId
+    description: string
+    created_on: Date
+    author_id: ObjectId
+    open_on: Date|null
+    close_on: Date|null
+}
+
+
 export function getNotesCollection(db: Db) {
     return db.collection<OptionalId<MongoNote>>('notes')
 }
@@ -76,6 +87,10 @@ export function getNoteVersionsCollection(db: Db) {
 
 export function getUsersCollection(db: Db) {
     return db.collection<MongoUser>('users')
+}
+
+export function getTestsCollection(db: Db) {
+    return db.collection<OptionalId<MongoTest>>('tests')
 }
 
 

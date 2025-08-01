@@ -5,7 +5,7 @@ import type { MutationNewNoteArgs } from './generated'
 import { Context } from './types'
 import { ObjectIdType, JSONType } from './types'
 import { Resolvers, Note } from './generated'
-import { getNotesCollection, getDeletedNotesCollection, getNoteVersionsCollection } from '@/lib/models'
+import { getNotesCollection, getDeletedNotesCollection, getNoteVersionsCollection, getTestsCollection } from '@/lib/models'
 
 const NOTES_PIPELINE = [
   { $sort: { created_on: -1 } }, // Ordina per data di creazione della Note
@@ -65,7 +65,7 @@ export const resolvers = {
         .toArray()
     },
 
-    note: async (_parent: unknown, {_id}: { _id: ObjectId }, context: Context) => {
+    note: async (_parent: unknown, {_id}: { _id: ObjectId }, context: Context): Promise<Note | null> => {
       const collection = getNotesCollection(context.db)
       const notes = await collection.aggregate<Note>([
           { $match: { _id } },
@@ -83,7 +83,10 @@ export const resolvers = {
       if (notes.length === 0) throw new Error('Note not found')
       if (notes.length > 1) throw new Error('Multiple notes found')
       const note = notes[0]
-      return note as Note
+      // Carica i test collegati
+      const testsCollection = getTestsCollection(context.db)
+      const tests = await testsCollection.find({ note_id: _id }).toArray()
+      return { ...note, tests }
     },
 
     profile: async (_parent: unknown, _args: unknown, context: Context) => {
@@ -92,6 +95,34 @@ export const resolvers = {
   },
 
   Mutation: {
+    createTest: async (
+      _parent: unknown,
+      args: { 
+        noteId: ObjectId,
+        description?: string
+      },
+      context: Context
+    ): Promise<boolean> => {
+      if (!context.user) throw new Error('Not authenticated')
+      const notesCollection = getNotesCollection(context.db)
+      const note = await notesCollection.findOne({ _id: args.noteId })
+      if (!note) throw new Error('Note not found')
+      if (note.private && !note.author_id.equals(context.user._id)) {
+        throw new Error('Not authorized to create test for this note')
+      }
+      const testsCollection = getTestsCollection(context.db)
+      const now = new Date()
+      const testDoc = {
+        note_id: args.noteId,
+        author_id: context.user._id,
+        created_on: now,
+        description: args.description || '',
+        open_on: null,
+        close_on: null
+      }
+      await testsCollection.insertOne(testDoc)
+      return true
+    },
     newNote: async (
       _parent: unknown,
       args: MutationNewNoteArgs,

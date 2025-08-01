@@ -1,3 +1,13 @@
+type Test {
+    _id: ObjectId!
+    note_id: ObjectId!
+    description: String
+    created_on: Timestamp!
+    author_id: ObjectId!
+    open_on: Timestamp
+    close_on: Timestamp
+}
+
 scalar ObjectId
 scalar Timestamp
 scalar JSON
@@ -17,6 +27,7 @@ type Note {
   private: Boolean!
   created_on: Timestamp!
   updated_on: Timestamp!
+  tests: [Test!]!
 }
 
 type Profile {
@@ -37,4 +48,5 @@ type Mutation {
   newNote(title: String!, delta: JSON, private: Boolean, variant: String): Note
   updateNote(_id: ObjectId!, title: String, delta: JSON, private: Boolean, variant: String): Note
   deleteNote(_id: ObjectId!): Boolean
+  createTest(noteId: ObjectId!): Boolean
 }

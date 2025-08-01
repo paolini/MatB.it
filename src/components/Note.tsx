@@ -1,8 +1,10 @@
 "use client"
-import { gql, useQuery } from '@apollo/client'
+import { gql, useQuery, useMutation, useApolloClient } from '@apollo/client'
+
 import { useState } from 'react';
 
-import { Note, Profile } from '@/app/graphql/generated'
+import { Note, Profile, Test } from '@/app/graphql/generated'
+import TestList from '@/components/TestList'
 import { Loading, Error } from '@/components/utils'
 import DeltaContent from '@/components/DeltaContent'
 import NoteForm from '@/components/NoteForm'
@@ -21,11 +23,21 @@ const NoteQuery = gql`
             created_on
             updated_on
             private
-        },
-        profile{
+            tests {
+                _id
+                note_id
+                description
+                created_on
+                author_id
+                open_on
+                close_on
+            }
+        }
+        profile {
             _id
         }
-}`
+    }
+`
 
 export default function NoteWrapper({_id}: {_id: string}) {
     const [editMode, setEditMode] = useState(false)    
@@ -72,7 +84,11 @@ export default function NoteWrapper({_id}: {_id: string}) {
             </div>
             {note.private && <span className="text-sm text-gray-500">Nota privata</span>}
         </div>
+        <TestList tests={note.tests} />
         <NoteFooter note={note} />
+        {note?.variant === 'test' && (
+            <CreateTestButton noteId={note._id} />
+        )}
         {note?.author?._id === profile?._id  && (
             <button className="px-4 py-2 bg-blue-500 text-white rounded mt-2 hover:bg-blue-600 transition-colors" onClick={() => setEditMode(true)}>
                 Edit Note
@@ -93,3 +109,25 @@ function NoteFooter({note}: {
     </div>
 }
 
+const CreateTestMutation = gql`
+    mutation CreateTest($noteId: ObjectId!) {
+        createTest(noteId: $noteId)
+    }
+`
+
+function CreateTestButton({noteId}: {noteId: string}) {
+    const [createTest, { loading, error }] = useMutation(CreateTestMutation, {
+        refetchQueries: ["Note"],
+    })
+
+    return (
+        <button
+            className="px-4 py-2 bg-green-500 text-white rounded mt-2 hover:bg-green-600 transition-colors"
+            onClick={() => createTest({ variables: { noteId } })}
+            disabled={loading}
+        >
+            {loading ? 'Creazione...' : 'Crea test'}
+            {error && <Error error={error} />}
+        </button>
+    )
+}

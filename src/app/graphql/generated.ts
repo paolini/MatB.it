@@ -22,9 +22,15 @@ export type Scalars = {
 
 export type Mutation = {
   __typename?: 'Mutation';
+  createTest: Maybe<Scalars['Boolean']['output']>;
   deleteNote: Maybe<Scalars['Boolean']['output']>;
   newNote: Maybe<Note>;
   updateNote: Maybe<Note>;
+};
+
+
+export type MutationCreateTestArgs = {
+  noteId: Scalars['ObjectId']['input'];
 };
 
 
@@ -56,6 +62,7 @@ export type Note = {
   created_on: Scalars['Timestamp']['output'];
   delta: Maybe<Scalars['JSON']['output']>;
   private: Scalars['Boolean']['output'];
+  tests: Array<Test>;
   title: Scalars['String']['output'];
   updated_on: Scalars['Timestamp']['output'];
   variant: Maybe<Scalars['String']['output']>;
@@ -80,6 +87,17 @@ export type Query = {
 
 export type QueryNoteArgs = {
   _id: Scalars['ObjectId']['input'];
+};
+
+export type Test = {
+  __typename?: 'Test';
+  _id: Scalars['ObjectId']['output'];
+  author_id: Scalars['ObjectId']['output'];
+  close_on: Maybe<Scalars['Timestamp']['output']>;
+  created_on: Scalars['Timestamp']['output'];
+  description: Maybe<Scalars['String']['output']>;
+  note_id: Scalars['ObjectId']['output'];
+  open_on: Maybe<Scalars['Timestamp']['output']>;
 };
 
 export type User = {
@@ -169,6 +187,7 @@ export type ResolversTypes = ResolversObject<{
   Profile: ResolverTypeWrapper<Profile>;
   Query: ResolverTypeWrapper<{}>;
   String: ResolverTypeWrapper<Scalars['String']['output']>;
+  Test: ResolverTypeWrapper<Test>;
   Timestamp: ResolverTypeWrapper<Scalars['Timestamp']['output']>;
   User: ResolverTypeWrapper<User>;
 }>;
@@ -183,6 +202,7 @@ export type ResolversParentTypes = ResolversObject<{
   Profile: Profile;
   Query: {};
   String: Scalars['String']['output'];
+  Test: Test;
   Timestamp: Scalars['Timestamp']['output'];
   User: User;
 }>;
@@ -192,6 +212,7 @@ export interface JsonScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes
 }
 
 export type MutationResolvers<ContextType = Context, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = ResolversObject<{
+  createTest: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType, RequireFields<MutationCreateTestArgs, 'noteId'>>;
   deleteNote: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType, RequireFields<MutationDeleteNoteArgs, '_id'>>;
   newNote: Resolver<Maybe<ResolversTypes['Note']>, ParentType, ContextType, RequireFields<MutationNewNoteArgs, 'title'>>;
   updateNote: Resolver<Maybe<ResolversTypes['Note']>, ParentType, ContextType, RequireFields<MutationUpdateNoteArgs, '_id'>>;
@@ -203,6 +224,7 @@ export type NoteResolvers<ContextType = Context, ParentType extends ResolversPar
   created_on: Resolver<ResolversTypes['Timestamp'], ParentType, ContextType>;
   delta: Resolver<Maybe<ResolversTypes['JSON']>, ParentType, ContextType>;
   private: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  tests: Resolver<Array<ResolversTypes['Test']>, ParentType, ContextType>;
   title: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   updated_on: Resolver<ResolversTypes['Timestamp'], ParentType, ContextType>;
   variant: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
@@ -228,6 +250,17 @@ export type QueryResolvers<ContextType = Context, ParentType extends ResolversPa
   profile: Resolver<Maybe<ResolversTypes['Profile']>, ParentType, ContextType>;
 }>;
 
+export type TestResolvers<ContextType = Context, ParentType extends ResolversParentTypes['Test'] = ResolversParentTypes['Test']> = ResolversObject<{
+  _id: Resolver<ResolversTypes['ObjectId'], ParentType, ContextType>;
+  author_id: Resolver<ResolversTypes['ObjectId'], ParentType, ContextType>;
+  close_on: Resolver<Maybe<ResolversTypes['Timestamp']>, ParentType, ContextType>;
+  created_on: Resolver<ResolversTypes['Timestamp'], ParentType, ContextType>;
+  description: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  note_id: Resolver<ResolversTypes['ObjectId'], ParentType, ContextType>;
+  open_on: Resolver<Maybe<ResolversTypes['Timestamp']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+}>;
+
 export interface TimestampScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['Timestamp'], any> {
   name: 'Timestamp';
 }
@@ -246,6 +279,7 @@ export type Resolvers<ContextType = Context> = ResolversObject<{
   ObjectId: GraphQLScalarType;
   Profile: ProfileResolvers<ContextType>;
   Query: QueryResolvers<ContextType>;
+  Test: TestResolvers<ContextType>;
   Timestamp: GraphQLScalarType;
   User: UserResolvers<ContextType>;
 }>;

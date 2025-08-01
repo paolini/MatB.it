@@ -1,3 +1,10 @@
+
+### 7. Test/Quiz Execution & Results Tracking
+- Possibilità per l'utente di eseguire test/quiz a scelta multipla presenti nelle note con variant "test"
+- Nuova collection `TestExecution` per tracciare ogni tentativo, risposte e punteggio
+- Flusso: l'utente avvia il test, risponde alle domande, invia le risposte e visualizza il risultato
+- I risultati sono visibili solo all'utente e all'autore (o secondo le regole di privacy della nota)
+- API GraphQL dedicate per avviare, inviare e consultare le esecuzioni dei test
 # MatBit - Project Overview for AI
 
 ## Project Description
@@ -188,6 +195,41 @@ type MongoUser = {
     first_login: Date
     last_login: Date
     createdAt: Date
+}
+```
+
+### Tests Collection
+```typescript
+type Test = {
+    _id: ObjectId
+    note_id: ObjectId           // ID della nota con variant "test"
+    description?: string        // Descrizione opzionale
+    created_on: Date
+    author_id: ObjectId  // chi ha creato il test
+    open_on?: Date
+    close_on?: Date
+}
+```
+
+### Results Collection
+```typescript
+type TestResult = {
+    _id: ObjectId
+    test_id: ObjectId           // ID del test     
+    note_version_id: ObjectId   // Versione della nota (HEAD) al momento della creazione
+    user_id: ObjectId           // Utente che ha eseguito il test
+    started_on: Date
+    completed_on?: Date // potrebbe essere in corso
+    questions: {
+        note_version_id: ObjectId // Provenienza della domanda (nota principale o innestata)
+        permutation?: number[]
+        answer: string
+        normalized_answer: string
+        score: number
+    }[]
+    randomized_options?: { [question_id: string]: number[] } // Ordine delle opzioni per ogni domanda
+    score?: number
+    max_score?: number
 }
 ```
 
