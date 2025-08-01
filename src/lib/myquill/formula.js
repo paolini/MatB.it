@@ -179,7 +179,7 @@ export class FormulaEditorModule {
         this.quill.insertEmbed(index - 1, 'formula', '', 'user');
         // Posiziona il cursore dopo la formula appena inserita
         this.quill.setSelection(index, 0, 'silent');
-        const [blot] = this.quill.getLeaf(index - 1);
+        const [blot] = this.quill.getLeaf(index);
         this.showFormulaEditor(blot);
       }
     });
@@ -200,7 +200,7 @@ export class FormulaEditorModule {
             this.quill.insertEmbed(range.index, 'formula', '', 'user');
             // Posiziona il cursore dopo la formula
             this.quill.setSelection(range.index + 1, 0, 'silent');
-            const [blot] = this.quill.getLeaf(range.index);
+            const [blot] = this.quill.getLeaf(range.index +1);
             this.showFormulaEditor(blot);
           }
         });
