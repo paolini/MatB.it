@@ -1,6 +1,6 @@
 "use client"
 
-import { Delta, QuillEditor, Quill } from './myquill.js'
+import { Delta, QuillEditor, Quill, Range } from './myquill.js'
 import 'katex/dist/katex.min.css';
 import './delta-variants.css';
 import { useRef, useEffect, useState } from 'react';
@@ -47,7 +47,7 @@ export default function MyQuill({
     deleteError?: Error
 }) {
     const quillInstance = useRef<InstanceType<typeof Quill> | null>(null)
-    const savedRange = useRef<any>(null) // Salva il range prima di aprire il modal
+    const savedRange = useRef<Range | null>(null) // Salva il range prima di aprire il modal
     const [showDelta, setShowDelta] = useState(false)
     const [showCreateModal, setShowCreateModal] = useState(false)
     const [prefilledVariant, setPrefilledVariant] = useState<string>('default')
@@ -60,7 +60,7 @@ export default function MyQuill({
             if (typeof window !== 'undefined' && !window.katex) {
                 try {
                     const katex = await import('katex');
-                    (window as any).katex = katex.default;
+                    (window as unknown as { katex: any }).katex = katex.default;
                 } catch (error) {
                     console.error('Failed to load KaTeX:', error);
                 }
@@ -122,7 +122,7 @@ export default function MyQuill({
                 
                 // Aggiungi handler per il pulsante note-ref e MC
                 if (!readOnly) {
-                    const toolbar = quill.getModule('toolbar') as { addHandler: (name: string, handler: (value?: any) => void) => void };
+                    const toolbar = quill.getModule('toolbar') as any;
                     toolbar.addHandler('note-ref', () => {
                         console.log('🔘 MyQuill: Pulsante note-ref cliccato')
                         const currentRange = quill.getSelection();
@@ -141,7 +141,7 @@ export default function MyQuill({
                     
                     // Aggiungi event listener per la select environment
                     setTimeout(() => {
-                        const toolbarModule = quill.getModule('toolbar') as any;
+                        const toolbarModule: any = quill.getModule('toolbar');
                         const selectElement = toolbarModule.container?.querySelector('select.ql-environment') as HTMLSelectElement;
                         
                         if (selectElement) {

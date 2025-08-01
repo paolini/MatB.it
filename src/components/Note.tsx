@@ -1,9 +1,9 @@
 "use client"
-import { gql, useQuery, useMutation, useApolloClient } from '@apollo/client'
+import { gql, useQuery, useMutation } from '@apollo/client'
 
 import { useState } from 'react';
 
-import { Note, Profile, Test } from '@/app/graphql/generated'
+import { Note, Profile } from '@/app/graphql/generated'
 import TestList from '@/components/TestList'
 import { Loading, Error } from '@/components/utils'
 import DeltaContent from '@/components/DeltaContent'

@@ -66,7 +66,7 @@ export default function NoteReferenceModal({ isOpen, onClose, onNoteSelected, in
     }
   }, [isOpen, initialVariant])
   
-  const [createNote, { loading: creating, error: createError }] = useMutation(NewNoteMutation)
+ const [createNote, { error: createError }] = useMutation(NewNoteMutation)
   const { data: notesData, loading: loadingNotes, error: notesError } = useQuery<{notes: Note[]}>(NotesQuery)
 
   const handleCreateNote = async () => {

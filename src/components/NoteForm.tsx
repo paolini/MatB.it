@@ -4,10 +4,9 @@ import dynamic from "next/dynamic"
 import { gql, useMutation } from '@apollo/client'
 import { useRouter } from 'next/navigation'
 
-const MyQuill = dynamic(() => import('@/lib/myquill/MyQuill'), { ssr: false });
+import {Delta} from '@/lib/myquill/myquill.js'
 
-// Type definition per Delta (per evitare import diretto)
-type DeltaType = any;
+const MyQuill = dynamic(() => import('@/lib/myquill/MyQuill'), { ssr: false });
 
 const UpdateNoteMutation = gql`
 mutation UpdateNote($_id: ObjectId!, $title: String, $delta: JSON, $private: Boolean, $variant: String) {
@@ -36,7 +35,7 @@ interface NoteFormProps {
   initialTitle?: string
   initialVariant?: string
   initialPrivate?: boolean
-  initialDelta?: DeltaType
+  initialDelta?: Delta
   
   // Comportamento
   titlePlaceholder?: string
@@ -47,8 +46,8 @@ interface NoteFormProps {
   onTitleChange?: (title: string) => void
   onVariantChange?: (variant: string) => void
   onPrivateChange?: (isPrivate: boolean) => void
-  onDeltaChange?: (delta: DeltaType) => void
-  onSave?: (title: string, delta: DeltaType, isPrivate: boolean, variant: string) => void
+  onDeltaChange?: (delta: Delta) => void
+  onSave?: (title: string, delta: Delta, isPrivate: boolean, variant: string) => void
   onCancel?: () => void
   
   // Callbacks per modalità 'edit'
@@ -95,7 +94,7 @@ export default function NoteForm({
   const [title, setTitle] = useState(initialTitle)
   const [variant, setVariant] = useState(initialVariant)
   const [isPrivate, setIsPrivate] = useState(initialPrivate)
-  const [delta, setDelta] = useState<DeltaType>(initialDelta || null)
+  const [delta, setDelta] = useState<Delta|undefined>(initialDelta || undefined)
   
   // Mutations per modalità 'edit'
   const [updateNote, { loading: isUpdating, error: updateError }] = useMutation(UpdateNoteMutation)
@@ -114,7 +113,7 @@ export default function NoteForm({
           // Carica KaTeX
           if (!window.katex) {
             const katex = await import('katex');
-            (window as any).katex = katex.default;
+            (window as typeof window & { katex: any }).katex = katex.default;
           }
           
           // Carica Delta e inizializza se necessario
@@ -165,12 +164,12 @@ export default function NoteForm({
     onPrivateChange?.(newPrivate)
   }
 
-  const handleDeltaChange = (newDelta: DeltaType) => {
+  const handleDeltaChange = (newDelta: Delta) => {
     setDelta(newDelta)
     onDeltaChange?.(newDelta)
   }
   
-  const handleSaveWithDelta = async (currentDelta: DeltaType) => {
+  const handleSaveWithDelta = async (currentDelta: Delta) => {
     if (mode === 'edit' && noteId) {
       try {
         await updateNote({ 
