@@ -23,7 +23,9 @@ export type Scalars = {
 export type Mutation = {
   __typename?: 'Mutation';
   deleteNote: Maybe<Scalars['Boolean']['output']>;
+  deleteTest: Maybe<Scalars['Boolean']['output']>;
   newNote: Maybe<Note>;
+  newSubmission: Scalars['ObjectId']['output'];
   newTest: Maybe<Scalars['Boolean']['output']>;
   updateNote: Maybe<Note>;
 };
@@ -34,11 +36,21 @@ export type MutationDeleteNoteArgs = {
 };
 
 
+export type MutationDeleteTestArgs = {
+  _id: Scalars['ObjectId']['input'];
+};
+
+
 export type MutationNewNoteArgs = {
   delta: InputMaybe<Scalars['JSON']['input']>;
   private: InputMaybe<Scalars['Boolean']['input']>;
   title: Scalars['String']['input'];
   variant: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type MutationNewSubmissionArgs = {
+  test_id: Scalars['ObjectId']['input'];
 };
 
 
@@ -60,6 +72,7 @@ export type Note = {
   __typename?: 'Note';
   _id: Scalars['ObjectId']['output'];
   author: User;
+  author_id: Scalars['ObjectId']['output'];
   created_on: Scalars['Timestamp']['output'];
   delta: Maybe<Scalars['JSON']['output']>;
   private: Scalars['Boolean']['output'];
@@ -83,6 +96,7 @@ export type Query = {
   note: Maybe<Note>;
   notes: Array<Note>;
   profile: Maybe<Profile>;
+  submission: Maybe<Submission>;
   test: Maybe<Test>;
 };
 
@@ -92,16 +106,37 @@ export type QueryNoteArgs = {
 };
 
 
+export type QuerySubmissionArgs = {
+  _id: Scalars['ObjectId']['input'];
+};
+
+
 export type QueryTestArgs = {
   _id: Scalars['ObjectId']['input'];
+};
+
+export type Submission = {
+  __typename?: 'Submission';
+  _id: Scalars['ObjectId']['output'];
+  answers: Maybe<Scalars['JSON']['output']>;
+  author: User;
+  author_id: Scalars['ObjectId']['output'];
+  completed_on: Maybe<Scalars['Timestamp']['output']>;
+  score: Maybe<Scalars['Float']['output']>;
+  started_on: Scalars['Timestamp']['output'];
+  test: Test;
+  test_id: Scalars['ObjectId']['output'];
 };
 
 export type Test = {
   __typename?: 'Test';
   _id: Scalars['ObjectId']['output'];
+  author: User;
   author_id: Scalars['ObjectId']['output'];
   close_on: Maybe<Scalars['Timestamp']['output']>;
   created_on: Scalars['Timestamp']['output'];
+  my_submissions: Array<Submission>;
+  note: Note;
   note_id: Scalars['ObjectId']['output'];
   open_on: Maybe<Scalars['Timestamp']['output']>;
   title: Maybe<Scalars['String']['output']>;
@@ -187,6 +222,7 @@ export type DirectiveResolverFn<TResult = {}, TParent = {}, TContext = {}, TArgs
 /** Mapping between all available schema types and the resolvers types */
 export type ResolversTypes = ResolversObject<{
   Boolean: ResolverTypeWrapper<Scalars['Boolean']['output']>;
+  Float: ResolverTypeWrapper<Scalars['Float']['output']>;
   JSON: ResolverTypeWrapper<Scalars['JSON']['output']>;
   Mutation: ResolverTypeWrapper<{}>;
   Note: ResolverTypeWrapper<Note>;
@@ -194,6 +230,7 @@ export type ResolversTypes = ResolversObject<{
   Profile: ResolverTypeWrapper<Profile>;
   Query: ResolverTypeWrapper<{}>;
   String: ResolverTypeWrapper<Scalars['String']['output']>;
+  Submission: ResolverTypeWrapper<Submission>;
   Test: ResolverTypeWrapper<Test>;
   Timestamp: ResolverTypeWrapper<Scalars['Timestamp']['output']>;
   User: ResolverTypeWrapper<User>;
@@ -202,6 +239,7 @@ export type ResolversTypes = ResolversObject<{
 /** Mapping between all available schema types and the resolvers parents */
 export type ResolversParentTypes = ResolversObject<{
   Boolean: Scalars['Boolean']['output'];
+  Float: Scalars['Float']['output'];
   JSON: Scalars['JSON']['output'];
   Mutation: {};
   Note: Note;
@@ -209,6 +247,7 @@ export type ResolversParentTypes = ResolversObject<{
   Profile: Profile;
   Query: {};
   String: Scalars['String']['output'];
+  Submission: Submission;
   Test: Test;
   Timestamp: Scalars['Timestamp']['output'];
   User: User;
@@ -220,7 +259,9 @@ export interface JsonScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes
 
 export type MutationResolvers<ContextType = Context, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = ResolversObject<{
   deleteNote: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType, RequireFields<MutationDeleteNoteArgs, '_id'>>;
+  deleteTest: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType, RequireFields<MutationDeleteTestArgs, '_id'>>;
   newNote: Resolver<Maybe<ResolversTypes['Note']>, ParentType, ContextType, RequireFields<MutationNewNoteArgs, 'title'>>;
+  newSubmission: Resolver<ResolversTypes['ObjectId'], ParentType, ContextType, RequireFields<MutationNewSubmissionArgs, 'test_id'>>;
   newTest: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType, RequireFields<MutationNewTestArgs, 'note_id'>>;
   updateNote: Resolver<Maybe<ResolversTypes['Note']>, ParentType, ContextType, RequireFields<MutationUpdateNoteArgs, '_id'>>;
 }>;
@@ -228,6 +269,7 @@ export type MutationResolvers<ContextType = Context, ParentType extends Resolver
 export type NoteResolvers<ContextType = Context, ParentType extends ResolversParentTypes['Note'] = ResolversParentTypes['Note']> = ResolversObject<{
   _id: Resolver<ResolversTypes['ObjectId'], ParentType, ContextType>;
   author: Resolver<ResolversTypes['User'], ParentType, ContextType>;
+  author_id: Resolver<ResolversTypes['ObjectId'], ParentType, ContextType>;
   created_on: Resolver<ResolversTypes['Timestamp'], ParentType, ContextType>;
   delta: Resolver<Maybe<ResolversTypes['JSON']>, ParentType, ContextType>;
   private: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
@@ -255,14 +297,31 @@ export type QueryResolvers<ContextType = Context, ParentType extends ResolversPa
   note: Resolver<Maybe<ResolversTypes['Note']>, ParentType, ContextType, RequireFields<QueryNoteArgs, '_id'>>;
   notes: Resolver<Array<ResolversTypes['Note']>, ParentType, ContextType>;
   profile: Resolver<Maybe<ResolversTypes['Profile']>, ParentType, ContextType>;
+  submission: Resolver<Maybe<ResolversTypes['Submission']>, ParentType, ContextType, RequireFields<QuerySubmissionArgs, '_id'>>;
   test: Resolver<Maybe<ResolversTypes['Test']>, ParentType, ContextType, RequireFields<QueryTestArgs, '_id'>>;
+}>;
+
+export type SubmissionResolvers<ContextType = Context, ParentType extends ResolversParentTypes['Submission'] = ResolversParentTypes['Submission']> = ResolversObject<{
+  _id: Resolver<ResolversTypes['ObjectId'], ParentType, ContextType>;
+  answers: Resolver<Maybe<ResolversTypes['JSON']>, ParentType, ContextType>;
+  author: Resolver<ResolversTypes['User'], ParentType, ContextType>;
+  author_id: Resolver<ResolversTypes['ObjectId'], ParentType, ContextType>;
+  completed_on: Resolver<Maybe<ResolversTypes['Timestamp']>, ParentType, ContextType>;
+  score: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
+  started_on: Resolver<ResolversTypes['Timestamp'], ParentType, ContextType>;
+  test: Resolver<ResolversTypes['Test'], ParentType, ContextType>;
+  test_id: Resolver<ResolversTypes['ObjectId'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
 export type TestResolvers<ContextType = Context, ParentType extends ResolversParentTypes['Test'] = ResolversParentTypes['Test']> = ResolversObject<{
   _id: Resolver<ResolversTypes['ObjectId'], ParentType, ContextType>;
+  author: Resolver<ResolversTypes['User'], ParentType, ContextType>;
   author_id: Resolver<ResolversTypes['ObjectId'], ParentType, ContextType>;
   close_on: Resolver<Maybe<ResolversTypes['Timestamp']>, ParentType, ContextType>;
   created_on: Resolver<ResolversTypes['Timestamp'], ParentType, ContextType>;
+  my_submissions: Resolver<Array<ResolversTypes['Submission']>, ParentType, ContextType>;
+  note: Resolver<ResolversTypes['Note'], ParentType, ContextType>;
   note_id: Resolver<ResolversTypes['ObjectId'], ParentType, ContextType>;
   open_on: Resolver<Maybe<ResolversTypes['Timestamp']>, ParentType, ContextType>;
   title: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
@@ -287,6 +346,7 @@ export type Resolvers<ContextType = Context> = ResolversObject<{
   ObjectId: GraphQLScalarType;
   Profile: ProfileResolvers<ContextType>;
   Query: QueryResolvers<ContextType>;
+  Submission: SubmissionResolvers<ContextType>;
   Test: TestResolvers<ContextType>;
   Timestamp: GraphQLScalarType;
   User: UserResolvers<ContextType>;

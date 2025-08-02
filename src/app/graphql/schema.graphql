@@ -1,13 +1,3 @@
-type Test {
-    _id: ObjectId!
-    note_id: ObjectId!
-    title: String
-    created_on: Timestamp!
-    author_id: ObjectId!
-    open_on: Timestamp
-    close_on: Timestamp
-}
-
 scalar ObjectId
 scalar Timestamp
 scalar JSON
@@ -18,11 +8,19 @@ type User {
   image: String
 }
 
+type Profile {
+  _id: ObjectId!
+  name: String
+  email: String
+  image: String
+}
+
 type Note {
   _id: ObjectId!
   title: String!
   delta: JSON
   variant: String
+  author_id: ObjectId!
   author: User!
   private: Boolean!
   created_on: Timestamp!
@@ -30,11 +28,29 @@ type Note {
   tests: [Test!]!
 }
 
-type Profile {
-  _id: ObjectId!
-  name: String
-  email: String
-  image: String
+type Test {
+    _id: ObjectId!
+    note_id: ObjectId!
+    note: Note!
+    title: String
+    created_on: Timestamp!
+    author_id: ObjectId!
+    author: User!
+    open_on: Timestamp
+    close_on: Timestamp
+    my_submissions: [Submission!]!
+}
+
+type Submission {
+    _id: ObjectId!
+    test_id: ObjectId!
+    test: Test!
+    author_id: ObjectId!
+    author: User!
+    started_on: Timestamp!
+    completed_on: Timestamp
+    answers: JSON
+    score: Float
 }
 
 type Query {
@@ -43,6 +59,7 @@ type Query {
   notes: [Note!]!
   profile: Profile
   test(_id: ObjectId!): Test
+  submission(_id: ObjectId!): Submission
 }
 
 type Mutation {
@@ -51,4 +68,6 @@ type Mutation {
   deleteNote(_id: ObjectId!): Boolean
   
   newTest(note_id: ObjectId!, title: String): Boolean
+  deleteTest(_id: ObjectId!): Boolean
+  newSubmission(test_id: ObjectId!): ObjectId!
 }

@@ -72,6 +72,15 @@ export type MongoTest = {
     close_on: Date|null
 }
 
+export type MongoSubmission = {
+    _id: ObjectId
+    test_id: ObjectId
+    author_id: ObjectId
+    started_on: Date|null
+    completed_on: Date|null
+    answers: object|null
+    score: number|null
+}
 
 export function getNotesCollection(db: Db) {
     return db.collection<OptionalId<MongoNote>>('notes')
@@ -93,6 +102,63 @@ export function getTestsCollection(db: Db) {
     return db.collection<OptionalId<MongoTest>>('tests')
 }
 
+export function getDeletedTestsCollection(db: Db) {
+    return db.collection<OptionalId<MongoTest>>('deleted_tests')
+}
 
+export function getSubmissionsCollection(db: Db) {
+    return db.collection<OptionalId<MongoSubmission>>('submissions')
+}
 
+export const TEST_PIPELINE = [
+  // inserisce i dati dell'autore
+  {
+    $lookup: {
+      from: 'users',
+      localField: 'author_id',
+      foreignField: '_id',
+      as: 'author'
+    }
+  }, {
+    $unwind: '$author'
+  },
+  {
+    $lookup: {
+        from: 'notes',
+        localField: 'note_id',
+        foreignField: '_id',
+        as: 'note'
+    }
+  }, {
+    $unwind: '$note'
+  },
+]
 
+export const NOTE_PIPELINE = [
+  {
+    $lookup: {
+      from: 'users',
+      localField: 'author_id',
+      foreignField: '_id',
+      as: 'author'
+    }
+  }, {
+    // da array a oggetto singolo, se l'autore non esiste, sarà null
+    $unwind: { path: '$author', preserveNullAndEmptyArrays: true }
+  },
+  {
+    // Aggiungiamo updated_on basato sulla versione corrente
+    $lookup: {
+      from: 'note_versions',
+      localField: 'note_version_id',
+      foreignField: '_id',
+      as: 'version'
+    }
+  }, {
+    $unwind: '$version'
+  }, {
+    $addFields: {
+      updated_on: '$version.created_on' // L'ultima modifica è quando è stata creata l'ultima versione
+    }
+  }
+]

@@ -1,42 +1,10 @@
 import { ObjectId } from 'mongodb'
 
 import { Context } from '../types'
-import { Note } from '../generated'
-import { getNotesCollection, getTestsCollection } from '@/lib/models'
+import { Note, Test } from '../generated'
+import { getNotesCollection, getTestsCollection, 
+  TEST_PIPELINE, NOTE_PIPELINE } from '@/lib/models'
 
-export const NOTE_PIPELINE = [
-  {
-    $lookup: {
-      from: 'users',
-      localField: 'author_id',
-      foreignField: '_id',
-      as: 'author'
-    }
-  },
-  {
-    // da array a oggetto singolo
-    $unwind: '$author'
-  },
-  {
-    // Aggiungiamo updated_on basato sulla versione corrente
-    $lookup: {
-      from: 'note_versions',
-      localField: 'note_version_id',
-      foreignField: '_id',
-      as: 'version'
-    }
-  },
-  {
-    $unwind: '$version'
-  },
-  {
-    $addFields: {
-      updated_on: '$version.created_on' // L'ultima modifica è quando è stata creata l'ultima versione
-    }
-  }
-]
-
-    
 export default async function note (_parent: unknown, {_id}: { _id: ObjectId }, context: Context): Promise<Note | null> {
     const collection = getNotesCollection(context.db)
     const notes = await collection.aggregate<Note>([
@@ -57,6 +25,9 @@ export default async function note (_parent: unknown, {_id}: { _id: ObjectId }, 
     const note = notes[0]
     // Carica i test collegati
     const testsCollection = getTestsCollection(context.db)
-    const tests = await testsCollection.find({ note_id: _id }).toArray()
+    const tests = await testsCollection.aggregate<Test>([
+      { $match: { note_id: _id } },
+      ...TEST_PIPELINE,
+    ]).toArray()
     return { ...note, tests }
 }

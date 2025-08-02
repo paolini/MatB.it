@@ -1,25 +1,11 @@
 import { ObjectId } from 'mongodb'
 
 import { Context } from '../types'
-import { Note, Test } from '../generated'
-import { getNotesCollection, getTestsCollection } from '@/lib/models'
-
-const TEST_PIPELINE = [
-  {
-    $lookup: {
-      from: 'users',
-      localField: 'author_id',
-      foreignField: '_id',
-      as: 'author'
-    }
-  },
-  {
-    // da array a oggetto singolo
-    $unwind: '$author'
-  },
-]
+import { Test } from '../generated'
+import { getTestsCollection, TEST_PIPELINE } from '@/lib/models'
 
 export default async function test (_parent: unknown, {_id}: { _id: ObjectId }, context: Context): Promise<Test | null> {
+    const user = context.user
     const collection = getTestsCollection(context.db)
     const tests = await collection.aggregate<Test>([
         { $match: { _id } },
@@ -32,12 +18,24 @@ export default async function test (_parent: unknown, {_id}: { _id: ObjectId }, 
         }
         },
         ...TEST_PIPELINE,
-        { // estrai elemento 0 dell'array
-          $replaceRoot: { newRoot: { $mergeObjects: [ { $arrayElemAt: ['$note', 0] }, '$$ROOT' ] } }
+        {
+            // Aggiunge le sottomissioni dell'utente corrente
+            $lookup: {
+                from: 'submissions',
+                let: { userId: context.user?._id },
+                pipeline: [
+                    { $match: { $expr: { $and: [ 
+                        { $eq: ['$test_id', '$_id'] }, 
+                        { $eq: ['$author_id', user?._id] } ] } } },
+                    { $sort: { started_on: -1 } }
+                ],
+                as: 'my_submissions'
+            }
         }
     ]).toArray()
 
     if (tests.length === 0) throw new Error('Test not found')
+    const test = tests[0]
 
-    return tests[0]
+    return test
 }

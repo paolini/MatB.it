@@ -5,12 +5,15 @@ import { Resolvers } from './generated'
 import notes from './resolvers/notes'
 import note from './resolvers/note'
 import test from './resolvers/test'
+import submission from './resolvers/submission'
 
 import newNote from './resolvers/newNote'
 import updateNote from './resolvers/updateNote'
 import deleteNote from './resolvers/deleteNote'
 
 import newTest from './resolvers/newTest'
+import deleteTest from './resolvers/deleteTest'
+import newSubmission from './resolvers/newSubmission'
 
 export const resolvers = {
   ObjectId: ObjectIdType,
@@ -25,6 +28,8 @@ export const resolvers = {
     note,
 
     test,
+
+    submission,
   },
 
   Mutation: {
@@ -33,6 +38,9 @@ export const resolvers = {
     deleteNote,    
     
     newTest,
+    deleteTest,
+
+    newSubmission,
   }
 } satisfies Partial<Resolvers<Context>>
 

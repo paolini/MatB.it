@@ -2,9 +2,7 @@ import type { MutationUpdateNoteArgs } from '../generated'
 
 import { Context } from '../types'
 import { Note } from '../generated'
-import { getNotesCollection } from '@/lib/models'
-
-import { NOTE_PIPELINE } from './note'
+import { getNotesCollection, NOTE_PIPELINE } from '@/lib/models'
 
 export default async function (
       _parent: unknown,

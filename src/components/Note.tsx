@@ -5,7 +5,7 @@ import { useState } from 'react';
 
 import { Note, Profile } from '@/app/graphql/generated'
 import TestList from '@/components/TestList'
-import { Loading, Error } from '@/components/utils'
+import { Loading, Error, EDIT_BUTTON_CLASS } from '@/components/utils'
 import DeltaContent from '@/components/DeltaContent'
 import NoteForm from '@/components/NoteForm'
 
@@ -90,8 +90,8 @@ export default function NoteWrapper({_id}: {_id: string}) {
             <CreateTestButton note={note} />
         )}
         {note?.author?._id === profile?._id  && (
-            <button className="px-4 py-2 bg-blue-500 text-white rounded mt-2 hover:bg-blue-600 transition-colors" onClick={() => setEditMode(true)}>
-                Edit Note
+            <button className={EDIT_BUTTON_CLASS} onClick={() => setEditMode(true)}>
+                Edit
             </button>
         )}
     </div>
@@ -111,7 +111,7 @@ function NoteFooter({note}: {
 
 const NewTestMutation = gql`
     mutation NewTest($note_id: ObjectId!, $title: String) {
-        newTest(noteId: $note_id, title: $title)
+        newTest(note_id: $note_id, title: $title)
     }
 `
 
@@ -122,12 +122,14 @@ function CreateTestButton({note}: {note: Note}) {
         refetchQueries: ["Note"],
     })
 
-    return <button
-        className="px-4 py-2 bg-green-500 text-white rounded mt-2 hover:bg-green-600 transition-colors"
-        onClick={() => createTest({ variables: { note_id, title } })}
-        disabled={loading}
-    >
-            {loading ? 'Creazione...' : 'Crea test'}
-            {error && <Error error={error} />}
-    </button>
+    return <>
+        <button
+            className="px-4 py-2 bg-green-500 text-white rounded mt-2 hover:bg-green-600 transition-colors"
+            onClick={() => createTest({ variables: { note_id, title } })}
+            disabled={loading}
+            >
+                {loading ? 'Creazione...' : 'Crea test'}
+        </button>
+        {error && <Error error={error} />}
+    </>
 }
