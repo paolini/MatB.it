@@ -65,7 +65,7 @@ export type MongoUser = {
 export type MongoTest = {
     _id: ObjectId
     note_id: ObjectId
-    description: string
+    title: string
     created_on: Date
     author_id: ObjectId
     open_on: Date|null

@@ -1,7 +1,7 @@
 type Test {
     _id: ObjectId!
     note_id: ObjectId!
-    description: String
+    title: String
     created_on: Timestamp!
     author_id: ObjectId!
     open_on: Timestamp
@@ -42,11 +42,13 @@ type Query {
   note(_id: ObjectId!): Note
   notes: [Note!]!
   profile: Profile
+  test(_id: ObjectId!): Test
 }
 
 type Mutation {
   newNote(title: String!, delta: JSON, private: Boolean, variant: String): Note
   updateNote(_id: ObjectId!, title: String, delta: JSON, private: Boolean, variant: String): Note
   deleteNote(_id: ObjectId!): Boolean
-  createTest(noteId: ObjectId!): Boolean
+  
+  newTest(note_id: ObjectId!, title: String): Boolean
 }

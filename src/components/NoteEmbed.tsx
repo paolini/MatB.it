@@ -5,7 +5,6 @@ import 'katex/dist/katex.min.css'
 
 import { Note } from '@/app/graphql/generated'
 import DeltaContent, { Context } from './DeltaContent'
-import './note.css'
 
 const NOTE_QUERY = gql`
   query Note($id: ObjectId!) {

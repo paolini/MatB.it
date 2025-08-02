@@ -6,14 +6,16 @@ export default function TestList({ tests }: { tests: Test[] }) {
         <div className="mt-4">
             <h2 className="text-lg font-semibold mb-2">Test associati</h2>
             <ul className="space-y-2">
-                {tests.map(test => (
-                    <li key={test._id} className="border rounded p-2">
-                        <span className="font-bold">Creato il:</span> {new Date(test.created_on).toLocaleString()}<br/>
-                        <span className="font-bold">Autore:</span> {String(test.author_id)}<br/>
-                        {test.description && <span className="font-bold">Descrizione:</span>} {test.description}
-                    </li>
-                ))}
+                {tests.map(test => <TestListItem key={test._id} test={test} />)}
             </ul>
         </div>
     )
+}
+
+function TestListItem({ test }: { test: Test }) {
+    return <li className="border rounded p-2">
+        <a href={`/test/${test._id}`}><span className="font-bold">Test del </span> {new Date(test.open_on || test.created_on).toLocaleString()}<br/>
+        {test.title || ""}
+        </a>
+    </li>
 }

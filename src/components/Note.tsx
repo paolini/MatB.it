@@ -26,7 +26,7 @@ const NoteQuery = gql`
             tests {
                 _id
                 note_id
-                description
+                title
                 created_on
                 author_id
                 open_on
@@ -87,7 +87,7 @@ export default function NoteWrapper({_id}: {_id: string}) {
         <TestList tests={note.tests} />
         <NoteFooter note={note} />
         {note?.variant === 'test' && (
-            <CreateTestButton noteId={note._id} />
+            <CreateTestButton note={note} />
         )}
         {note?.author?._id === profile?._id  && (
             <button className="px-4 py-2 bg-blue-500 text-white rounded mt-2 hover:bg-blue-600 transition-colors" onClick={() => setEditMode(true)}>
@@ -109,25 +109,25 @@ function NoteFooter({note}: {
     </div>
 }
 
-const CreateTestMutation = gql`
-    mutation CreateTest($noteId: ObjectId!) {
-        createTest(noteId: $noteId)
+const NewTestMutation = gql`
+    mutation NewTest($note_id: ObjectId!, $title: String) {
+        newTest(noteId: $note_id, title: $title)
     }
 `
 
-function CreateTestButton({noteId}: {noteId: string}) {
-    const [createTest, { loading, error }] = useMutation(CreateTestMutation, {
+function CreateTestButton({note}: {note: Note}) {
+    const note_id = note._id
+    const title = note.title || ""
+    const [createTest, { loading, error }] = useMutation(NewTestMutation, {
         refetchQueries: ["Note"],
     })
 
-    return (
-        <button
-            className="px-4 py-2 bg-green-500 text-white rounded mt-2 hover:bg-green-600 transition-colors"
-            onClick={() => createTest({ variables: { noteId } })}
-            disabled={loading}
-        >
+    return <button
+        className="px-4 py-2 bg-green-500 text-white rounded mt-2 hover:bg-green-600 transition-colors"
+        onClick={() => createTest({ variables: { note_id, title } })}
+        disabled={loading}
+    >
             {loading ? 'Creazione...' : 'Crea test'}
             {error && <Error error={error} />}
-        </button>
-    )
+    </button>
 }

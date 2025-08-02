@@ -5,7 +5,6 @@ import 'katex/dist/katex.min.css'
 import { Delta  } from '@/lib/myquill/myquill.js'
 import NoteEmbed from './NoteEmbed'
 import document_from_delta, {Document, Paragraph, Node, Formula, List, Choice, NoteRef } from '@/lib/myquill/document_from_delta'
-import './note.css'
 
 // Dichiarazione di tipo per KaTeX
 declare global {
