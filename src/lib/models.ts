@@ -162,3 +162,29 @@ export const NOTE_PIPELINE = [
     }
   }
 ]
+
+export const SUBMISSION_PIPELINE = [
+  // inserisce i dati dell'autore
+  {
+    $lookup: {
+      from: 'users',
+      localField: 'author_id',
+      foreignField: '_id',
+      as: 'author'
+    }
+  }, {
+    $unwind: { path: '$author', preserveNullAndEmptyArrays: true }
+  },
+  // inserisce i dati del test
+  {
+    $lookup: {
+      from: 'tests',
+      localField: 'test_id',
+      foreignField: '_id',
+      as: 'test'
+    }
+  }, {
+    $unwind: { path: '$test', preserveNullAndEmptyArrays: true }
+  },
+]
+

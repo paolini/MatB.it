@@ -47,7 +47,7 @@ export default function TestWrapper({_id}: {_id: string}) {
     </>
 }
 
-const StartSubmissionMutation = gql`
+const NewSubmissionMutation = gql`
 mutation NewSubmission($test_id: ObjectId!) {
     newSubmission(test_id: $test_id)
 }`
@@ -56,7 +56,11 @@ function ViewTest({test}: {
     test: Test,
 }) {
     const router = useRouter()
-    const [startSubmission, { loading: isStarting, error: startError }] = useMutation(StartSubmissionMutation)
+const [startSubmission, { loading: isStarting, error: startError }] = useMutation(NewSubmissionMutation, {
+    refetchQueries: [
+        { query: TestQuery, variables: { _id: test._id } }
+    ]
+})
     const [now, setNow] = useState(new Date())
     
     // Aggiorna il timestamp ogni secondo

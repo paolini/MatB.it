@@ -13,22 +13,11 @@ const SubmissionQuery = gql`
             test {
                 _id
                 title
-                created_on
                 open_on
                 close_on
-                note {
-                    _id
-                    delta
-                }
             }
-            created_on
-            open_on 
-            close_on
-            my_submissions {
-                _id
-                started_on
-                completed_on
-            }
+            started_on
+            completed_on
         }
         profile {
             _id
