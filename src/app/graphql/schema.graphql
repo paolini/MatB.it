@@ -45,12 +45,11 @@ type Submission {
     _id: ObjectId!
     test_id: ObjectId!
     test: Test!
+    document: JSON!
     author_id: ObjectId!
     author: User!
     started_on: Timestamp!
     completed_on: Timestamp
-    answers: JSON
-    score: Float
 }
 
 type Query {

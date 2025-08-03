@@ -148,7 +148,7 @@ rl.on('close', async () => {
           delta: Array.isArray(note.ops) ? { ops: note.ops } : note.ops,
           note_version_id: versionResult.insertedId,
           created_on: new Date(now),
-          private: false,
+          private: true,
           author_id: author_id
         };
         const noteResult = await db.collection('notes').insertOne(noteDoc);

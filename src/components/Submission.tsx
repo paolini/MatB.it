@@ -5,6 +5,7 @@ import { Test, Profile, Submission } from '@/app/graphql/generated'
 import { Loading, Error, EDIT_BUTTON_CLASS, CANCEL_BUTTON_CLASS, DELETE_BUTTON_CLASS, BUTTON_CLASS } from '@/components/utils'
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import DocumentElement from './DocumentElement'
 
 const SubmissionQuery = gql`
     query Submission($_id: ObjectId!) {
@@ -18,6 +19,7 @@ const SubmissionQuery = gql`
             }
             started_on
             completed_on
+            document
         }
         profile {
             _id
@@ -34,8 +36,13 @@ export default function SubmissionWrapper({_id}: {_id: string}) {
     if (loading || !data) return <Loading />
 
     const { submission, profile } = data
+    const context = { parents: [] }
 
     return <>
         Submission {submission._id}
+        <DocumentElement 
+            context={context}
+            document={submission.document}
+        />
     </>
 }

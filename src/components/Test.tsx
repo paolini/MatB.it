@@ -29,7 +29,7 @@ const TestQuery = gql`
 
 export default function TestWrapper({_id}: {_id: string}) {
     const [editMode, setEditMode] = useState(false)
-    const { loading, error, data, refetch } = useQuery<{test: Test, profile: Profile}>(
+    const { loading, error, data, refetch } = useQuery<{test: Test, profile: Profile|null}>(
         TestQuery, {variables: { _id }})
 
     if (error) return <Error error={error} />    
@@ -38,22 +38,27 @@ export default function TestWrapper({_id}: {_id: string}) {
     const test = data?.test 
     const profile = data?.profile
 
-    if (editMode) return <EditTest test={test} setEditMode={setEditMode} />
+    if (editMode) return <EditTest test={test} setEditMode={setEditMode} profile={profile}/>
     return <>
-        <ViewTest test={test} />
-        <button className={EDIT_BUTTON_CLASS} onClick={() => setEditMode(!editMode)}>
-            {"Edit"}
-        </button>
+        <ViewTest test={test} profile={profile} />
+        {
+            profile 
+            && test.author_id === profile._id
+            && <button className={EDIT_BUTTON_CLASS} onClick={() => setEditMode(!editMode)}>
+                {"Edit"}
+            </button>
+        }
     </>
 }
 
 const NewSubmissionMutation = gql`
-mutation NewSubmission($test_id: ObjectId!) {
-    newSubmission(test_id: $test_id)
+    mutation NewSubmission($test_id: ObjectId!) {
+        newSubmission(test_id: $test_id)
 }`
 
-function ViewTest({test}: {
+function ViewTest({test,profile}: {
     test: Test,
+    profile: Profile|null
 }) {
     const router = useRouter()
 const [startSubmission, { loading: isStarting, error: startError }] = useMutation(NewSubmissionMutation, {
@@ -75,13 +80,17 @@ const [startSubmission, { loading: isStarting, error: startError }] = useMutatio
         <h1>
             {test.title || `Test ${test._id}`}
         </h1>
+        { !profile
+            && <span>Fai il login per iniziare il test</span>
+        }
         {
-            test.my_submissions.length === 0 
+            profile
+            && test.my_submissions.length === 0 
             && (!test.open_on || (test.open_on < now))
             && (!test.close_on || (test.close_on > now)) 
             && <button className={BUTTON_CLASS} disabled={isStarting} onClick={async () => {
                 const result = await startSubmission({ variables: { test_id: test._id } })
-                const submission_id = result.data?.startSubmission
+                const submission_id = result.data?.newSubmission
                 if (submission_id) {
                     router.push(`/submission/${submission_id}`)
                 }
@@ -104,15 +113,16 @@ const DeleteTestMutation = gql`
     deleteTest(_id: $_id)
 }`
 
-function EditTest({test, setEditMode}: {
+function EditTest({test, profile, setEditMode}: {
     test: Test,
+    profile: Profile|null,
     setEditMode: (editMode: boolean) => void
 }) {
     const router = useRouter()
     const [deleteTest, { loading: isDeleting, error: deleteError }] = useMutation(DeleteTestMutation)
 
     return <>
-        <ViewTest test={test} />
+        <ViewTest test={test} profile={profile}/>
         <button className={CANCEL_BUTTON_CLASS} onClick={() => setEditMode(false)}>
             annulla
         </button>

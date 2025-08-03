@@ -63,40 +63,49 @@ export function NoteEmbedInner({ context, note }: {
     setShowInfo(!showInfo);
   };
 
-  return (
+  return <DocumentEmbed variant={note.variant || undefined} title={note.title}>
+    <div className="embedded-note-content">
+      <DeltaContent 
+        delta={note.delta} 
+        context={context}
+      />
+    </div>
+    
+    {showInfo && (
+      <div className="note-info-popup">
+        <div><a href={`/note/${note._id}/`}><strong>{variantLabel}:</strong> {note.title}</a></div>
+        <div><strong>Autore:</strong> {note.author?.name || 'N/A'}</div>
+        <div><strong>Creata:</strong> {createdDate}</div>
+        <div><strong>Ultima modifica:</strong> {updatedDate}{privacyText}</div>
+      </div>
+    )}
+    
     <div 
-      className={`ql-variant-container ql-var-${note.variant || 'default'}`}
+      className="note-info-icon"
+      onClick={handleInfoClick}
+      title="Informazioni nota"
+    >
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
+      </svg>
+    </div>
+  </DocumentEmbed>
+}
+
+export function DocumentEmbed({variant, title, children}: {
+  variant?: string
+  title?: string
+  children: React.ReactNode
+}) {
+  return <div 
+      className={`ql-variant-container ql-var-${variant || 'default'}`}
       style={{ margin: '0.5em 0', padding: '0.5em', position: 'relative' }}
     >
       <div className="embedded-note-header">
-        <span className="embedded-note-title" style={{ margin: '0 0 0.3em 0', fontSize: '1em' }}>{note.title}</span>
+        { title && 
+        <span className="embedded-note-title" style={{ margin: '0 0 0.3em 0', fontSize: '1em' }}>{title}</span>
+        }
+        {children}
       </div>
-      <div className="embedded-note-content">
-        <DeltaContent 
-          delta={note.delta} 
-          context={context}
-        />
-      </div>
-      
-      {showInfo && (
-        <div className="note-info-popup">
-          <div><a href={`/note/${note._id}/`}><strong>{variantLabel}:</strong> {note.title}</a></div>
-          <div><strong>Autore:</strong> {note.author?.name || 'N/A'}</div>
-          <div><strong>Creata:</strong> {createdDate}</div>
-          <div><strong>Ultima modifica:</strong> {updatedDate}{privacyText}</div>
-        </div>
-      )}
-      
-      <div 
-        className="note-info-icon"
-        onClick={handleInfoClick}
-        title="Informazioni nota"
-      >
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
-        </svg>
-      </div>
-    </div>
-  );
+  </div>
 }
-

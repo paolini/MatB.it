@@ -118,11 +118,10 @@ export type QueryTestArgs = {
 export type Submission = {
   __typename?: 'Submission';
   _id: Scalars['ObjectId']['output'];
-  answers: Maybe<Scalars['JSON']['output']>;
   author: User;
   author_id: Scalars['ObjectId']['output'];
   completed_on: Maybe<Scalars['Timestamp']['output']>;
-  score: Maybe<Scalars['Float']['output']>;
+  document: Scalars['JSON']['output'];
   started_on: Scalars['Timestamp']['output'];
   test: Test;
   test_id: Scalars['ObjectId']['output'];
@@ -222,7 +221,6 @@ export type DirectiveResolverFn<TResult = {}, TParent = {}, TContext = {}, TArgs
 /** Mapping between all available schema types and the resolvers types */
 export type ResolversTypes = ResolversObject<{
   Boolean: ResolverTypeWrapper<Scalars['Boolean']['output']>;
-  Float: ResolverTypeWrapper<Scalars['Float']['output']>;
   JSON: ResolverTypeWrapper<Scalars['JSON']['output']>;
   Mutation: ResolverTypeWrapper<{}>;
   Note: ResolverTypeWrapper<Note>;
@@ -239,7 +237,6 @@ export type ResolversTypes = ResolversObject<{
 /** Mapping between all available schema types and the resolvers parents */
 export type ResolversParentTypes = ResolversObject<{
   Boolean: Scalars['Boolean']['output'];
-  Float: Scalars['Float']['output'];
   JSON: Scalars['JSON']['output'];
   Mutation: {};
   Note: Note;
@@ -303,11 +300,10 @@ export type QueryResolvers<ContextType = Context, ParentType extends ResolversPa
 
 export type SubmissionResolvers<ContextType = Context, ParentType extends ResolversParentTypes['Submission'] = ResolversParentTypes['Submission']> = ResolversObject<{
   _id: Resolver<ResolversTypes['ObjectId'], ParentType, ContextType>;
-  answers: Resolver<Maybe<ResolversTypes['JSON']>, ParentType, ContextType>;
   author: Resolver<ResolversTypes['User'], ParentType, ContextType>;
   author_id: Resolver<ResolversTypes['ObjectId'], ParentType, ContextType>;
   completed_on: Resolver<Maybe<ResolversTypes['Timestamp']>, ParentType, ContextType>;
-  score: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
+  document: Resolver<ResolversTypes['JSON'], ParentType, ContextType>;
   started_on: Resolver<ResolversTypes['Timestamp'], ParentType, ContextType>;
   test: Resolver<ResolversTypes['Test'], ParentType, ContextType>;
   test_id: Resolver<ResolversTypes['ObjectId'], ParentType, ContextType>;

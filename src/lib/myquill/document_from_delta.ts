@@ -45,10 +45,26 @@ export type Paragraph = {
 export type NoteRef = {
   type: "note-ref"
   note_id: string
+  document?: Document // non c'è se il caricamento è asincrono
+}
+
+export type LoaderData = {
+  delta: Delta
+  variant?: string
+  title?: string
+}
+
+export type Options = {
+  submission?: boolean
+  note_loader?: (note_id: string) => Promise<LoaderData|null>
+  parents?: string[] // per evitare loops
+  variant?: string
+  title?: string
 }
 
 export type Document = {
   paragraphs: (Paragraph|NoteRef)[]
+  options: Options
 }
 
 function last_paragraph(document: Document): Paragraph {
@@ -158,17 +174,37 @@ function push_error_paragraph(document: Document, error: string) {
   document.paragraphs.push({type: "paragraph", attribute: "", line})
 }
 
-function push_note_ref(document: Document, note_ref: object, attributes: AttributeMap | undefined) {
+async function push_note_ref(document: Document, note_ref: object, attributes: AttributeMap | undefined) {
   if (note_ref && 'note_id' in note_ref && typeof note_ref.note_id === 'string') {
-    const paragraph: NoteRef = {type:"note-ref", note_id: note_ref.note_id}
+    const note_loader = document.options.note_loader
+    const paragraph: NoteRef = {
+      type:"note-ref", 
+      note_id: note_ref.note_id,
+    }
+    if (note_loader) {
+      const options = document.options
+      if (options.parents && options.parents.includes(note_ref.note_id)) {
+          push_error_paragraph(document, `circular reference ${note_ref.note_id}`)
+          return
+      }
+      const data = await note_loader(note_ref.note_id)
+      if (data) {
+        paragraph.document = await document_from_delta(data.delta, {
+          ...options,
+          parents: [...(options.parents||[]),note_ref.note_id],
+          variant: data.variant,
+          title: data.title
+        })
+      }
+     }
     document.paragraphs.push(paragraph)    
   } else {
     push_error_paragraph(document, `invalid note reference ${JSON.stringify(note_ref)}`)
   }
 }
 
-export default function document_from_delta(delta: Delta): Document {
-  const document: Document = { paragraphs: [] }
+export default async function document_from_delta(delta: Delta, options: Options): Promise<Document> {
+  const document: Document = { paragraphs: [], options}
   const line: Line = { type: 'line', nodes: []}
 
   for (const op of delta.ops) {
@@ -185,7 +221,7 @@ export default function document_from_delta(delta: Delta): Document {
         push_formula(line, insert.formula, op.attributes)        
       } else if (insert["note-ref"]) {
         if (line.nodes.length > 0) push_newline(document, line, {})
-        push_note_ref(document, insert["note-ref"], op.attributes)
+        await push_note_ref(document, insert["note-ref"], op.attributes)
       } else {
         push_error(line, `invalid insert object ${JSON.stringify(insert)}`)
       }

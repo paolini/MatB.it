@@ -62,24 +62,26 @@ export type MongoUser = {
     createdAt: Date
 }
 
+// somministrazione di un test, compito, questionario...
+// il testo del test è nella nota note_id
 export type MongoTest = {
     _id: ObjectId
-    note_id: ObjectId
-    title: string
-    created_on: Date
-    author_id: ObjectId
-    open_on: Date|null
-    close_on: Date|null
+    note_id: ObjectId // il testo del compito (ultima versione)
+    title: string // nome del test
+    created_on: Date // quando è stato creato
+    author_id: ObjectId // chi l'ha creato
+    open_on: Date|null // quando è possibile aprirlo
+    close_on: Date|null // entro quando è possibile compilarlo
 }
 
+// risposte date da un utente al test
 export type MongoSubmission = {
     _id: ObjectId
     test_id: ObjectId
-    author_id: ObjectId
-    started_on: Date|null
-    completed_on: Date|null
-    answers: object|null
-    score: number|null
+    author_id: ObjectId // chi ha svolto il test (studente)
+    document: object // testo personalizzato del questionario
+    started_on: Date // quando è iniziato
+    completed_on: Date|null // quando (e se) è stato inviato 
 }
 
 export function getNotesCollection(db: Db) {
