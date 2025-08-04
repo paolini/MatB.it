@@ -20,8 +20,8 @@ export type Scalars = {
   Timestamp: { input: any; output: any; }
 };
 
-export type Answer = {
-  __typename?: 'Answer';
+export type AnswerItem = {
+  __typename?: 'AnswerItem';
   answer: Maybe<Scalars['Int']['output']>;
   note_id: Scalars['ObjectId']['output'];
 };
@@ -124,7 +124,7 @@ export type QueryTestArgs = {
 export type Submission = {
   __typename?: 'Submission';
   _id: Scalars['ObjectId']['output'];
-  answers: Array<Answer>;
+  answers: Array<AnswerItem>;
   author: User;
   author_id: Scalars['ObjectId']['output'];
   completed_on: Maybe<Scalars['Timestamp']['output']>;
@@ -227,7 +227,7 @@ export type DirectiveResolverFn<TResult = {}, TParent = {}, TContext = {}, TArgs
 
 /** Mapping between all available schema types and the resolvers types */
 export type ResolversTypes = ResolversObject<{
-  Answer: ResolverTypeWrapper<Answer>;
+  AnswerItem: ResolverTypeWrapper<AnswerItem>;
   Boolean: ResolverTypeWrapper<Scalars['Boolean']['output']>;
   Int: ResolverTypeWrapper<Scalars['Int']['output']>;
   JSON: ResolverTypeWrapper<Scalars['JSON']['output']>;
@@ -245,7 +245,7 @@ export type ResolversTypes = ResolversObject<{
 
 /** Mapping between all available schema types and the resolvers parents */
 export type ResolversParentTypes = ResolversObject<{
-  Answer: Answer;
+  AnswerItem: AnswerItem;
   Boolean: Scalars['Boolean']['output'];
   Int: Scalars['Int']['output'];
   JSON: Scalars['JSON']['output'];
@@ -261,7 +261,7 @@ export type ResolversParentTypes = ResolversObject<{
   User: User;
 }>;
 
-export type AnswerResolvers<ContextType = Context, ParentType extends ResolversParentTypes['Answer'] = ResolversParentTypes['Answer']> = ResolversObject<{
+export type AnswerItemResolvers<ContextType = Context, ParentType extends ResolversParentTypes['AnswerItem'] = ResolversParentTypes['AnswerItem']> = ResolversObject<{
   answer: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   note_id: Resolver<ResolversTypes['ObjectId'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
@@ -317,7 +317,7 @@ export type QueryResolvers<ContextType = Context, ParentType extends ResolversPa
 
 export type SubmissionResolvers<ContextType = Context, ParentType extends ResolversParentTypes['Submission'] = ResolversParentTypes['Submission']> = ResolversObject<{
   _id: Resolver<ResolversTypes['ObjectId'], ParentType, ContextType>;
-  answers: Resolver<Array<ResolversTypes['Answer']>, ParentType, ContextType>;
+  answers: Resolver<Array<ResolversTypes['AnswerItem']>, ParentType, ContextType>;
   author: Resolver<ResolversTypes['User'], ParentType, ContextType>;
   author_id: Resolver<ResolversTypes['ObjectId'], ParentType, ContextType>;
   completed_on: Resolver<Maybe<ResolversTypes['Timestamp']>, ParentType, ContextType>;
@@ -354,7 +354,7 @@ export type UserResolvers<ContextType = Context, ParentType extends ResolversPar
 }>;
 
 export type Resolvers<ContextType = Context> = ResolversObject<{
-  Answer: AnswerResolvers<ContextType>;
+  AnswerItem: AnswerItemResolvers<ContextType>;
   JSON: GraphQLScalarType;
   Mutation: MutationResolvers<ContextType>;
   Note: NoteResolvers<ContextType>;

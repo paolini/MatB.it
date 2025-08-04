@@ -1,11 +1,10 @@
 "use client"
-import React from 'react'
+import React, { Dispatch, SetStateAction } from 'react'
 import 'katex/dist/katex.min.css'
 
 import NoteEmbed, { DocumentEmbed } from './NoteEmbed'
 import { Document, Paragraph, Node, Formula, List, Choice, NoteRef } from '@/lib/myquill/document'
 import { ObjectId } from 'bson'
-import { Answer } from '@/app/graphql/generated'
 
 // Dichiarazione di tipo per KaTeX
 declare global {
@@ -18,7 +17,8 @@ declare global {
 
 export type Context = {
   parents: string[], // Array di ID dei genitori per evitare loop infiniti
-  answers?: Answer[], 
+  answers: Record<string, number>,
+  setAnswers: Dispatch<SetStateAction<Record<string,number>>>,
 }
 
 export default function DocumentElement({context,document}:{context:Context, document: Document}) {
@@ -27,9 +27,9 @@ export default function DocumentElement({context,document}:{context:Context, doc
 
 function ParagraphElement({context,paragraph}:{context:Context, paragraph: Paragraph|NoteRef|Document}) {
   if (paragraph.type === 'document') {
-      // sincrono
+      const parents = paragraph.note_id ? [...context.parents,paragraph.note_id]: context.parents
       return <DocumentEmbed variant={paragraph.variant} title={paragraph.title}>
-          <DocumentElement context={context} document={paragraph}/>
+          <DocumentElement context={{...context,parents}} document={paragraph}/>
       </DocumentEmbed>
   }
   if (paragraph.type === 'note-ref') {
@@ -116,6 +116,7 @@ function FormulaElement({formula}:{formula:Formula}) {
 
 function ListElement({context, list}:{context: Context, list:List}) {
   if (list.attribute === 'choice') return <ChoiceElement context={context} choice={list} />
+  
   const children = list.lines.map((line,key) => <li key={key}>
         <LineElement context={context} nodes={line.nodes} />
     </li>)
@@ -124,15 +125,22 @@ function ListElement({context, list}:{context: Context, list:List}) {
 }
 
 function ChoiceElement({context, choice}:{context: Context, choice:Choice}) {
+  const note_id = context?.parents.length>0 && context.parents[context.parents.length-1] || undefined
+  const answer = note_id ? context.answers[note_id] : undefined
   return <ul className="delta-choice-list">
     { choice.lines.map((line,i) => <li key={i} data-list="choice" style={{display: 'flex', alignItems: 'center', gap: '0.5em'}}>
         <input
           type="radio"
           style={{marginRight: '0.5em'}}
+          checked={answer===i}
+          onChange={() => {
+            if (!note_id) return
+            context.setAnswers(old => ({
+              ...old,
+              [note_id]:i,
+            }))
+          }}
         />
-        {/* Etichetta A, B, C... 
-        <span style={{fontWeight: 'bold', marginRight: '0.5em'}}>{String.fromCharCode(65 + i)}.</span>
-        */}
         <LineElement context={context} nodes={line.nodes} />
       </li>
     )}

@@ -41,7 +41,7 @@ type Test {
     my_submissions: [Submission!]!
 }
 
-type Answer {
+type AnswerItem {
   note_id: ObjectId!
   answer: Int # per adesso solo choice è implementata
 }
@@ -51,7 +51,7 @@ type Submission {
     test_id: ObjectId!
     test: Test!
     document: JSON!
-    answers: [Answer!]!
+    answers: [AnswerItem!]!
     author_id: ObjectId!
     author: User!
     started_on: Timestamp!

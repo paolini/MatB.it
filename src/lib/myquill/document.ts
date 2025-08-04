@@ -5,7 +5,7 @@ import { Delta, AttributeMap } from './myquill'
 export type Formula = {
   type: "formula"
   value: string
-  displaystyle: boolean
+  displaystyle?: boolean
 }
 
 export type Node = string | Formula | Span | List
@@ -172,7 +172,8 @@ function push_formula(line: Line, formula: object, attributes: AttributeMap | un
     if ('displaystyle' in formula && typeof formula.displaystyle === 'boolean') {
       displaystyle = formula.displaystyle 
     }
-    const node: Formula = {type:"formula", value, displaystyle}
+    const node: Formula = {type:"formula", value }
+    if (displaystyle) node.displaystyle = true
     push_node(line.nodes, decorate_node(node, attributes))
   } else {
     push_error(line, `invalid formula ${JSON.stringify(formula)}`)

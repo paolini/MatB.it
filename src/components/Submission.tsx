@@ -1,10 +1,9 @@
 "use client"
-import { gql, useMutation, useQuery } from '@apollo/client'
+import { gql, useQuery } from '@apollo/client'
 
-import { Test, Profile, Submission } from '@/app/graphql/generated'
-import { Loading, Error, EDIT_BUTTON_CLASS, CANCEL_BUTTON_CLASS, DELETE_BUTTON_CLASS, BUTTON_CLASS } from '@/components/utils'
-import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { Profile, Submission } from '@/app/graphql/generated'
+import { Loading, Error } from '@/components/utils'
+import { useState } from 'react'
 import DocumentElement from './DocumentElement'
 
 const SubmissionQuery = gql`
@@ -35,12 +34,26 @@ export default function SubmissionWrapper({_id}: {_id: string}) {
     const [editMode, setEditMode] = useState(false)
     const { loading, error, data } = useQuery<{submission: Submission, profile: Profile}>(
         SubmissionQuery, {variables: { _id }})
+    const [answers, setAnswers] = useState<Record<string, number>>({})
 
     if (error) return <Error error={error} />    
     if (loading || !data) return <Loading />
 
     const { submission, profile } = data
-    const context = { parents: [], answers: submission.answers || undefined }
+
+    return <SubmissionElement submission={submission} />
+}
+
+function SubmissionElement({submission}:{
+    submission: Submission,
+}) {
+    const answers_map = Object.fromEntries((submission.answers || []).map((answer) => [answer.note_id, answer.answer]))
+    const [answers,setAnswers] = useState<Record<string,number>>(answers_map)
+    const context = { 
+        parents: [], 
+        answers,
+        setAnswers,
+    }
 
     return <>
         <h1>{submission.test.title || `submission ${submission._id}`}</h1>
@@ -48,6 +61,6 @@ export default function SubmissionWrapper({_id}: {_id: string}) {
             context={context}
             document={submission.document}
         />
-        <pre>{JSON.stringify({submission},null,2)}</pre>
+        <pre>{JSON.stringify({context},null,2)}</pre>
     </>
 }
