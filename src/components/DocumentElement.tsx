@@ -2,8 +2,9 @@
 import React from 'react'
 import 'katex/dist/katex.min.css'
 
-import NoteEmbed, {DocumentEmbed} from './NoteEmbed'
-import {Document, Paragraph, Node, Formula, List, Choice, NoteRef } from '@/lib/myquill/document_from_delta'
+import NoteEmbed, { DocumentEmbed } from './NoteEmbed'
+import { Document, Paragraph, Node, Formula, List, Choice, NoteRef } from '@/lib/myquill/document'
+import { ObjectId } from 'bson'
 
 // Dichiarazione di tipo per KaTeX
 declare global {
@@ -15,10 +16,10 @@ declare global {
 }
 
 export type Context = {
-  parents: string[] // Array di ID dei genitori per evitare loop infiniti
+  parents: ObjectId[] // Array di ID dei genitori per evitare loop infiniti
 }
 
-export default function DocumentElement({context,document}:{context:Context,document: Document}) {
+export default function DocumentElement({context,document}:{context:Context, document: Document}) {
   return document.paragraphs.map((paragraph,key) => <ParagraphElement key={key} context={context} paragraph={paragraph} />)
 }
 
@@ -33,9 +34,9 @@ function ParagraphElement({context,paragraph}:{context:Context,paragraph: Paragr
     }
     // asincrono
     if (context.parents.includes(paragraph.note_id)) {
-      return <span className="ql-note-ref-simple">[Circular reference to note: {paragraph.note_id}]</span>
+      return <span className="ql-note-ref-simple">[Circular reference to note: {`${paragraph.note_id}`}]</span>
     }
-    return <NoteEmbed noteId={paragraph.note_id} context={context} />
+    return <NoteEmbed note_id={paragraph.note_id} context={context} />
   }
   if (paragraph.attribute === 'h1') return <h1 className="note"><LineElement nodes={paragraph.line.nodes} /></h1>
   if (paragraph.attribute === 'h2') return <h2 className="note"><LineElement nodes={paragraph.line.nodes} /></h2>

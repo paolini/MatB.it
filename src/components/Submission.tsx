@@ -29,7 +29,7 @@ const SubmissionQuery = gql`
 
 export default function SubmissionWrapper({_id}: {_id: string}) {
     const [editMode, setEditMode] = useState(false)
-    const { loading, error, data, refetch } = useQuery<{submission: Submission, profile: Profile}>(
+    const { loading, error, data } = useQuery<{submission: Submission, profile: Profile}>(
         SubmissionQuery, {variables: { _id }})
 
     if (error) return <Error error={error} />    
@@ -39,7 +39,7 @@ export default function SubmissionWrapper({_id}: {_id: string}) {
     const context = { parents: [] }
 
     return <>
-        Submission {submission._id}
+        <h1>{submission.test.title || `submission ${submission._id}`}</h1>
         <DocumentElement 
             context={context}
             document={submission.document}

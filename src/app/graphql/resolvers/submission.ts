@@ -1,19 +1,113 @@
 import { ObjectId } from 'mongodb'
 
 import { Context } from '../types'
-import { Submission, Test } from '../generated'
-import { getSubmissionsCollection, SUBMISSION_PIPELINE } from '@/lib/models'
+import { Submission } from '../generated'
+import { getNotesCollection, getSubmissionsCollection, SUBMISSION_PIPELINE } from '@/lib/models'
+import { document_from_delta, Document, Paragraph, NoteRef, Node } from '@/lib/myquill/document'
+import { Delta } from '@/lib/myquill/myquill'
+import { MongoSubmission, MongoAnswer } from '@/lib/models'
 
 export default async function (_parent: unknown, {_id}: { _id: ObjectId }, context: Context): Promise<Submission | null> {
     const user = context.user
     const collection = getSubmissionsCollection(context.db)
-    const items = await collection.aggregate<Submission>([
+    const notesCollection = getNotesCollection(context.db)
+    
+    const items = await collection.aggregate<Submission & MongoSubmission>([
         { $match: { _id } },
         ...SUBMISSION_PIPELINE,
     ]).toArray()
 
     if (items.length === 0) throw new Error('Submission not found')
     const submission = items[0]
+    const test = submission.test
 
-    return submission
+    if (!user) throw new Error('Not authenticated')
+    if (!(test.author_id.equals(user._id)) 
+        && !(submission.author_id.equals(user._id))) {
+        throw new Error('Not authorized to view this submission')
+    }
+
+    const note = await note_loader(test.note_id)
+    if (!note) throw new Error('Note not found')
+
+    const answers = submission.answers || []
+
+    const options = {
+        submission: true,
+        note_loader,
+        note_id: test.note_id
+    }
+
+    const document = await document_from_delta(note.delta, options)
+    shuffle_and_insert_answers(document, submission.answers || [])
+
+    return {
+        ...submission,
+        document
+    }
+
+    async function note_loader(note_id: ObjectId) {
+        const note = await notesCollection.findOne({ _id: note_id })
+        return note ? {
+            delta: note.delta as Delta,
+            variant: note.variant,
+            title: note.title
+        } : null
+    }
+}
+
+function shuffle_and_insert_answers(document: Document, answers: MongoAnswer[]) {
+    const map = Object.fromEntries(answers.map(answer => [answer.note_id.toString(), answer]))
+
+    recurse_document(document)
+
+    function recurse_document(document: Document) {
+        const note_id = document.options.note_id
+        if (!note_id) throw new Error("invalid document: no note_id")
+        document.paragraphs.forEach((p: Paragraph|NoteRef) => {
+            if (p.type === 'note-ref') {
+                if (p.document) {
+                    recurse_document(p.document)
+                }
+            } else {
+                p.line.nodes.forEach((node:Node) => {
+                    if (typeof node === 'string') return
+                    if (node.type === 'list' && node.attribute === 'choice') {
+                        const n = node.lines.length
+                        const answer = get_choice_answer(n, note_id)
+                        if (!(answer.permutation && answer.permutation.length === node.lines.length)) {
+                            throw new Error(`invalid permutation in question ${note_id}`)
+                        }
+                        node.lines = answer.permutation.map(i => node.lines[i])
+                        if (answer.answer) {
+                            node.selected = answer.permutation[answer.answer]
+                        }
+                    }
+                })
+            }
+        })
+    }
+
+    function get_choice_answer(n: number, note_id: ObjectId): MongoAnswer {
+        let answer = map[note_id.toString()]
+        if (answer) return answer
+        answer = {
+            note_id,
+            permutation: shuffle([...Array(n).keys()]),
+        }
+        answers.push(answer)
+        map[note_id.toString()] = answer
+        return answer
+    }
+}
+
+function shuffle(array: number[]) {
+  let currentIndex = array.length;
+  while (currentIndex != 0) {
+    let randomIndex = Math.floor(Math.random() * currentIndex);
+    currentIndex--;
+    [array[currentIndex], array[randomIndex]] = [
+      array[randomIndex], array[currentIndex]];
+  }
+  return array
 }

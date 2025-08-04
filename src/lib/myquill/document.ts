@@ -1,3 +1,4 @@
+import { ObjectId } from 'bson'
 import { Delta, AttributeMap } from './myquill'
 
 export type Formula = {
@@ -34,6 +35,7 @@ export type Choice = {
   type: "list"
   attribute: "choice"
   lines: Line[]
+  selected?: number // 0-index of selected choice, undefined if not selected
 }
 
 export type Paragraph = {
@@ -44,7 +46,7 @@ export type Paragraph = {
 
 export type NoteRef = {
   type: "note-ref"
-  note_id: string
+  note_id: ObjectId
   document?: Document // non c'è se il caricamento è asincrono
 }
 
@@ -56,10 +58,11 @@ export type LoaderData = {
 
 export type Options = {
   submission?: boolean
-  note_loader?: (note_id: string) => Promise<LoaderData|null>
-  parents?: string[] // per evitare loops
+  note_loader?: (note_id: ObjectId) => Promise<LoaderData|null>
+  parents?: ObjectId[] // per evitare loops
   variant?: string
   title?: string
+  note_id?: ObjectId
 }
 
 export type Document = {
@@ -117,7 +120,8 @@ function push_newline(document: Document, given_line: Line, attributes: Attribut
   const new_line: Line = { type:"line", nodes: given_line.nodes }
   given_line.nodes = []
 
-  const listType: "" | "bullet" | "ordered" | "choice" = attributes && typeof attributes.list === 'string' && (attributes.list as 'bullet' | 'ordered' | 'choice')
+  const listType: "" | "bullet" | "ordered" | "choice" 
+    = attributes && typeof attributes.list === 'string' && (attributes.list as 'bullet' | 'ordered' | 'choice')
     || attributes && typeof attributes.list === 'object' && attributes.list && 'list' in attributes.list && (attributes.list.list as 'choice')
     || ''
   if (listType) {
@@ -177,23 +181,25 @@ function push_error_paragraph(document: Document, error: string) {
 async function push_note_ref(document: Document, note_ref: object, attributes: AttributeMap | undefined) {
   if (note_ref && 'note_id' in note_ref && typeof note_ref.note_id === 'string') {
     const note_loader = document.options.note_loader
+    const note_id = new ObjectId(note_ref.note_id)
     const paragraph: NoteRef = {
-      type:"note-ref", 
-      note_id: note_ref.note_id,
-    }
+        type: "note-ref",
+        note_id,
+      }
     if (note_loader) {
       const options = document.options
-      if (options.parents && options.parents.includes(note_ref.note_id)) {
-          push_error_paragraph(document, `circular reference ${note_ref.note_id}`)
+      if (options.parents && options.parents.includes(note_id)) {
+          push_error_paragraph(document, `circular reference ${note_id}`)
           return
       }
-      const data = await note_loader(note_ref.note_id)
+      const data = await note_loader(note_id)
       if (data) {
         paragraph.document = await document_from_delta(data.delta, {
           ...options,
-          parents: [...(options.parents||[]),note_ref.note_id],
+          parents: [...(options.parents||[]),note_id],
           variant: data.variant,
-          title: data.title
+          title: data.title,
+          note_id,
         })
       }
      }
@@ -203,8 +209,8 @@ async function push_note_ref(document: Document, note_ref: object, attributes: A
   }
 }
 
-export default async function document_from_delta(delta: Delta, options: Options): Promise<Document> {
-  const document: Document = { paragraphs: [], options}
+export async function document_from_delta(delta: Delta, options: Options): Promise<Document> {
+  const document: Document = { paragraphs: [], options: {...options}}
   const line: Line = { type: 'line', nodes: []}
 
   for (const op of delta.ops) {

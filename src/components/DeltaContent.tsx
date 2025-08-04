@@ -1,10 +1,11 @@
 "use client"
 import React from 'react'
 import 'katex/dist/katex.min.css'
+import { ObjectId } from 'bson'
 
 import { Delta  } from '@/lib/myquill/myquill.js'
-import document_from_delta, {Document } from '@/lib/myquill/document_from_delta'
-import DocumentElement from './DocumentElement'
+import { document_from_delta, Document } from '@/lib/myquill/document'
+import DocumentElement, {Context} from './DocumentElement'
 
 // Dichiarazione di tipo per KaTeX
 declare global {
@@ -13,10 +14,6 @@ declare global {
       renderToString: (input: string, options?: Record<string, unknown>) => string;
     };
   }
-}
-
-export type Context = {
-  parents: string[] // Array di ID dei genitori per evitare loop infiniti
 }
 
 import { useEffect, useState } from 'react'

@@ -211,7 +211,9 @@
 
 .ql-variant-container.ql-var-test h1,
 .ql-variant-container.ql-var-test .embedded-note-title,
-.ql-variant-container.ql-var-test h4 {
+.ql-variant-container.ql-var-test h4,
+.ql-variant-container.ql-var-question .embedded-note-title
+{
   color: #c71c1c;
   font-weight: bold;
 }

@@ -79,9 +79,15 @@ export type MongoSubmission = {
     _id: ObjectId
     test_id: ObjectId
     author_id: ObjectId // chi ha svolto il test (studente)
-    document: object // testo personalizzato del questionario
     started_on: Date // quando è iniziato
-    completed_on: Date|null // quando (e se) è stato inviato 
+    completed_on: Date|null // quando (e se) è stato inviato
+    answers: MongoAnswer[]
+}
+
+export type MongoAnswer = {
+    note_id: ObjectId // id della nota (HEAD) a cui si riferisce la risposta
+    permutation?: number[]
+    answer?: number // risposta depermutata 0-index
 }
 
 export function getNotesCollection(db: Db) {

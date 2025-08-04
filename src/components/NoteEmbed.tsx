@@ -2,9 +2,11 @@
 import React, { useState } from 'react'
 import { useQuery, gql } from '@apollo/client'
 import 'katex/dist/katex.min.css'
+import { ObjectId } from 'bson'
 
 import { Note } from '@/app/graphql/generated'
-import DeltaContent, { Context } from './DeltaContent'
+import DeltaContent from './DeltaContent'
+import { Context } from './DocumentElement'
 
 const NOTE_QUERY = gql`
   query Note($id: ObjectId!) {
@@ -21,26 +23,26 @@ const NOTE_QUERY = gql`
   }
 `
 
-export default function NoteEmbed({context, noteId}: { 
-  noteId: string
+export default function NoteEmbed({context, note_id}: { 
+  note_id: ObjectId
   context: Context
 }) {
   const { data, loading, error } = useQuery(NOTE_QUERY, {
-    variables: { id: noteId }
+    variables: { id: note_id }
   });
 
   if (loading) {
-    return <span className="ql-note-ref-simple">[Loading note: {noteId}]</span>;
+    return <span className="ql-note-ref-simple">[Loading note: {`${note_id}`}]</span>;
   }
 
   const note = data?.note;
   if (error || !note) {
-    return <span className="ql-note-ref-simple">[Note not found: {noteId}]</span>;
+    return <span className="ql-note-ref-simple">[Note not found: {`${note_id}`}]</span>;
   }
 
   return (
     <NoteEmbedInner
-      context={{...context, parents: [...context.parents, noteId]}}
+      context={{...context, parents: [...context.parents, note_id]}}
       note={note}
     />
   );
@@ -99,11 +101,12 @@ export function DocumentEmbed({variant, title, children}: {
 }) {
   return <div 
       className={`ql-variant-container ql-var-${variant || 'default'}`}
-      style={{ margin: '0.5em 0', padding: '0.5em', position: 'relative' }}
     >
       <div className="embedded-note-header">
         { title && 
-        <span className="embedded-note-title" style={{ margin: '0 0 0.3em 0', fontSize: '1em' }}>{title}</span>
+        <span className="embedded-note-title" style={{ margin: '0 0 0.3em 0', fontSize: '1em' }}>
+          {title}
+        </span>
         }
         {children}
       </div>
