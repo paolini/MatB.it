@@ -5,7 +5,7 @@ import 'katex/dist/katex.min.css'
 import { ObjectId } from 'bson'
 
 import { Note } from '@/app/graphql/generated'
-import DeltaContent from './DeltaContent'
+import NoteContent from './NoteContent'
 import { Context } from './DocumentElement'
 
 const NOTE_QUERY = gql`
@@ -31,21 +31,15 @@ export default function NoteEmbed({context, note_id}: {
     variables: { _id: note_id }
   });
 
-  if (loading) {
-    return <span className="ql-note-ref-simple">[Loading note: {`${note_id}`}]</span>;
-  }
+  if (loading) return <span className="ql-note-ref-simple">[Loading note: {`${note_id}`}]</span>
 
   const note = data?.note;
-  if (error || !note) {
-    return <span className="ql-note-ref-simple">[Note not found: {`${note_id}`}]</span>;
-  }
+  if (error || !note) return <span className="ql-note-ref-simple">[Note not found: {`${note_id}`}]</span>
 
-  return (
-    <NoteEmbedInner
+  return <NoteEmbedInner
       context={{...context, parents: [...context.parents, note_id.toString()]}}
       note={note}
     />
-  );
 }
 
 export function NoteEmbedInner({ context, note }: {
@@ -67,8 +61,8 @@ export function NoteEmbedInner({ context, note }: {
 
   return <DocumentEmbed variant={note.variant || undefined} title={note.title}>
     <div className="embedded-note-content">
-      <DeltaContent 
-        delta={note.delta} 
+      <NoteContent 
+        note={note}
         context={context}
       />
     </div>

@@ -1,4 +1,6 @@
+import { ObjectId } from 'bson'
 import { Delta, AttributeMap } from './myquill'
+
 
 export type Formula = {
   type: "formula"
@@ -43,29 +45,35 @@ export type Paragraph = {
   line: Line
 }
 
-export type NoteRef = {
-  type: "note-ref"
-  note_id: string
-  document?: Document // non c'è se il caricamento è asincrono
-}
-
-export type LoaderData = {
+export type NoteData = {
   delta: Delta
-  variant?: string
-  title?: string
+  variant: string|null
+  title: string
+  _id: ObjectId
 }
 
 export type Options = {
-  submission?: boolean
-  note_loader?: (note_id: string) => Promise<LoaderData|null>
-  parents?: string[] // per evitare loops
+  note_loader?: (note_id: string) => Promise<NoteData|null>
   variant?: string
   title?: string
   note_id?: string
 }
 
+export type NoteRef = {
+  type: "note-ref"
+  note_id: string
+}
+
 export type Document = {
-  paragraphs: (Paragraph|NoteRef)[]
+  type: "document"
+  paragraphs: (Paragraph|NoteRef|Document)[]
+  variant?: string
+  title?: string
+  note_id?: string
+}
+
+export type Context = {
+  parents: string[]
   options: Options
 }
 
@@ -177,40 +185,53 @@ function push_error_paragraph(document: Document, error: string) {
   document.paragraphs.push({type: "paragraph", attribute: "", line})
 }
 
-async function push_note_ref(document: Document, note_ref: object, attributes: AttributeMap | undefined) {
+async function push_note_ref(context: Context, document: Document, note_ref: object, attributes: AttributeMap | undefined) {
   if (note_ref && 'note_id' in note_ref && typeof note_ref.note_id === 'string') {
-    const note_loader = document.options.note_loader
+    const note_loader = context.options.note_loader
     const note_id = note_ref.note_id
-    const paragraph: NoteRef = {
-        type: "note-ref",
-        note_id,
-      }
     if (note_loader) {
-      const options = document.options
-      if (options.parents && options.parents.includes(note_id)) {
+      if (context.parents.includes(note_id)) {
           push_error_paragraph(document, `circular reference ${note_id}`)
           return
       }
       const data = await note_loader(note_id)
       if (data) {
-        paragraph.document = await document_from_delta(data.delta, {
-          ...options,
-          parents: [...(options.parents||[]),note_id],
-          variant: data.variant,
-          title: data.title,
-          note_id,
-        })
+        const sub_document = await document_from_note_recurse({
+          ...context, 
+          parents: [...context.parents, note_id]
+        }, data)
+        document.paragraphs.push(sub_document)
       }
-     }
-    document.paragraphs.push(paragraph)    
+    } else {
+      const paragraph: NoteRef = {
+          type: "note-ref",
+          note_id,
+        }
+      document.paragraphs.push(paragraph)    
+    }
   } else {
     push_error_paragraph(document, `invalid note reference ${JSON.stringify(note_ref)}`)
   }
 }
 
-export async function document_from_delta(delta: Delta, options: Options): Promise<Document> {
-  const document: Document = { paragraphs: [], options: {...options}}
+export async function document_from_note(note: NoteData, options?: Options): Promise<Document> {
+  const context: Context = {
+    options: options || {},
+    parents: []
+  }
+  return await document_from_note_recurse(context, note)
+}
+  
+async function document_from_note_recurse(context: Context, note: NoteData): Promise<Document> {
+  const document: Document = {
+    type: "document",
+    paragraphs: [],
+    title: note.title,
+    variant: note.variant||undefined,
+    note_id: note._id.toString()
+  }
   const line: Line = { type: 'line', nodes: []}
+  const delta = note.delta
 
   for (const op of delta.ops) {
     const insert = op.insert
@@ -226,7 +247,7 @@ export async function document_from_delta(delta: Delta, options: Options): Promi
         push_formula(line, insert.formula, op.attributes)        
       } else if (insert["note-ref"]) {
         if (line.nodes.length > 0) push_newline(document, line, {})
-        await push_note_ref(document, insert["note-ref"], op.attributes)
+        await push_note_ref(context, document, insert["note-ref"], op.attributes)
       } else {
         push_error(line, `invalid insert object ${JSON.stringify(insert)}`)
       }

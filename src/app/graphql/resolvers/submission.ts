@@ -3,7 +3,7 @@ import { ObjectId } from 'mongodb'
 import { Context } from '../types'
 import { Submission } from '../generated'
 import { getNotesCollection, getSubmissionsCollection, SUBMISSION_PIPELINE } from '@/lib/models'
-import { document_from_delta, Document, Paragraph, NoteRef, Node } from '@/lib/myquill/document'
+import { document_from_note, Document, Paragraph, NoteRef, Node, NoteData } from '@/lib/myquill/document'
 import { Delta } from '@/lib/myquill/myquill'
 import { MongoSubmission, MongoAnswer } from '@/lib/models'
 
@@ -30,16 +30,17 @@ export default async function (_parent: unknown, {_id}: { _id: ObjectId }, conte
     const note = await note_loader(test.note_id)
     if (!note) throw new Error('Note not found')
 
-    const answers = submission.answers || []
-
+        
     const options = {
-        submission: true,
         note_loader,
         note_id: test.note_id.toString()
     }
-
-    const document = await document_from_delta(note.delta, options)
-    shuffle_and_insert_answers(document, submission.answers || [])
+        
+    const document = await document_from_note(note, options)
+    const answers = submission.answers || []
+    const answers_must_be_saved = shuffle_and_insert_answers(document, submission.answers)
+    await collection.updateOne({_id: submission._id}, { $set: { answers } })
+//    strip_answers(document)
 
     return {
         ...submission,
@@ -47,30 +48,31 @@ export default async function (_parent: unknown, {_id}: { _id: ObjectId }, conte
         document,
     }
 
-    async function note_loader(note_id: string) {
+    async function note_loader(note_id: string): Promise<NoteData|null> {
         const note = await notesCollection.findOne({ _id: new ObjectId(note_id) })
         return note ? {
             delta: note.delta as Delta,
-            variant: note.variant,
-            title: note.title
+            variant: note.variant || null,
+            title: note.title,
+            _id: new ObjectId(note_id)
         } : null
     }
 }
 
 function shuffle_and_insert_answers(document: Document, answers: MongoAnswer[]) {
+    let answersUpdated = false
     const map = Object.fromEntries(answers.map(answer => [answer.note_id.toString(), answer]))
 
     recurse_document(document)
+    return answersUpdated
 
     function recurse_document(document: Document) {
-        const note_id = document.options.note_id
+        const note_id = document.note_id
         if (!note_id) throw new Error("invalid document: no note_id")
-        document.paragraphs.forEach((p: Paragraph|NoteRef) => {
-            if (p.type === 'note-ref') {
-                if (p.document) {
-                    recurse_document(p.document)
-                }
-            } else {
+        document.paragraphs.forEach((p: Paragraph|NoteRef|Document) => {
+            if (p.type === 'document') {
+                    recurse_document(p)
+            } else if (p.type === 'paragraph') {
                 p.line.nodes.forEach((node:Node) => {
                     if (typeof node === 'string') return
                     if (node.type === 'list' && node.attribute === 'choice') {
@@ -98,6 +100,7 @@ function shuffle_and_insert_answers(document: Document, answers: MongoAnswer[]) 
         }
         answers.push(answer)
         map[note_id] = answer
+        answersUpdated = true
         return answer
     }
 }
@@ -112,3 +115,26 @@ function shuffle(array: number[]) {
   }
   return array
 }
+
+/*
+ toglie le permutazioni dal documento
+*/
+/*
+function strip_answers(document: Document) {
+    document.paragraphs.forEach(paragraph => {
+        if (paragraph.type === 'note-ref') {
+            if (paragraph.document) strip_answers(paragraph.document)
+        } else {
+            paragraph.line.nodes.forEach(strip_node)
+        }
+    })
+}
+
+function strip_node(node: Node) {
+    if (typeof node === 'string') return
+    else if (node.type === 'span') node.nodes.forEach(strip_node)
+    else if (node.type === 'list') {
+        node.
+    }
+} 
+    */

@@ -6,7 +6,7 @@ import { useState } from 'react';
 import { Note, Profile } from '@/app/graphql/generated'
 import TestList from '@/components/TestList'
 import { Loading, Error, EDIT_BUTTON_CLASS } from '@/components/utils'
-import DeltaContent from '@/components/DeltaContent'
+import NoteContent from '@/components/NoteContent'
 import NoteForm from '@/components/NoteForm'
 
 const NoteQuery = gql`
@@ -78,9 +78,7 @@ export default function NoteWrapper({_id}: {_id: string}) {
                 {note.title}
             </h1>
             <div className="delta">
-                <DeltaContent 
-                    delta={note.delta}
-                />
+                <NoteContent note={note} />
             </div>
             {note.private && <span className="text-sm text-gray-500">Nota privata</span>}
         </div>

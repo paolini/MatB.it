@@ -25,15 +25,14 @@ export default function DocumentElement({context,document}:{context:Context, doc
   return document.paragraphs.map((paragraph,key) => <ParagraphElement key={key} context={context} paragraph={paragraph} />)
 }
 
-function ParagraphElement({context,paragraph}:{context:Context,paragraph: Paragraph|NoteRef}) {
+function ParagraphElement({context,paragraph}:{context:Context, paragraph: Paragraph|NoteRef|Document}) {
+  if (paragraph.type === 'document') {
+      // sincrono
+      return <DocumentEmbed variant={paragraph.variant} title={paragraph.title}>
+          <DocumentElement context={context} document={paragraph}/>
+      </DocumentEmbed>
+  }
   if (paragraph.type === 'note-ref') {
-    if (paragraph.document) {
-        // sincrono
-        const options = paragraph.document.options
-        return <DocumentEmbed variant={options.variant} title={options.title}>
-            <DocumentElement context={context} document={paragraph.document}/>
-        </DocumentEmbed>
-    }
     // asincrono
     if (context.parents.includes(paragraph.note_id)) {
       return <span className="ql-note-ref-simple">[Circular reference to note: {`${paragraph.note_id}`}]</span>

@@ -2,8 +2,8 @@
 import React from 'react'
 import 'katex/dist/katex.min.css'
 
-import { Delta  } from '@/lib/myquill/myquill.js'
-import { document_from_delta, Document } from '@/lib/myquill/document'
+import { document_from_note, Document } from '@/lib/myquill/document'
+import { Note } from '@/app/graphql/generated'
 import DocumentElement, {Context} from './DocumentElement'
 
 // Dichiarazione di tipo per KaTeX
@@ -18,8 +18,8 @@ declare global {
 import { useEffect, useState } from 'react'
 import { Loading } from './utils'
 
-export default function DeltaContent({ delta, context }: {
-  delta: Delta
+export default function NoteContent({ note, context }: {
+  note: Note,
   context?: Context
 }) {
   const [document, setDocument] = useState<Document|null>(null)
@@ -28,18 +28,18 @@ export default function DeltaContent({ delta, context }: {
   useEffect(() => {
     let mounted = true
     async function load() {
-      if (!delta || !delta.ops) {
+      if (!note.delta || !note.delta.ops) {
         setDocument(null)
         return
       }
-      const doc = await document_from_delta(delta, {parents:[]})
+      const doc = await document_from_note(note)
       if (mounted) setDocument(doc)
     }
     load()
     return () => { mounted = false }
-  }, [delta])
+  }, [note])
 
-  if (!delta || !delta.ops) return <></>
+  if (!note.delta || !note.delta.ops) return <></>
   if (!document) return <Loading />
 
   return <>

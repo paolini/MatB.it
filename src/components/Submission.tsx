@@ -48,6 +48,6 @@ export default function SubmissionWrapper({_id}: {_id: string}) {
             context={context}
             document={submission.document}
         />
-        <pre>{JSON.stringify({submission})}</pre>
+        <pre>{JSON.stringify({submission},null,2)}</pre>
     </>
 }
