@@ -26,6 +26,11 @@ export type AnswerItem = {
   note_id: Scalars['ObjectId']['output'];
 };
 
+export type AnswerItemInput = {
+  answer: InputMaybe<Scalars['Int']['input']>;
+  note_id: Scalars['ObjectId']['input'];
+};
+
 export type Mutation = {
   __typename?: 'Mutation';
   deleteNote: Maybe<Scalars['Boolean']['output']>;
@@ -34,6 +39,7 @@ export type Mutation = {
   newSubmission: Scalars['ObjectId']['output'];
   newTest: Maybe<Scalars['Boolean']['output']>;
   updateNote: Maybe<Note>;
+  updateSubmission: Maybe<Scalars['Boolean']['output']>;
 };
 
 
@@ -72,6 +78,12 @@ export type MutationUpdateNoteArgs = {
   private: InputMaybe<Scalars['Boolean']['input']>;
   title: InputMaybe<Scalars['String']['input']>;
   variant: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type MutationUpdateSubmissionArgs = {
+  _id: Scalars['ObjectId']['input'];
+  answers: Array<AnswerItemInput>;
 };
 
 export type Note = {
@@ -228,6 +240,7 @@ export type DirectiveResolverFn<TResult = {}, TParent = {}, TContext = {}, TArgs
 /** Mapping between all available schema types and the resolvers types */
 export type ResolversTypes = ResolversObject<{
   AnswerItem: ResolverTypeWrapper<AnswerItem>;
+  AnswerItemInput: AnswerItemInput;
   Boolean: ResolverTypeWrapper<Scalars['Boolean']['output']>;
   Int: ResolverTypeWrapper<Scalars['Int']['output']>;
   JSON: ResolverTypeWrapper<Scalars['JSON']['output']>;
@@ -246,6 +259,7 @@ export type ResolversTypes = ResolversObject<{
 /** Mapping between all available schema types and the resolvers parents */
 export type ResolversParentTypes = ResolversObject<{
   AnswerItem: AnswerItem;
+  AnswerItemInput: AnswerItemInput;
   Boolean: Scalars['Boolean']['output'];
   Int: Scalars['Int']['output'];
   JSON: Scalars['JSON']['output'];
@@ -278,6 +292,7 @@ export type MutationResolvers<ContextType = Context, ParentType extends Resolver
   newSubmission: Resolver<ResolversTypes['ObjectId'], ParentType, ContextType, RequireFields<MutationNewSubmissionArgs, 'test_id'>>;
   newTest: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType, RequireFields<MutationNewTestArgs, 'note_id'>>;
   updateNote: Resolver<Maybe<ResolversTypes['Note']>, ParentType, ContextType, RequireFields<MutationUpdateNoteArgs, '_id'>>;
+  updateSubmission: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType, RequireFields<MutationUpdateSubmissionArgs, '_id' | 'answers'>>;
 }>;
 
 export type NoteResolvers<ContextType = Context, ParentType extends ResolversParentTypes['Note'] = ResolversParentTypes['Note']> = ResolversObject<{

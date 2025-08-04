@@ -30,7 +30,6 @@ export default async function (_parent: unknown, {_id}: { _id: ObjectId }, conte
     const note = await note_loader(test.note_id)
     if (!note) throw new Error('Note not found')
 
-        
     const options = {
         note_loader,
         note_id: test.note_id.toString()
@@ -38,14 +37,22 @@ export default async function (_parent: unknown, {_id}: { _id: ObjectId }, conte
         
     const document = await document_from_note(note, options)
     const answers = submission.answers || []
-    const answers_must_be_saved = shuffle_and_insert_answers(document, submission.answers)
-    await collection.updateOne({_id: submission._id}, { $set: { answers } })
-//    strip_answers(document)
+    const answers_must_be_saved = shuffle_and_insert_answers(document, answers)
+    
+    if (answers_must_be_saved) await collection.updateOne({_id: submission._id}, { $set: { answers } })
 
     return {
         ...submission,
-        answers,
-        document,
+        answers: answers.map((a:MongoAnswer) => (
+            a.permutation && typeof a.answer === 'number' ? {
+                note_id: a.note_id,
+                answer: a.permutation[a.answer],
+                permutation: a.permutation,
+            } : {
+                note_id: a.note_id,
+                answer: a.answer || null,
+            })),
+            document,
     }
 
     async function note_loader(note_id: string): Promise<NoteData|null> {

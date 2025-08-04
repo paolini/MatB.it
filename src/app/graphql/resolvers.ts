@@ -14,6 +14,7 @@ import deleteNote from './resolvers/deleteNote'
 import newTest from './resolvers/newTest'
 import deleteTest from './resolvers/deleteTest'
 import newSubmission from './resolvers/newSubmission'
+import updateSubmission from './resolvers/updateSubmission'
 
 export const resolvers = {
   ObjectId: ObjectIdType,
@@ -41,6 +42,7 @@ export const resolvers = {
     deleteTest,
 
     newSubmission,
+    updateSubmission,
   }
 } satisfies Partial<Resolvers<Context>>
 

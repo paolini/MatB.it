@@ -18,7 +18,7 @@ declare global {
 export type Context = {
   parents: string[], // Array di ID dei genitori per evitare loop infiniti
   answers: Record<string, number>,
-  setAnswers: Dispatch<SetStateAction<Record<string,number>>>,
+  setAnswer: (id: string, answer: number) => void
 }
 
 export default function DocumentElement({context,document}:{context:Context, document: Document}) {
@@ -126,7 +126,7 @@ function ListElement({context, list}:{context: Context, list:List}) {
 
 function ChoiceElement({context, choice}:{context: Context, choice:Choice}) {
   const note_id = context?.parents.length>0 && context.parents[context.parents.length-1] || undefined
-  const answer = note_id ? context.answers[note_id] : undefined
+  const answer = note_id && context.answers ? context.answers[note_id] : undefined
   return <ul className="delta-choice-list">
     { choice.lines.map((line,i) => <li key={i} data-list="choice" style={{display: 'flex', alignItems: 'center', gap: '0.5em'}}>
         <input
@@ -134,11 +134,8 @@ function ChoiceElement({context, choice}:{context: Context, choice:Choice}) {
           style={{marginRight: '0.5em'}}
           checked={answer===i}
           onChange={() => {
-            if (!note_id) return
-            context.setAnswers(old => ({
-              ...old,
-              [note_id]:i,
-            }))
+            if (!(note_id && context.setAnswer)) return;
+            context.setAnswer(note_id, i)
           }}
         />
         <LineElement context={context} nodes={line.nodes} />

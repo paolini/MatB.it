@@ -46,6 +46,11 @@ type AnswerItem {
   answer: Int # per adesso solo choice è implementata
 }
 
+input AnswerItemInput {
+  note_id: ObjectId!
+  answer: Int
+}
+
 type Submission {
     _id: ObjectId!
     test_id: ObjectId!
@@ -71,8 +76,10 @@ type Mutation {
   newNote(title: String!, delta: JSON, private: Boolean, variant: String): Note
   updateNote(_id: ObjectId!, title: String, delta: JSON, private: Boolean, variant: String): Note
   deleteNote(_id: ObjectId!): Boolean
-  
+
   newTest(note_id: ObjectId!, title: String): Boolean
   deleteTest(_id: ObjectId!): Boolean
   newSubmission(test_id: ObjectId!): ObjectId!
+
+  updateSubmission(_id: ObjectId!, answers: [AnswerItemInput!]!): Boolean
 }
