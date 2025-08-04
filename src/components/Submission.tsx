@@ -20,6 +20,10 @@ const SubmissionQuery = gql`
             started_on
             completed_on
             document
+            answers {
+                note_id
+                answer
+            }
         }
         profile {
             _id
@@ -36,7 +40,7 @@ export default function SubmissionWrapper({_id}: {_id: string}) {
     if (loading || !data) return <Loading />
 
     const { submission, profile } = data
-    const context = { parents: [] }
+    const context = { parents: [], answers: submission.answers || undefined }
 
     return <>
         <h1>{submission.test.title || `submission ${submission._id}`}</h1>
@@ -44,5 +48,6 @@ export default function SubmissionWrapper({_id}: {_id: string}) {
             context={context}
             document={submission.document}
         />
+        <pre>{JSON.stringify({submission})}</pre>
     </>
 }

@@ -41,11 +41,17 @@ type Test {
     my_submissions: [Submission!]!
 }
 
+type Answer {
+  note_id: ObjectId!
+  answer: Int # per adesso solo choice è implementata
+}
+
 type Submission {
     _id: ObjectId!
     test_id: ObjectId!
     test: Test!
     document: JSON!
+    answers: [Answer!]!
     author_id: ObjectId!
     author: User!
     started_on: Timestamp!

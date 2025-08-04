@@ -9,8 +9,8 @@ import DeltaContent from './DeltaContent'
 import { Context } from './DocumentElement'
 
 const NOTE_QUERY = gql`
-  query Note($id: ObjectId!) {
-    note(_id: $id) {
+  query Note($_id: ObjectId!) {
+    note(_id: $_id) {
       _id
       title
       delta
@@ -28,7 +28,7 @@ export default function NoteEmbed({context, note_id}: {
   context: Context
 }) {
   const { data, loading, error } = useQuery(NOTE_QUERY, {
-    variables: { id: note_id }
+    variables: { _id: note_id }
   });
 
   if (loading) {
@@ -42,7 +42,7 @@ export default function NoteEmbed({context, note_id}: {
 
   return (
     <NoteEmbedInner
-      context={{...context, parents: [...context.parents, note_id]}}
+      context={{...context, parents: [...context.parents, note_id.toString()]}}
       note={note}
     />
   );

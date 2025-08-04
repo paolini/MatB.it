@@ -35,7 +35,7 @@ export default async function (_parent: unknown, {_id}: { _id: ObjectId }, conte
     const options = {
         submission: true,
         note_loader,
-        note_id: test.note_id
+        note_id: test.note_id.toString()
     }
 
     const document = await document_from_delta(note.delta, options)
@@ -43,11 +43,12 @@ export default async function (_parent: unknown, {_id}: { _id: ObjectId }, conte
 
     return {
         ...submission,
-        document
+        answers,
+        document,
     }
 
-    async function note_loader(note_id: ObjectId) {
-        const note = await notesCollection.findOne({ _id: note_id })
+    async function note_loader(note_id: string) {
+        const note = await notesCollection.findOne({ _id: new ObjectId(note_id) })
         return note ? {
             delta: note.delta as Delta,
             variant: note.variant,
@@ -88,15 +89,15 @@ function shuffle_and_insert_answers(document: Document, answers: MongoAnswer[]) 
         })
     }
 
-    function get_choice_answer(n: number, note_id: ObjectId): MongoAnswer {
-        let answer = map[note_id.toString()]
+    function get_choice_answer(n: number, note_id: string): MongoAnswer {
+        let answer = map[note_id]
         if (answer) return answer
         answer = {
-            note_id,
+            note_id: new ObjectId(note_id),
             permutation: shuffle([...Array(n).keys()]),
         }
         answers.push(answer)
-        map[note_id.toString()] = answer
+        map[note_id] = answer
         return answer
     }
 }

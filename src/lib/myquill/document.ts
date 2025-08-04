@@ -1,4 +1,3 @@
-import { ObjectId } from 'bson'
 import { Delta, AttributeMap } from './myquill'
 
 export type Formula = {
@@ -46,7 +45,7 @@ export type Paragraph = {
 
 export type NoteRef = {
   type: "note-ref"
-  note_id: ObjectId
+  note_id: string
   document?: Document // non c'è se il caricamento è asincrono
 }
 
@@ -58,11 +57,11 @@ export type LoaderData = {
 
 export type Options = {
   submission?: boolean
-  note_loader?: (note_id: ObjectId) => Promise<LoaderData|null>
-  parents?: ObjectId[] // per evitare loops
+  note_loader?: (note_id: string) => Promise<LoaderData|null>
+  parents?: string[] // per evitare loops
   variant?: string
   title?: string
-  note_id?: ObjectId
+  note_id?: string
 }
 
 export type Document = {
@@ -181,7 +180,7 @@ function push_error_paragraph(document: Document, error: string) {
 async function push_note_ref(document: Document, note_ref: object, attributes: AttributeMap | undefined) {
   if (note_ref && 'note_id' in note_ref && typeof note_ref.note_id === 'string') {
     const note_loader = document.options.note_loader
-    const note_id = new ObjectId(note_ref.note_id)
+    const note_id = note_ref.note_id
     const paragraph: NoteRef = {
         type: "note-ref",
         note_id,

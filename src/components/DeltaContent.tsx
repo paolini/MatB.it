@@ -1,7 +1,6 @@
 "use client"
 import React from 'react'
 import 'katex/dist/katex.min.css'
-import { ObjectId } from 'bson'
 
 import { Delta  } from '@/lib/myquill/myquill.js'
 import { document_from_delta, Document } from '@/lib/myquill/document'
