@@ -95,6 +95,7 @@ export function DocumentEmbed({variant, title, children}: {
 }) {
   return <div 
       className={`ql-variant-container ql-var-${variant || 'default'}`}
+      style={{ position: 'relative' }}
     >
       <div className="embedded-note-header">
         { title && 
