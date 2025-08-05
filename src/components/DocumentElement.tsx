@@ -1,5 +1,5 @@
 "use client"
-import React, { Dispatch, SetStateAction } from 'react'
+import React from 'react'
 import 'katex/dist/katex.min.css'
 
 import NoteEmbed, { DocumentEmbed } from './NoteEmbed'
@@ -132,7 +132,7 @@ function ChoiceElement({context, choice}:{context: Context, choice:Choice}) {
         <input
           type="radio"
           style={{marginRight: '0.5em'}}
-          checked={answer===i}
+          checked={answer===i || (answer === undefined && i === 0)}
           onChange={() => {
             if (!(note_id && context.setAnswer)) return;
             context.setAnswer(note_id, i)

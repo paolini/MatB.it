@@ -90,6 +90,5 @@ function SubmissionElement({submission}: {
             {isSubmitting ? 'Invio...' : 'invia risposte'}
         </button>
         {submitError && <Error error={submitError} />}
-        <pre>{JSON.stringify({ context }, null, 2)}</pre>
     </>
 }

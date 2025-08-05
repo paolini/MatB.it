@@ -5,6 +5,7 @@ import { Test, Profile } from '@/app/graphql/generated'
 import { Loading, Error, EDIT_BUTTON_CLASS, CANCEL_BUTTON_CLASS, DELETE_BUTTON_CLASS, BUTTON_CLASS } from '@/components/utils'
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { myTimestamp } from '@/lib/utils'
 
 const TestQuery = gql`
     query Test($_id: ObjectId!) {
@@ -75,7 +76,6 @@ const [startSubmission, { loading: isStarting, error: startError }] = useMutatio
         }, 1000);
         return () => clearInterval(interval);
     }, [])
-
     return <div className="matbit-test">
         <h1>
             {test.title || `Test ${test._id}`}
@@ -101,8 +101,8 @@ const [startSubmission, { loading: isStarting, error: startError }] = useMutatio
         {startError && <Error error={startError} />}
         {test.my_submissions.map(submission => <a key={submission._id} className={BUTTON_CLASS} href={`/submission/${submission._id}`}>
             { submission.completed_on 
-                ? `riapri test completato ${new Date(submission.completed_on).toLocaleString()}`
-                : `riprendi test ${new Date(submission.started_on).toLocaleString()}`
+                ? `riapri test completato il ${myTimestamp(submission.completed_on)}`
+                : `riprendi test del ${myTimestamp(submission.started_on)}`
             }
         </a>)}
     </div>
