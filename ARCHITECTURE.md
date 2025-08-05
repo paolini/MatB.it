@@ -1,10 +1,3 @@
-
-### 7. Test/Quiz Execution & Results Tracking
-- Possibilità per l'utente di eseguire test/quiz a scelta multipla presenti nelle note con variant "test"
-- Nuova collection `TestExecution` per tracciare ogni tentativo, risposte e punteggio
-- Flusso: l'utente avvia il test, risponde alle domande, invia le risposte e visualizza il risultato
-- I risultati sono visibili solo all'utente e all'autore (o secondo le regole di privacy della nota)
-- API GraphQL dedicate per avviare, inviare e consultare le esecuzioni dei test
 # MatBit - Project Overview for AI
 
 ## Project Description
@@ -69,15 +62,16 @@ MatBit is a **collaborative note-taking web application** built with Next.js and
 - **Note variants system** for mathematical environments (theorem, lemma, proof, etc.)
 
 ### 5. Delta Rendering & Note Embedding
-- **DeltaContent React component** for converting Delta format to React components with embedded note support
-- **Replaced HTML string generation** with direct React component rendering for better performance and security
-- **Apollo GraphQL integration** for direct note fetching instead of prop drilling
-- **Synchronous KaTeX rendering** using renderToString for mathematical formulas
-- **Recursive note embedding** with depth control and async note resolution via useQuery
-- **Visual variants** with CSS-based styling (colored backgrounds, borders, labels)
-- **Note information system** with clickable icons showing metadata (author, dates, privacy)
-- **Proper HTML structure** - embedded notes are rendered as block-level elements to avoid hydration errors
-- **Consistent note reference format** - all references use the standardized `{ "note-ref": { "note_id": "..." } }` format
+La rappresentazione e il rendering delle Note avvengono tramite una struttura dati Document, che astrae e normalizza il contenuto Quill Delta e i riferimenti ricorsivi:
+- **Struttura Document**: ogni nota viene trasformata in un albero Document che rappresenta blocchi, inlines, formule, riferimenti e metadati, consentendo parsing, validazione e rendering coerente.
+- **Componenti React (NoteContent, NoteEmbed, ecc.)**: il rendering avviene direttamente dal Document, senza generazione di HTML string, garantendo sicurezza, performance e coerenza tra server e client.
+- **Gestione ricorsiva dei riferimenti**: i riferimenti ad altre note sono nodi speciali del Document e vengono risolti e renderizzati ricorsivamente, con controllo della profondità e fallback per cicli o errori.
+- **Integrazione Apollo GraphQL**: i dati delle note referenziate vengono caricati on-demand tramite useQuery, evitando prop drilling e ottimizzando il caching.
+- **Rendering KaTeX sincrono**: le formule matematiche sono nodi del Document e vengono renderizzate in modo sicuro e sincrono tramite KaTeX (renderToString).
+- **Sistema di varianti visuali**: le varianti (teorema, lemma, esercizio, ecc.) sono rappresentate sia nei dati che nel Document, e il rendering applica classi CSS per colori, bordi e label.
+- **Metadati e informazioni**: icone e popup contestuali mostrano autore, date, privacy e altre informazioni, integrati come nodi informativi nel Document.
+- **Struttura HTML corretta**: le note embeddate sono sempre rese come blocchi, evitando errori di hydration e garantendo accessibilità.
+- **Formato standardizzato dei riferimenti**: tutti i riferimenti usano `{ "note-ref": { "note_id": "..." } }` sia nel Delta che nel Document, assicurando interoperabilità e parsing affidabile.
 
 ### 6. Git-like Versioning System
 - **Note** acts as a Git-like branch pointing to the latest version (HEAD)
@@ -104,13 +98,18 @@ src/
 │   ├── Note.tsx          # Note display/edit component
 │   ├── Notes.tsx         # Notes list component
 │   ├── NavBar.tsx        # Navigation with auth
-│   ├── DeltaContent.tsx  # React component for Delta rendering with Apollo GraphQL
-│   ├── NoteReferenceModal.tsx  # Modal for note reference insertion (select existing or create new)
+│   ├── NoteContent.tsx   # Rendering di una nota tramite struttura Document
+│   ├── NoteEmbed.tsx     # Embedding ricorsivo di note tramite Document
+│   ├── NoteReferenceModal.tsx  # Modal per inserimento riferimenti nota
 │   └── Providers.tsx     # App-wide providers
 ├── lib/                  # Utility libraries
-│   ├── models.ts         # MongoDB type definitions & note reference types
+│   ├── models.ts         # Tipi MongoDB & tipi Document/NoteRef
 │   ├── mongodb.ts        # Database connection
-│   ├── deltaRenderer.js  # Legacy Delta-to-HTML renderer (being replaced by DeltaContent.tsx)
+│   ├── document/         # Parsing, validazione e rendering struttura Document
+│   │   ├── document.ts   # Definizione struttura Document e nodi
+│   │   ├── parser.ts     # Conversione Delta → Document
+│   │   ├── render.tsx    # Rendering React da Document
+│   │   └── utils.ts      # Utility per Document
 │   └── myquill/          # Custom Quill.js integration
 │       ├── MyQuill.tsx   # Quill wrapper component
 │       ├── myquill.js    # Quill configuration and blot registration
@@ -195,8 +194,6 @@ type MongoUser = {
     first_login: Date
     last_login: Date
     createdAt: Date
-}
-```
 
 ### Tests Collection
 ```typescript
@@ -205,9 +202,32 @@ type Test = {
     note_id: ObjectId           // ID della nota con variant "test"
     description?: string        // Descrizione opzionale
     created_on: Date
-    author_id: ObjectId  // chi ha creato il test
+    author_id: ObjectId         // chi ha creato il test
     open_on?: Date
     close_on?: Date
+}
+```
+
+### Submissions Collection
+```typescript
+type Submission = {
+    _id: ObjectId
+    test_id: ObjectId           // ID del test
+    user_id: ObjectId           // Utente che ha effettuato la submission
+    created_on: Date
+    updated_on?: Date
+    status: 'draft' | 'submitted' | 'graded'
+    answers: {
+        question_id: ObjectId
+        answer: string
+        normalized_answer?: string
+        score?: number
+    }[]
+    total_score?: number
+    max_score?: number
+    graded_on?: Date
+    grader_id?: ObjectId
+    feedback?: string
 }
 ```
 
@@ -229,6 +249,9 @@ type TestResult = {
     }[]
     randomized_options?: { [question_id: string]: number[] } // Ordine delle opzioni per ogni domanda
     score?: number
+    max_score?: number
+}
+```
     max_score?: number
 }
 ```
