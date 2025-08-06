@@ -15,20 +15,27 @@ interface GraphQLError {
 export function Loading() {
     return <SyncLoader />
 }
- 
-export function Error({ error }: { error: ApolloError|string }) {
-    const { message, details } = typeof error === 'string'
-        ? stringError(error)
-        : apolloError(error)
-        
+
+export type ErrorType = Error
+
+export function Error({ error }: { error: ErrorType|string|null|undefined }) {
+    if (!error) return null // No error to display
+
+    const { message, details } = parse(error)
+
     return <div className="text-red-500">
-        <h1 className="text-2xl font-bold">Error</h1>
         <p>{message}</p>
         {details}
     </div>
 
-    function stringError(error: string) {
-        return {message: error, details: null}
+    function parse(error: ErrorType|string) {
+        if (typeof error === 'string') {
+            return { message: error, details: null }
+        } else if (error instanceof ApolloError) {
+            return apolloError(error)
+        } else {
+            return { message: error.message, details: error.stack }
+        }
     }
 
     function apolloError(error: ApolloError) {
@@ -59,7 +66,10 @@ export function Error({ error }: { error: ApolloError|string }) {
     }
 }
 
-export const BUTTON_CLASS = "px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 transition-colors"
-export const EDIT_BUTTON_CLASS = "px-4 py-2 bg-blue-500 text-white rounded mt-2 hover:bg-blue-600 transition-colors"
-export const CANCEL_BUTTON_CLASS = "px-4 py-2 bg-gray-300 text-gray-800 rounded mt-2 hover:bg-gray-400 transition-colors"
-export const DELETE_BUTTON_CLASS = "px-4 py-2 bg-red-500 text-white rounded mt-2 hover:bg-red-600 transition-colors"
+const COMMON_BUTTON_CLASS = "mt-2 px-4 py-2 rounded transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+
+export const SAVE_BUTTON_CLASS   = `${COMMON_BUTTON_CLASS} bg-green-600 text-white hover:bg-green-800`
+export const BUTTON_CLASS        = `${COMMON_BUTTON_CLASS} bg-gray-200 text-gray-800 hover:bg-gray-300`
+export const EDIT_BUTTON_CLASS   = `${COMMON_BUTTON_CLASS} bg-blue-500 text-white hover:bg-blue-600`
+export const CANCEL_BUTTON_CLASS = `${COMMON_BUTTON_CLASS} bg-gray-300 text-gray-800 hover:bg-gray-400`
+export const DELETE_BUTTON_CLASS = `${COMMON_BUTTON_CLASS} bg-red-500 text-white hover:bg-red-600`

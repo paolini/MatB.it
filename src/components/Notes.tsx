@@ -2,8 +2,9 @@
 import { gql, useQuery } from "@apollo/client"
 import Link from 'next/link'
 
-import { Loading, Error } from "@/components/utils"
+import { Loading, Error, EDIT_BUTTON_CLASS } from "@/components/utils"
 import { Note } from "@/app/graphql/generated"
+import NewNoteButton from "./NewNoteButton"
 
 const notesQuery = gql`
     query Notes {
@@ -28,11 +29,7 @@ export default function Notes() {
     const private_notes = data.notes.filter((note: Note) => note.private)
     return <>
         <div className="flex justify-center">
-            <Link href="/note/new">
-                <button className="bg-blue-500 text-white px-4 py-2 rounded-md">
-                    Nuova Nota
-                </button>
-            </Link>
+            <NewNoteButton />
         </div>
 
         { public_notes.length === 0 && private_notes.length === 0 && (

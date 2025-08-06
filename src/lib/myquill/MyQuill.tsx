@@ -5,6 +5,7 @@ import 'katex/dist/katex.min.css';
 import './delta-variants.css';
 import { useRef, useEffect, useState } from 'react';
 import CreateNoteModal from '@/components/NoteReferenceModal';
+import { Error as ErrorElement, ErrorType, BUTTON_CLASS, CANCEL_BUTTON_CLASS, DELETE_BUTTON_CLASS, SAVE_BUTTON_CLASS } from '@/components/utils'
 
 const config = {
     theme: "snow",
@@ -43,8 +44,8 @@ export default function MyQuill({
     onCancel?: () => void
     onDelete?: () => void
     isSaving?: boolean
-    saveError?: Error
-    deleteError?: Error
+    saveError?: ErrorType
+    deleteError?: ErrorType
 }) {
     const quillInstance = useRef<InstanceType<typeof Quill> | null>(null)
     const savedRange = useRef<Range | null>(null) // Salva il range prima di aprire il modal
@@ -179,10 +180,10 @@ export default function MyQuill({
             }}
         />
         {!readOnly && (
-            <div className="mt-2 flex gap-2 items-center flex-wrap">
-                {onSave && (
+            <div className="mt-2 p-2 flex gap-2 items-center flex-wrap">
+                { onSave && 
                     <button
-                        className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 disabled:opacity-50"
+                        className={SAVE_BUTTON_CLASS}
                         onClick={() => {
                             if (quillInstance.current) {
                                 const delta = quillInstance.current.getContents()
@@ -191,48 +192,39 @@ export default function MyQuill({
                         }}
                         disabled={isSaving}
                     >
-                        {isSaving ? 'Salvando...' : 'Salva'}
+                        {isSaving ? 'Salva...' : 'Salva'}
                     </button>
-                )}
+                }
                 
-                {onCancel && (
+                { onCancel &&
                     <button
-                        className="px-4 py-2 bg-gray-300 text-gray-800 rounded hover:bg-gray-400 transition-colors disabled:opacity-50"
+                        className={CANCEL_BUTTON_CLASS}
                         onClick={onCancel}
                         disabled={isSaving}
                     >
                         Annulla
                     </button>
-                )}
+                }
                 
-                {onDelete && (
+                { onDelete &&
                     <button
-                        className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors disabled:opacity-50"
+                        className={DELETE_BUTTON_CLASS}
                         onClick={() => setShowDeleteConfirm(true)}
                         disabled={isSaving}
                     >
                         Cancella nota
                     </button>
-                )}
+                }
                 
                 <button
-                    className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                    className={BUTTON_CLASS}
                     onClick={() => setShowDelta(!showDelta)}
                 >
                     {showDelta ? 'Nascondi' : 'Mostra'} Delta
                 </button>
                 
-                {/* Errori */}
-                {saveError && (
-                    <span className="text-red-500 text-sm">
-                        Errore: {saveError.message}
-                    </span>
-                )}
-                {deleteError && (
-                    <span className="text-red-500 text-sm">
-                        Errore cancellazione: {deleteError.message}
-                    </span>
-                )}
+                <ErrorElement error={saveError} />
+                <ErrorElement error={deleteError} />
             </div>
         )}
         {!readOnly && showDelta && (

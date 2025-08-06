@@ -1,7 +1,7 @@
 "use client"
 import { gql, useQuery, useMutation } from '@apollo/client'
 
-import { useState } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
 
 import { Note, Profile } from '@/app/graphql/generated'
 import TestList from '@/components/TestList'
@@ -39,39 +39,26 @@ const NoteQuery = gql`
     }
 `
 
-export default function NoteWrapper({_id}: {_id: string}) {
-    const [editMode, setEditMode] = useState(false)    
-    const { loading, error, data, refetch } = useQuery<{note: Note, profile: Profile}>(
-        NoteQuery, {variables: { _id }})
-
+export default function NoteWrapper({ _id }: { _id: string }) {
+    const searchParams = useSearchParams();
+    const editMode = searchParams.get('edit') !== null;
+    const { loading, error, data } = useQuery<{ note: Note, profile: Profile }>(
+        NoteQuery, { variables: { _id } })
+    
     if (error) return <Error error={error} />    
     if (loading || !data) return <Loading />
 
     const note = data?.note
     const profile = data?.profile
-    
 
-    if (editMode) return <div>
-        <NoteForm
-            mode="edit"
-            noteId={note._id}
-            initialTitle={note.title}
-            initialVariant={note.variant || 'default'}
-            initialPrivate={note.private}
-            initialDelta={note.delta}
-            showTitleAs="heading"
-            titleClassName="text-2xl font-bold w-full mb-2"
-            onEditComplete={() => {
-                setEditMode(false)
-                refetch()
-            }}
-            onEditCancel={() => setEditMode(false)}
-            canDelete={note?.author?._id === profile?._id}
-            showActions={true}
-        />
-        <NoteFooter note={note} />
-    </div>
-    
+    if (editMode) return <NoteEdit note={note} />
+    else return <NoteView note={note} profile={profile} />
+}
+
+function NoteView({note, profile}: {
+    note: Note,
+    profile: Profile,
+}) {
     return <div>
         <div className={`ql-variant-container ql-var-${note.variant || 'default'}`}>
             <h1>
@@ -87,11 +74,19 @@ export default function NoteWrapper({_id}: {_id: string}) {
         {note?.variant === 'test' && (
             <CreateTestButton note={note} />
         )}
-        {note?.author?._id === profile?._id  && (
-            <button className={EDIT_BUTTON_CLASS} onClick={() => setEditMode(true)}>
+        {note?.author?._id === profile?._id  && 
+            <a className={EDIT_BUTTON_CLASS} href={`?edit`} style={{ marginLeft: 8 }}>
                 Edit
-            </button>
-        )}
+            </a>
+        }
+    </div>
+}
+
+function NoteEdit({note}: {note: Note}) {
+    const router = useRouter();
+    return <div>
+        <NoteForm note={note}/>
+        <NoteFooter note={note} />
     </div>
 }
 

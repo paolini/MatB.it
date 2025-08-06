@@ -35,7 +35,7 @@ export type Mutation = {
   __typename?: 'Mutation';
   deleteNote: Maybe<Scalars['Boolean']['output']>;
   deleteTest: Maybe<Scalars['Boolean']['output']>;
-  newNote: Maybe<Note>;
+  newNote: Scalars['ObjectId']['output'];
   newSubmission: Scalars['ObjectId']['output'];
   newTest: Maybe<Scalars['Boolean']['output']>;
   updateNote: Maybe<Note>;
@@ -56,7 +56,7 @@ export type MutationDeleteTestArgs = {
 export type MutationNewNoteArgs = {
   delta: InputMaybe<Scalars['JSON']['input']>;
   private: InputMaybe<Scalars['Boolean']['input']>;
-  title: Scalars['String']['input'];
+  title: InputMaybe<Scalars['String']['input']>;
   variant: InputMaybe<Scalars['String']['input']>;
 };
 
@@ -288,7 +288,7 @@ export interface JsonScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes
 export type MutationResolvers<ContextType = Context, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = ResolversObject<{
   deleteNote: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType, RequireFields<MutationDeleteNoteArgs, '_id'>>;
   deleteTest: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType, RequireFields<MutationDeleteTestArgs, '_id'>>;
-  newNote: Resolver<Maybe<ResolversTypes['Note']>, ParentType, ContextType, RequireFields<MutationNewNoteArgs, 'title'>>;
+  newNote: Resolver<ResolversTypes['ObjectId'], ParentType, ContextType, MutationNewNoteArgs>;
   newSubmission: Resolver<ResolversTypes['ObjectId'], ParentType, ContextType, RequireFields<MutationNewSubmissionArgs, 'test_id'>>;
   newTest: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType, RequireFields<MutationNewTestArgs, 'note_id'>>;
   updateNote: Resolver<Maybe<ResolversTypes['Note']>, ParentType, ContextType, RequireFields<MutationUpdateNoteArgs, '_id'>>;
