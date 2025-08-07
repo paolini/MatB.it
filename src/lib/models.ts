@@ -39,7 +39,7 @@ export type NoteVersion = {
     _id: ObjectId
     title: string
     delta: object                // Contenuto in formato Quill Delta (JSON flessibile)
-    variant?: string            // Tipo di contenuto opzionale (es: teorema, dimostrazione, esercizio, etc.)
+    variant: string            // Tipo di contenuto opzionale (es: teorema, dimostrazione, esercizio, etc.)
     author_id: ObjectId         // Chi ha creato questa versione
     parent_version_id?: ObjectId          // Primo parent (catena principale)
     second_parent_version_id?: ObjectId   // Secondo parent (per merge)
