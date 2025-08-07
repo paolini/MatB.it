@@ -53,7 +53,6 @@ export default function MyQuill({
     const [showDelta, setShowDelta] = useState(false)
     const [showCreateModal, setShowCreateModal] = useState(false)
     const [prefilledVariant, setPrefilledVariant] = useState<string>('default')
-    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
 
     // Cleanup dell'editor delle formule al dismount
     useEffect(() => {
@@ -135,21 +134,9 @@ export default function MyQuill({
                         Annulla
                     </button>
                 }
-                
-                { onDelete &&
-                    <button
-                        className={DELETE_BUTTON_CLASS}
-                        onClick={() => setShowDeleteConfirm(true)}
-                        disabled={isSaving}
-                    >
-                        Cancella nota
-                    </button>
-                }
-                
-                <button
-                    className={BUTTON_CLASS}
-                    onClick={() => setShowDelta(!showDelta)}
-                >
+
+                <DeleteButton onDelete={onDelete} disabled={isSaving} />
+                <button className={BUTTON_CLASS} onClick={() => setShowDelta(!showDelta)}>
                     {showDelta ? 'Nascondi' : 'Mostra'} Delta
                 </button>
                 
@@ -178,31 +165,6 @@ export default function MyQuill({
             initialVariant={prefilledVariant}
         />
         
-        {/* Modal di conferma cancellazione */}
-        {showDeleteConfirm && (
-            <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 z-50">
-                <div className="bg-white p-6 rounded shadow-lg flex flex-col items-center">
-                    <p className="mb-4">Sei sicuro di voler cancellare questa nota?</p>
-                    <div className="flex gap-2">
-                        <button 
-                            className="px-4 py-2 bg-gray-300 text-gray-800 rounded hover:bg-gray-400" 
-                            onClick={() => setShowDeleteConfirm(false)}
-                        >
-                            Annulla
-                        </button>
-                        <button 
-                            className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600" 
-                            onClick={() => {
-                                setShowDeleteConfirm(false)
-                                onDelete?.()
-                            }}
-                        >
-                            Conferma cancellazione
-                        </button>
-                    </div>
-                </div>
-            </div>
-        )}
     </div>
 
     function onReady(quill: InstanceType<typeof Quill>) {
@@ -268,4 +230,53 @@ export default function MyQuill({
             }, 100); // Piccolo delay per assicurarsi che la toolbar sia renderizzata
         }
     }
+}
+
+function DeleteButton({onDelete,disabled}:{
+    onDelete?: () => void
+    disabled?: boolean
+}) {
+    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+    if (!onDelete) return null
+    return  <>
+        <button
+            className={DELETE_BUTTON_CLASS}
+            onClick={() => setShowDeleteConfirm(true)}
+            disabled={disabled}
+            >
+            Cancella nota
+        </button>
+        {/* Modal di conferma cancellazione */}
+        {showDeleteConfirm &&
+            <ConfirmDelete onDelete={onDelete} close={() => setShowDeleteConfirm(false)} />
+        }
+    </>
+}
+
+function ConfirmDelete({onDelete,close}:{
+    onDelete?: () => void
+    close?: () => void
+}) {
+    return <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 z-50">
+        <div className="bg-white p-6 rounded shadow-lg flex flex-col items-center">
+            <p className="mb-4">Sei sicuro di voler cancellare questa nota?</p>
+            <div className="flex gap-2">
+                <button 
+                    className="px-4 py-2 bg-gray-300 text-gray-800 rounded hover:bg-gray-400" 
+                    onClick={() => close?.()}
+                >
+                    Annulla
+                </button>
+                <button 
+                    className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600" 
+                    onClick={() => {
+                        close?.()
+                        onDelete?.()
+                    }}
+                >
+                    Conferma cancellazione
+                </button>
+            </div>
+        </div>
+    </div>
 }
