@@ -64,16 +64,18 @@ export default function Notes() {
 }
 
 function NoteItem({ note }: { note: Note }) {
-    return (
-        <div className="border p-4 rounded-md">
+    return <Link
+                href={`/note/${note._id}`}
+                className="border p-4 rounded-md block hover:bg-gray-50"
+                style={{ textDecoration: 'none', color: 'inherit' }}
+            >
             <h3 className="text-xl font-bold">
-                <Link href={`/note/${note._id}`}>{note.title}</Link>
+                {note.title}
             </h3>
             <p className="text-gray-500">
                 {note.author && <span>by {note.author.name}</span>}
-                {} created on {new Date(note.created_on).toLocaleDateString()} {}
-                {} modified on {new Date(note.updated_on).toLocaleDateString()}
+                {' '}created on {new Date(note.created_on).toLocaleDateString()}
+                {' '}modified on {new Date(note.updated_on).toLocaleDateString()}
             </p>
-        </div>
-    )
+    </Link>
 }

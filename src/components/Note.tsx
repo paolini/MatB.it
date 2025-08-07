@@ -83,7 +83,7 @@ function NoteView({note, profile}: {
 }
 
 function NoteEdit({note}: {note: Note}) {
-    const router = useRouter();
+    const router = useRouter()
     return <div>
         <NoteForm note={note}/>
         <NoteFooter note={note} />

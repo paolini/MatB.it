@@ -12,6 +12,7 @@ export class Embed extends EmbedBlot {
   static className = 'ql-formula';
 
   constructor(scroll, node) {
+    console.log(`Embed constructor ${scroll}, ${node}`);
     super(scroll, node);
     this.contentNode = document.createElement('span');
     this.contentNode.setAttribute('contenteditable', 'false');
@@ -25,11 +26,13 @@ export class Embed extends EmbedBlot {
     this.domNode.appendChild(this.rightGuard);
   }
   index(node, offset) {
+    console.log(`index ${node} ${offset}`)
     if (node === this.leftGuard) return 0;
     if (node === this.rightGuard) return 1;
     return super.index(node, offset);
   }
   restore(node) {
+    console.log(`restore ${node}`)
     let range = null;
     let textNode;
     const text = node.data.split(GUARD_TEXT).join('');
@@ -86,6 +89,7 @@ export class MyFormula extends Embed {
   static tagName = 'SPAN';     // o ciò che serve
 
   static create(data) {
+    console.log('MyFormula.create', data);
     // data può essere una stringa (legacy) o un oggetto { value, displaystyle }
     const node = super.create();
     if (typeof data === 'string') {
@@ -101,6 +105,7 @@ export class MyFormula extends Embed {
   }
 
   static render(node) {
+    console.log('MyFormula.render', node);
     const value = node.getAttribute('data-value');
     const displaystyle = node.classList.contains('tex-displaystyle');
 
@@ -140,6 +145,7 @@ export class MyFormula extends Embed {
   }
 
   static value(domNode) {
+    console.log('MyFormula value', domNode);
     return {
       value: domNode.getAttribute('data-value'),
       displaystyle: domNode.classList.contains('tex-displaystyle')
@@ -155,8 +161,9 @@ export class MyFormula extends Embed {
 
   html() {
     console.log('MyFormula html');
-    const formula = this.value();
-    return `<span>${formula}</span>`;
+    const { value, displaystyle } = this.constructor.value(this.domNode);
+    const ds = displaystyle ? ' data-displaystyle="true"' : '';
+    return `<span class="ql-formula"${ds} data-value="${value}">${value}</span>`;
   }
 }
 

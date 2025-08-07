@@ -1,6 +1,7 @@
 "use client"
 
-import { Delta, QuillEditor, Quill, Range } from './myquill.js'
+import { QuillEditor, Quill, Range } from './myquill.js'
+import Delta from 'quill-delta-es'
 import 'katex/dist/katex.min.css';
 import './delta-variants.css';
 import { useRef, useEffect, useState } from 'react';
@@ -53,6 +54,8 @@ export default function MyQuill({
     const [showCreateModal, setShowCreateModal] = useState(false)
     const [prefilledVariant, setPrefilledVariant] = useState<string>('default')
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+
+    console.log('🔧 MyQuill: Inizializzazione editor')
 
     // Cleanup dell'editor delle formule al dismount
     useEffect(() => {
@@ -118,66 +121,7 @@ export default function MyQuill({
             readOnly={readOnly}
             config={readOnly ? readonlyConfig : config}
             defaultValue={content || new Delta()}
-            onReady={quill => { 
-                quillInstance.current = quill 
-                
-                // Aggiungi handler per il pulsante note-ref e MC
-                if (!readOnly) {
-                    const toolbar = quill.getModule('toolbar') as any;
-                    toolbar.addHandler('note-ref', () => {
-                        console.log('🔘 MyQuill: Pulsante note-ref cliccato')
-                        const currentRange = quill.getSelection();
-                        savedRange.current = currentRange;
-                        setPrefilledVariant('default');
-                        setShowCreateModal(true);
-                    });
-
-                    // Handler per il pulsante MC (multiple choice)
-                    toolbar.addHandler('mc-choice', () => {
-                        const range = quill.getSelection();
-                        if (!range) return;
-                        // Applica il formato list: 'choice' alla selezione corrente
-                        quill.formatLine(range.index, range.length, { list: 'choice' });
-                    });
-                    
-                    // Aggiungi event listener per la select environment
-                    setTimeout(() => {
-                        const toolbarModule: any = quill.getModule('toolbar');
-                        const selectElement = toolbarModule.container?.querySelector('select.ql-environment') as HTMLSelectElement;
-                        
-                        if (selectElement) {
-                            console.log('🔧 MyQuill: Select environment trovata, aggiungendo listener')
-                            
-                            // Salva il range PRIMA che la select venga cliccata (quando perde il focus)
-                            selectElement.addEventListener('mousedown', () => {
-                                const currentRange = quill.getSelection();
-                                console.log('👆 MyQuill: Mousedown su select, salvataggio range:', currentRange)
-                                savedRange.current = currentRange;
-                            });
-                            
-                            selectElement.addEventListener('change', (event) => {
-                                const target = event.target as HTMLSelectElement;
-                                const value = target.value;
-                                
-                                console.log('🔘 MyQuill: Environment selezionato:', value)
-                                console.log('💾 MyQuill: Range salvato durante mousedown:', savedRange.current)
-                                
-                                if (value) {
-                                    // Apri il modal con la variant precompilata
-                                    console.log('🪟 MyQuill: Apertura modal con variant:', value)
-                                    setPrefilledVariant(value);
-                                    setShowCreateModal(true);
-                                    
-                                    // Reset della select
-                                    target.value = '';
-                                }
-                            });
-                        } else {
-                            console.log('❌ MyQuill: Select environment non trovata')
-                        }
-                    }, 100); // Piccolo delay per assicurarsi che la toolbar sia renderizzata
-                }
-            }}
+            onReady={onReady}
         />
         {!readOnly && (
             <div className="mt-2 p-2 flex gap-2 items-center flex-wrap">
@@ -274,5 +218,79 @@ export default function MyQuill({
             </div>
         )}
     </div>
-}
 
+    function onReady(quill: InstanceType<typeof Quill>) {
+        console.log('🔧 MyQuill: Editor onReady', quill)
+        quillInstance.current = quill
+
+        // Matcher per supportare copia/incolla delle formule
+        quill.clipboard.addMatcher('span', function(node, delta): Delta {
+            console.log('🔧 MyQuill: Matcher per span attivato', node, delta);
+            if (node instanceof HTMLElement && node.classList.contains('ql-formula')) {
+                const value = node.getAttribute('data-value') || node.textContent;
+                const displaystyle = node.classList.contains('tex-displaystyle');
+                return new Delta([
+                    { insert: { formula: value }, attributes: displaystyle ? { displaystyle: true } : {} }
+                ]);
+            }
+            return delta;
+        });
+
+        // Aggiungi handler per il pulsante note-ref e MC
+        if (!readOnly) {
+            const toolbar = quill.getModule('toolbar') as any;
+            toolbar.addHandler('note-ref', () => {
+                console.log('🔘 MyQuill: Pulsante note-ref cliccato')
+                const currentRange = quill.getSelection();
+                savedRange.current = currentRange;
+                setPrefilledVariant('default');
+                setShowCreateModal(true);
+            });
+
+            // Handler per il pulsante MC (multiple choice)
+            toolbar.addHandler('mc-choice', () => {
+                const range = quill.getSelection();
+                if (!range) return;
+                // Applica il formato list: 'choice' alla selezione corrente
+                quill.formatLine(range.index, range.length, { list: 'choice' });
+            });
+            
+            // Aggiungi event listener per la select environment
+            setTimeout(() => {
+                const toolbarModule: any = quill.getModule('toolbar');
+                const selectElement = toolbarModule.container?.querySelector('select.ql-environment') as HTMLSelectElement;
+                
+                if (selectElement) {
+                    console.log('🔧 MyQuill: Select environment trovata, aggiungendo listener')
+                    
+                    // Salva il range PRIMA che la select venga cliccata (quando perde il focus)
+                    selectElement.addEventListener('mousedown', () => {
+                        const currentRange = quill.getSelection();
+                        console.log('👆 MyQuill: Mousedown su select, salvataggio range:', currentRange)
+                        savedRange.current = currentRange;
+                    });
+                    
+                    selectElement.addEventListener('change', (event) => {
+                        const target = event.target as HTMLSelectElement;
+                        const value = target.value;
+                        
+                        console.log('🔘 MyQuill: Environment selezionato:', value)
+                        console.log('💾 MyQuill: Range salvato durante mousedown:', savedRange.current)
+                        
+                        if (value) {
+                            // Apri il modal con la variant precompilata
+                            console.log('🪟 MyQuill: Apertura modal con variant:', value)
+                            setPrefilledVariant(value);
+                            setShowCreateModal(true);
+                            
+                            // Reset della select
+                            target.value = '';
+                        }
+                    });
+                } else {
+                    console.log('❌ MyQuill: Select environment non trovata')
+                }
+            }, 100); // Piccolo delay per assicurarsi che la toolbar sia renderizzata
+        }
+    }
+}

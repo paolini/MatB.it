@@ -14,7 +14,7 @@ export default function () {
     const router = useRouter()
     const [createNote, { loading, error }] = useMutation(CREATE_NOTE, {
         onCompleted: (data: { newNote: ObjectId }) => {
-            if (data?.newNote) router.push(`/note/${data.newNote}`)
+            if (data?.newNote) router.push(`/note/${data.newNote}?edit`)
         },
     })
 

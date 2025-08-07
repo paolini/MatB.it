@@ -1,12 +1,13 @@
 import MyQuill from 'quill-next'
 import MyQuillEditor from 'quill-next-react'
+import Delta from 'quill-delta-es'
 
 import { MyFormula, FormulaEditorModule } from './formula.js'
 import { NoteRefBlot } from './noteref.js'
 
 import { ChoiceListItem } from './choice-list.js'
 
-export { Delta, Op, AttributeMap, Range } from 'quill-next'
+export { Op, AttributeMap, Range } from 'quill-next'
 
 MyQuill.register('formats/formula', MyFormula, true);
 MyQuill.register('modules/formulaEditor', FormulaEditorModule);
