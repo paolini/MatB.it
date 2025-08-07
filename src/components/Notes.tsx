@@ -2,8 +2,8 @@
 import { gql, useQuery } from "@apollo/client"
 import Link from 'next/link'
 
-import { Loading, Error, EDIT_BUTTON_CLASS } from "@/components/utils"
-import { Note } from "@/app/graphql/generated"
+import { Loading, Error } from "@/components/utils"
+import { Note, Profile } from "@/app/graphql/generated"
 import NewNoteButton from "./NewNoteButton"
 
 const notesQuery = gql`
@@ -14,9 +14,13 @@ const notesQuery = gql`
             private
             created_on
             updated_on
+            author_id
             author {
                 name
             }
+        }
+        profile {
+            _id    
         }
     }
 `
@@ -25,8 +29,10 @@ export default function Notes() {
     if (loading) return <Loading />
     if (error) return <Error error={error} />
 
-    const public_notes = data.notes.filter((note: Note) => !note.private)   
-    const private_notes = data.notes.filter((note: Note) => note.private)
+    const {notes, profile} = data
+
+    const public_notes = notes.filter((note: Note) => !note.private)   
+    const private_notes = notes.filter((note: Note) => note.private)
     return <>
         <div className="flex justify-center">
             <NewNoteButton />
@@ -44,7 +50,7 @@ export default function Notes() {
                     {data.notes
                         .filter((note: Note) => !note.private)
                         .map((note: Note) =>
-                            <NoteItem key={note._id} note={note} />
+                            <NoteItem key={note._id} note={note} profile={profile}/>
                         )}
                 </div>
             </>
@@ -56,17 +62,23 @@ export default function Notes() {
                 {data.notes
                     .filter((note: Note) => note.private)
                     .map((note: Note) =>
-                        <NoteItem key={note._id} note={note} />
+                        <NoteItem key={note._id} note={note} profile={profile}/>
                     )}
             </div>
         </>}
     </>
 }
 
-function NoteItem({ note }: { note: Note }) {
+function NoteItem({ note, profile }: { note: Note, profile: Profile }) {
+    const isPrivate = note.private
+    const isMine = note.author_id === profile?._id
+
+    let classColors = isMine ? "bg-green-50 hover:bg-green-100"
+        : isPrivate ? "bg-yellow-50 hover:bg-yellow-100"
+        : "bg-white hover:bg-gray-100"
     return <Link
                 href={`/note/${note._id}`}
-                className="border p-4 rounded-md block hover:bg-gray-50"
+                className={`border p-4 rounded-md block ${classColors}`}
                 style={{ textDecoration: 'none', color: 'inherit' }}
             >
             <h3 className="text-xl font-bold">
