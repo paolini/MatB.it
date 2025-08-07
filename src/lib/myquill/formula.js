@@ -12,7 +12,6 @@ export class Embed extends EmbedBlot {
   static className = 'ql-formula';
 
   constructor(scroll, node) {
-    console.log(`Embed constructor ${scroll}, ${node}`);
     super(scroll, node);
     this.contentNode = document.createElement('span');
     this.contentNode.setAttribute('contenteditable', 'false');
@@ -26,13 +25,11 @@ export class Embed extends EmbedBlot {
     this.domNode.appendChild(this.rightGuard);
   }
   index(node, offset) {
-    console.log(`index ${node} ${offset}`)
     if (node === this.leftGuard) return 0;
     if (node === this.rightGuard) return 1;
     return super.index(node, offset);
   }
   restore(node) {
-    console.log(`restore ${node}`)
     let range = null;
     let textNode;
     const text = node.data.split(GUARD_TEXT).join('');
@@ -73,7 +70,6 @@ export class Embed extends EmbedBlot {
   }
 
   update(mutations, context) {
-    console.log('Embed update', mutations, context);
     mutations.forEach(mutation => {
       if (mutation.type === 'characterData' && (mutation.target === this.leftGuard || mutation.target === this.rightGuard)) {
         const range = this.restore(mutation.target);
@@ -89,7 +85,6 @@ export class MyFormula extends Embed {
   static tagName = 'SPAN';     // o ciò che serve
 
   static create(data) {
-    console.log('MyFormula.create', data);
     // data può essere una stringa (legacy) o un oggetto { value, displaystyle }
     const node = super.create();
     if (typeof data === 'string') {
@@ -105,11 +100,9 @@ export class MyFormula extends Embed {
   }
 
   static render(node) {
-    console.log('MyFormula.render', node);
     const value = node.getAttribute('data-value');
     const displaystyle = node.classList.contains('tex-displaystyle');
 
-    console.log('Formula.render', value, displaystyle);
 
     // Verifica che KaTeX sia disponibile
     if (typeof window !== 'undefined' && window.katex && window.katex.render) {
@@ -131,7 +124,6 @@ export class MyFormula extends Embed {
   }
 
   format(name, value) {
-    console.log('MyFormula format', name, value);
     if (name === 'displaystyle') {
       if (value) {
         this.domNode.classList.add('tex-displaystyle')
@@ -145,7 +137,6 @@ export class MyFormula extends Embed {
   }
 
   static value(domNode) {
-    console.log('MyFormula value', domNode);
     return {
       value: domNode.getAttribute('data-value'),
       displaystyle: domNode.classList.contains('tex-displaystyle')
@@ -153,14 +144,12 @@ export class MyFormula extends Embed {
   }
 
   update(mutations, context) {
-    console.log('MyFormula update', mutations, context);
     super.update(mutations, context);
 
     MyFormula.render(this.domNode);
   }
 
   html() {
-    console.log('MyFormula html');
     const { value, displaystyle } = this.constructor.value(this.domNode);
     const ds = displaystyle ? ' data-displaystyle="true"' : '';
     return `<span class="ql-formula"${ds} data-value="${value}">${value}</span>`;
@@ -217,7 +206,6 @@ export class FormulaEditorModule {
 
   handleClick(event) {
     const formulaEl = event.target.closest('.ql-formula');
-    console.log('FormulaEditorModule handleClick', formulaEl);;
     if (formulaEl) {
       const blot = MyQuill.find(formulaEl);
       this.showFormulaEditor(blot);
@@ -226,10 +214,8 @@ export class FormulaEditorModule {
 
   showFormulaEditor(blot) {
     let editor = document.getElementById('matbit-formula-editor');
-    console.log('showFormulaEditor', blot, editor);
     // Crea il widget se non esiste
     if (!editor) {
-      console.log('Creating formula editor widget');
       editor = document.createElement('div');
       editor.id = 'matbit-formula-editor';
       editor.style.position = 'absolute';
