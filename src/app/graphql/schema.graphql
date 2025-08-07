@@ -81,5 +81,5 @@ type Mutation {
   deleteTest(_id: ObjectId!): Boolean
   newSubmission(test_id: ObjectId!): ObjectId!
 
-  updateSubmission(_id: ObjectId!, answers: [AnswerItemInput!]!): Boolean
+  updateSubmission(_id: ObjectId!, answers: [AnswerItemInput!], completed: Boolean): Boolean
 }

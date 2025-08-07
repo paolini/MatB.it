@@ -2,9 +2,10 @@
 import { gql, useQuery, useMutation } from '@apollo/client'
 
 import { Profile, Submission } from '@/app/graphql/generated'
-import { Loading, Error, BUTTON_CLASS } from '@/components/utils'
+import { Loading, Error, BUTTON_CLASS, EDIT_BUTTON_CLASS } from '@/components/utils'
 import { useState } from 'react'
 import DocumentElement, { Context } from './DocumentElement'
+import { useRouter } from 'next/navigation'
 
 const SubmissionQuery = gql`
     query Submission($_id: ObjectId!) {
@@ -48,13 +49,24 @@ const SUBMIT_MUTATION = gql`
   }
 `
 
+const TERMINATE_MUTATION = gql`
+  mutation TerminateSubmission($_id: ObjectId!) {
+    updateSubmission(_id: $_id, completed: true)
+  }
+`
+
 function SubmissionElement({submission}: {
     submission: Submission,
 }) {
+    const router = useRouter()
     const answers_map = Object.fromEntries((submission.answers || []).map((answer) => [answer.note_id, answer.answer]))
     const [answers, setAnswers] = useState<Record<string, number>>(answers_map)
     const [needSave, setNeedSave] = useState<boolean>(false)
     const [submitAnswers, { loading: isSubmitting, error: submitError }] = useMutation(SUBMIT_MUTATION)
+    const [terminateSubmission, { loading: isTerminating, error: terminateError }] = useMutation(TERMINATE_MUTATION, {
+        variables: { _id: submission._id, completed: true },
+        onCompleted: () => setNeedSave(false)    
+    })
 
     const context: Context = {
         parents: [],
@@ -75,7 +87,7 @@ function SubmissionElement({submission}: {
         />
         <button
             className={BUTTON_CLASS}
-            disabled={!needSave || isSubmitting}
+            disabled={!needSave || isSubmitting || isTerminating}
             onClick={async () => {
                 await submitAnswers({
                     variables: {
@@ -87,6 +99,16 @@ function SubmissionElement({submission}: {
             }}>
             {isSubmitting ? 'Invio...' : 'invia risposte'}
         </button>
-        {submitError && <Error error={submitError} />}
+        <button 
+            className={EDIT_BUTTON_CLASS} 
+            disabled={needSave || isSubmitting || isTerminating}
+            onClick={async () => {
+                await terminateSubmission()
+                router.push(`/test/${submission.test._id}`)
+            }}>
+            termina test
+        </button>
+        <Error error={submitError} />
+        <Error error={terminateError} />
     </>
 }

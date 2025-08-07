@@ -83,7 +83,8 @@ export type MutationUpdateNoteArgs = {
 
 export type MutationUpdateSubmissionArgs = {
   _id: Scalars['ObjectId']['input'];
-  answers: Array<AnswerItemInput>;
+  answers: InputMaybe<Array<AnswerItemInput>>;
+  completed: InputMaybe<Scalars['Boolean']['input']>;
 };
 
 export type Note = {
@@ -292,7 +293,7 @@ export type MutationResolvers<ContextType = Context, ParentType extends Resolver
   newSubmission: Resolver<ResolversTypes['ObjectId'], ParentType, ContextType, RequireFields<MutationNewSubmissionArgs, 'test_id'>>;
   newTest: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType, RequireFields<MutationNewTestArgs, 'note_id'>>;
   updateNote: Resolver<Maybe<ResolversTypes['Note']>, ParentType, ContextType, RequireFields<MutationUpdateNoteArgs, '_id'>>;
-  updateSubmission: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType, RequireFields<MutationUpdateSubmissionArgs, '_id' | 'answers'>>;
+  updateSubmission: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType, RequireFields<MutationUpdateSubmissionArgs, '_id'>>;
 }>;
 
 export type NoteResolvers<ContextType = Context, ParentType extends ResolversParentTypes['Note'] = ResolversParentTypes['Note']> = ResolversObject<{
