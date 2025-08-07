@@ -4,7 +4,7 @@ import { Context } from '../types'
 import { Note } from '../generated'
 import { getNotesCollection, NOTE_PIPELINE } from '@/lib/models'
 
-export default async function (
+const updateNote = async function (
       _parent: unknown,
       args: MutationUpdateNoteArgs,
       context: Context
@@ -37,3 +37,6 @@ export default async function (
     ]).toArray()
     return notes[0] || null
 }
+
+updateNote.displayName = 'updateNote'
+export default updateNote

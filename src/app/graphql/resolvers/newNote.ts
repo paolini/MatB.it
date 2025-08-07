@@ -1,13 +1,13 @@
 import type { MutationNewNoteArgs } from '../generated'
 
 import { Context } from '../types'
-import { getNotesCollection, getNoteVersionsCollection, NOTE_PIPELINE } from '@/lib/models'
+import { getNotesCollection, getNoteVersionsCollection } from '@/lib/models'
 
-export default async function (
+const newNote = async function (
     _parent: unknown,
     args: MutationNewNoteArgs,
     context: Context
-): Promise<Object> {
+): Promise<object> {
     if (!context.user) throw new Error('Not authenticated')
     const collection = getNotesCollection(context.db)
     const versionsCollection = getNoteVersionsCollection(context.db)
@@ -41,3 +41,5 @@ export default async function (
     if (!result.acknowledged) throw new Error('Failed to create note')
     return result.insertedId
 }
+
+export default newNote

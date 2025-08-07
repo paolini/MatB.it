@@ -1,7 +1,7 @@
 "use client"
 import { gql, useQuery, useMutation } from '@apollo/client'
 
-import { useSearchParams, useRouter } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 
 import { Note, Profile } from '@/app/graphql/generated'
 import TestList from '@/components/TestList'
@@ -83,7 +83,6 @@ function NoteView({note, profile}: {
 }
 
 function NoteEdit({note}: {note: Note}) {
-    const router = useRouter()
     return <div>
         <NoteForm note={note}/>
         <NoteFooter note={note} />

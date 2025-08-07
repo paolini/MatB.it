@@ -5,7 +5,7 @@ import { Submission } from '../generated'
 
 import { SUBMISSION_PIPELINE } from '@/lib/models'
 
-export default async function (
+const updateSubmission = async function (
   _parent: unknown,
   args: { _id: ObjectId, answers: { note_id: ObjectId, answer: number|null }[] },
   context: Context
@@ -42,6 +42,8 @@ export default async function (
   await collection.updateOne({ _id: args._id }, { $set: { answers } })
   return true
 }
+
+export default updateSubmission
 
 function inverse_permutation(array: number[]) {
   const inv = new Array(array.length)

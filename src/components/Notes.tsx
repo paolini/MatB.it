@@ -73,7 +73,7 @@ function NoteItem({ note, profile }: { note: Note, profile: Profile }) {
     const isPrivate = note.private
     const isMine = note.author_id === profile?._id
 
-    let classColors = isMine ? "bg-green-50 hover:bg-green-100"
+    const classColors = isMine ? "bg-green-50 hover:bg-green-100"
         : isPrivate ? "bg-yellow-50 hover:bg-yellow-100"
         : "bg-white hover:bg-gray-100"
     return <Link

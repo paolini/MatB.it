@@ -23,7 +23,11 @@ export default function NoteContent({ note, context }: {
   context?: Context
 }) {
   const [document, setDocument] = useState<Document|null>(null)
-  if (!context) context = { parents: [] }
+  if (!context) context = { 
+    parents: [], 
+    answers: {}, 
+    setAnswer: () => {} 
+  }
 
   useEffect(() => {
     let mounted = true

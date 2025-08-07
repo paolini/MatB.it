@@ -1,6 +1,5 @@
 import MyQuill from 'quill-next'
 import MyQuillEditor from 'quill-next-react'
-import Delta from 'quill-delta-es'
 
 import { MyFormula, FormulaEditorModule } from './formula.js'
 import { NoteRefBlot } from './noteref.js'

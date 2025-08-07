@@ -31,15 +31,13 @@ const SubmissionQuery = gql`
 `
 
 export default function SubmissionWrapper({_id}: {_id: string}) {
-    const [editMode, setEditMode] = useState(false)
     const { loading, error, data } = useQuery<{submission: Submission, profile: Profile}>(
         SubmissionQuery, {variables: { _id }})
-    const [answers, setAnswers] = useState<Record<string, number>>({})
 
     if (error) return <Error error={error} />    
     if (loading || !data) return <Loading />
 
-    const { submission, profile } = data
+    const { submission } = data
 
     return <SubmissionElement submission={submission} />
 }

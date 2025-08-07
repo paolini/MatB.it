@@ -4,10 +4,9 @@ import { Context } from '../types'
 import { Submission } from '../generated'
 import { getNotesCollection, getSubmissionsCollection, SUBMISSION_PIPELINE } from '@/lib/models'
 import { document_from_note, Document, Paragraph, NoteRef, Node, NoteData } from '@/lib/myquill/document'
-import { Delta } from '@/lib/myquill/myquill'
 import { MongoSubmission, MongoAnswer } from '@/lib/models'
 
-export default async function (_parent: unknown, {_id}: { _id: ObjectId }, context: Context): Promise<Submission | null> {
+const submission = async function (_parent: unknown, {_id}: { _id: ObjectId }, context: Context): Promise<Submission | null> {
     const user = context.user
     const collection = getSubmissionsCollection(context.db)
     const notesCollection = getNotesCollection(context.db)
@@ -58,13 +57,15 @@ export default async function (_parent: unknown, {_id}: { _id: ObjectId }, conte
     async function note_loader(note_id: string): Promise<NoteData|null> {
         const note = await notesCollection.findOne({ _id: new ObjectId(note_id) })
         return note ? {
-            delta: note.delta as Delta,
+            delta: note.delta,
             variant: note.variant || null,
             title: note.title,
             _id: new ObjectId(note_id)
         } : null
     }
 }
+
+export default submission
 
 function shuffle_and_insert_answers(document: Document, answers: MongoAnswer[]) {
     let answersUpdated = false
@@ -115,7 +116,7 @@ function shuffle_and_insert_answers(document: Document, answers: MongoAnswer[]) 
 function shuffle(array: number[]) {
   let currentIndex = array.length;
   while (currentIndex != 0) {
-    let randomIndex = Math.floor(Math.random() * currentIndex);
+    const randomIndex = Math.floor(Math.random() * currentIndex);
     currentIndex--;
     [array[currentIndex], array[randomIndex]] = [
       array[randomIndex], array[currentIndex]];

@@ -2,10 +2,9 @@
 import { useState, useEffect } from 'react'
 import { gql, useMutation, useQuery } from '@apollo/client'
 import { Note } from '@/app/graphql/generated'
-import NoteForm from './NoteForm'
 
 // Type definition per Delta (per evitare import diretto)
-type DeltaType = any;
+type DeltaType = unknown;
 
 const NewNoteMutation = gql`
 mutation NewNote($title: String!, $delta: JSON, $private: Boolean, $variant: String) {
@@ -225,21 +224,60 @@ export default function NoteReferenceModal({ isOpen, onClose, onNoteSelected, in
             </div>
           ) : (
             /* Tab per creare nuova nota */
-            <div>
-              <NoteForm
-                initialTitle={title}
-                initialVariant={variant}
-                initialPrivate={isPrivate}
-                initialDelta={delta}
-                showTitleAs="input"
-                onTitleChange={setTitle}
-                onVariantChange={setVariant}
-                onPrivateChange={setIsPrivate}
-                onDeltaChange={setDelta}
-                showActions={true}
-                onSave={handleCreateNote}
-                onCancel={handleClose}
-              />
+            <div className="space-y-4">
+              <div>
+                <input
+                  type="text"
+                  className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 text-2xl font-bold"
+                  value={title}
+                  onChange={e => setTitle(e.target.value)}
+                  placeholder="Titolo della nota"
+                />
+              </div>
+
+              <div>
+                <select
+                  className="border rounded px-3 py-2 w-full max-w-xs focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  value={variant}
+                  onChange={e => setVariant(e.target.value)}
+                >
+                  <option value="default">Nota</option>
+                  <option value="theorem">Teorema</option>
+                  <option value="lemma">Lemma</option>
+                  <option value="proof">Dimostrazione</option>
+                  <option value="remark">Osservazione</option>
+                  <option value="exercise">Esercizio</option>
+                  <option value="test">Test</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={isPrivate}
+                    onChange={e => setIsPrivate(e.target.checked)}
+                    className="rounded"
+                  />
+                  <span className="text-sm font-medium text-gray-700">Nota privata</span>
+                </label>
+              </div>
+
+              <div className="flex gap-3">
+                <button
+                  onClick={handleCreateNote}
+                  className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+                >
+                  Crea e Seleziona
+                </button>
+                <button
+                  onClick={handleClose}
+                  className="px-4 py-2 text-gray-600 border border-gray-300 rounded hover:bg-gray-50 transition-colors"
+                >
+                  Annulla
+                </button>
+              </div>
+              
               {createError && (
                 <div className="text-red-600 text-sm mt-4">
                   Errore: {createError.message}

@@ -61,7 +61,7 @@ export default function MyQuill({
             if (typeof window !== 'undefined' && !window.katex) {
                 try {
                     const katex = await import('katex');
-                    (window as unknown as { katex: any }).katex = katex.default;
+                    (window as unknown as { katex: unknown }).katex = katex.default;
                 } catch (error) {
                     console.error('Failed to load KaTeX:', error);
                 }
@@ -184,7 +184,7 @@ export default function MyQuill({
 
         // Aggiungi handler per il pulsante note-ref e MC
         if (!readOnly) {
-            const toolbar = quill.getModule('toolbar') as any;
+            const toolbar = quill.getModule('toolbar') as { addHandler: (name: string, handler: () => void) => void };
             toolbar.addHandler('note-ref', () => {
                 const currentRange = quill.getSelection();
                 savedRange.current = currentRange;
@@ -202,7 +202,7 @@ export default function MyQuill({
             
             // Aggiungi event listener per la select environment
             setTimeout(() => {
-                const toolbarModule: any = quill.getModule('toolbar');
+                const toolbarModule: { container?: HTMLElement } = quill.getModule('toolbar') as { container?: HTMLElement };
                 const selectElement = toolbarModule.container?.querySelector('select.ql-environment') as HTMLSelectElement;
                 
                 if (selectElement) {

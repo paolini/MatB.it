@@ -10,7 +10,8 @@ const CREATE_NOTE = gql`
         newNote
     }
 `
-export default function () {
+
+const NewNoteButton = function () {
     const router = useRouter()
     const [createNote, { loading, error }] = useMutation(CREATE_NOTE, {
         onCompleted: (data: { newNote: ObjectId }) => {
@@ -27,3 +28,6 @@ export default function () {
         </div>
     )
 }
+
+NewNoteButton.displayName = 'NewNoteButton'
+export default NewNoteButton

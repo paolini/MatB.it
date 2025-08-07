@@ -4,7 +4,7 @@ import type { MutationNewSubmissionArgs } from '../generated'
 import { Context} from '../types'
 import { getSubmissionsCollection, getTestsCollection } from '@/lib/models'
 
-export default async function (
+const newSubmission = async function (
     _parent: unknown,
     args: MutationNewSubmissionArgs,
     context: Context
@@ -31,3 +31,5 @@ export default async function (
     const res = await collection.insertOne(doc)
     return res.insertedId
 }
+
+export default newSubmission

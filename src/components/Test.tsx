@@ -30,7 +30,7 @@ const TestQuery = gql`
 
 export default function TestWrapper({_id}: {_id: string}) {
     const [editMode, setEditMode] = useState(false)
-    const { loading, error, data, refetch } = useQuery<{test: Test, profile: Profile|null}>(
+    const { loading, error, data } = useQuery<{test: Test, profile: Profile|null}>(
         TestQuery, {variables: { _id }})
 
     if (error) return <Error error={error} />    

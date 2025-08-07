@@ -1,4 +1,3 @@
-import Note from '@/components/Note'
 import Submission from '@/components/Submission'
 
 export default async function Page({ params }: { params: Promise<{ _id: string }> }) {

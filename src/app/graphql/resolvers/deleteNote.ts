@@ -3,7 +3,7 @@ import { ObjectId } from 'mongodb'
 import { Context } from '../types'
 import { getNotesCollection, getDeletedNotesCollection } from '@/lib/models'
 
-export default async function (
+const deleteNote = async function (
       _parent: unknown,
       args: { _id: ObjectId },
       context: Context
@@ -28,4 +28,6 @@ export default async function (
     await collection.deleteOne({ _id })
     return true
 }
+
+export default deleteNote
 
