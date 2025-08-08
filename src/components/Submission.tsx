@@ -18,6 +18,10 @@ const SubmissionQuery = gql`
                 open_on
                 close_on
             }
+            author {
+                _id
+                name
+            }
             started_on
             completed_on
             document
@@ -28,6 +32,7 @@ const SubmissionQuery = gql`
             }
             score
         }
+
         profile {
             _id
         }
@@ -41,9 +46,9 @@ export default function SubmissionWrapper({_id}: {_id: string}) {
     if (error) return <Error error={error} />    
     if (loading || !data) return <Loading />
 
-    const { submission } = data
+    const { submission, profile } = data
 
-    return <SubmissionElement submission={submission} />
+    return <SubmissionElement submission={submission} profile={profile} />
 }
 
 const SUBMIT_MUTATION = gql`
@@ -58,8 +63,9 @@ const TERMINATE_MUTATION = gql`
   }
 `
 
-function SubmissionElement({submission}: {
+function SubmissionElement({submission, profile}: {
     submission: Submission,
+    profile?: Profile
 }) {
     const answers_map: Record<string, ContextAnswer> = Object
         .fromEntries((submission.answers || [])
@@ -103,7 +109,7 @@ function SubmissionElement({submission}: {
 
     return <>
         <h1>{submission.test.title || `submission ${submission._id}`}</h1>
-        <Info submission={submission} />
+        <Info submission={submission} profile={profile}/>
         <DocumentElement
             context={context}
             document={submission.document}
@@ -133,13 +139,15 @@ function SubmissionElement({submission}: {
                 termina test
             </button>
         </>}
-        { submission.completed_on && <span>Test completato: {myTimestamp(submission.completed_on)}</span> }
         <Error error={submitError} />
         <Error error={terminateError} />
     </>
 }
 
-function Info({submission}: {submission: Submission}) {
+function Info({submission, profile}: {
+    submission: Submission
+    profile?: Profile
+}) {
     return <div style={{
         background: '#dbdbdbff',
         padding: '1em',
@@ -147,6 +155,10 @@ function Info({submission}: {submission: Submission}) {
         borderRadius: '6px 0 0 6px',
         boxShadow: '0 2px 8px rgba(0,0,0,0.04)'
     }}>
+        { submission.author._id !== profile?._id && <>
+            <strong>Compilato da:</strong> {submission.author.name || '???'}
+            <br />
+        </>}
         { submission.test.open_on && <><strong>Apertura test:</strong> {myTimestamp(submission.test.open_on)}<br /></> }
         { submission.test.close_on && <><strong>Chiusura test:</strong> {myTimestamp(submission.test.close_on)}<br /></> }
         { submission.test.close_on && <>Perché il test venga valutato devi terminarlo entro la data di chiusura.<br /></>}

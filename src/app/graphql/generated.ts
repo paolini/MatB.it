@@ -171,10 +171,10 @@ export type Test = {
   author_id: Scalars['ObjectId']['output'];
   close_on: Maybe<Scalars['Timestamp']['output']>;
   created_on: Scalars['Timestamp']['output'];
-  my_submissions: Array<Submission>;
   note: Note;
   note_id: Scalars['ObjectId']['output'];
   open_on: Maybe<Scalars['Timestamp']['output']>;
+  submissions: Array<Submission>;
   title: Maybe<Scalars['String']['output']>;
 };
 
@@ -372,10 +372,10 @@ export type TestResolvers<ContextType = Context, ParentType extends ResolversPar
   author_id: Resolver<ResolversTypes['ObjectId'], ParentType, ContextType>;
   close_on: Resolver<Maybe<ResolversTypes['Timestamp']>, ParentType, ContextType>;
   created_on: Resolver<ResolversTypes['Timestamp'], ParentType, ContextType>;
-  my_submissions: Resolver<Array<ResolversTypes['Submission']>, ParentType, ContextType>;
   note: Resolver<ResolversTypes['Note'], ParentType, ContextType>;
   note_id: Resolver<ResolversTypes['ObjectId'], ParentType, ContextType>;
   open_on: Resolver<Maybe<ResolversTypes['Timestamp']>, ParentType, ContextType>;
+  submissions: Resolver<Array<ResolversTypes['Submission']>, ParentType, ContextType>;
   title: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;

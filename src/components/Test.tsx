@@ -1,11 +1,12 @@
 "use client"
 import { gql, useMutation, useQuery } from '@apollo/client'
 
-import { Test, Profile } from '@/app/graphql/generated'
+import { Test, Profile, Submission } from '@/app/graphql/generated'
 import { Loading, Error, EDIT_BUTTON_CLASS, CANCEL_BUTTON_CLASS, DELETE_BUTTON_CLASS, BUTTON_CLASS } from '@/components/utils'
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { myTimestamp } from '@/lib/utils'
+import Link from 'next/link'
 
 const TestQuery = gql`
     query Test($_id: ObjectId!) {
@@ -16,10 +17,18 @@ const TestQuery = gql`
             created_on
             open_on 
             close_on
-            my_submissions {
+            submissions {
                 _id
                 started_on
                 completed_on
+                score
+                author {
+                    _id
+                    name
+                }
+            }
+            author {
+                _id
             }
         }
         profile {
@@ -57,7 +66,7 @@ const NewSubmissionMutation = gql`
         newSubmission(test_id: $test_id)
 }`
 
-function ViewTest({test,profile}: {
+function ViewTest({test, profile}: {
     test: Test,
     profile: Profile|null
 }) {
@@ -85,7 +94,7 @@ const [startSubmission, { loading: isStarting, error: startError }] = useMutatio
         }
         {
             profile
-            && test.my_submissions.length === 0 
+            && test.submissions.length === 0 
             && (!test.open_on || (test.open_on < now))
             && (!test.close_on || (test.close_on > now)) 
             && <button className={BUTTON_CLASS} disabled={isStarting} onClick={async () => {
@@ -99,13 +108,53 @@ const [startSubmission, { loading: isStarting, error: startError }] = useMutatio
             </button>
         }
         {startError && <Error error={startError} />}
-        {test.my_submissions.map(submission => <a key={submission._id} className={BUTTON_CLASS} href={`/submission/${submission._id}`}>
-            { submission.completed_on 
-                ? `riapri test completato il ${myTimestamp(submission.completed_on)}`
-                : `riprendi test del ${myTimestamp(submission.started_on)}`
-            }
-        </a>)}
+        <div className="flex flex-col gap-2">
+            {test.submissions
+                .filter(submission => submission.author?._id === profile?._id)
+                .map(submission => <SubmissionElement key={submission._id} submission={submission} />)}
+        </div>
+        { test.author._id === profile?._id && <table className="mt-4 w-full border-2 border-black" style={{borderCollapse: 'collapse'}}>
+                <thead className="bg-gray-100">
+                    <tr>
+                        <th className="px-2 py-1 text-left border border-black"></th>
+                        <th className="px-2 py-1 text-left border border-black">Inizio</th>
+                        <th className="px-2 py-1 text-left border border-black">Fine</th>
+                        <th className="px-2 py-1 text-left border border-black">Autore</th>
+                        <th className="px-2 py-1 text-left border border-black">Punti</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {test.submissions.map(submission => <SubmissionRow key={submission._id} submission={submission} />)}
+                </tbody>
+            </table>
+        }
     </div>
+}
+
+function SubmissionElement({submission}:{
+    submission: Submission
+}) {
+            return <a key={submission._id} className={BUTTON_CLASS} href={`/submission/${submission._id}`}>
+                { submission.completed_on 
+                    ? `riapri test completato il ${myTimestamp(submission.completed_on)}`
+                    : `riprendi test del ${myTimestamp(submission.started_on)}`
+                }
+        </a>
+}
+
+function SubmissionRow({submission}:{
+    submission: Submission
+}) {
+    const router = useRouter()
+    return (
+        <tr className="hover:bg-gray-50">
+            <td className="px-2 py-1 border border-black text-center"><Link href={`/submission/${submission._id}`} className="block w-full h-full">👁</Link></td>
+            <td className="px-2 py-1 border border-black">{myTimestamp(submission.started_on)}</td>
+            <td className="px-2 py-1 border border-black">{myTimestamp(submission.completed_on)}</td>
+            <td className="px-2 py-1 border border-black">{submission.author.name}</td>
+            <td className="px-2 py-1 border border-black">{submission.score || ''}</td>
+        </tr>
+    )
 }
 
 const DeleteTestMutation = gql`

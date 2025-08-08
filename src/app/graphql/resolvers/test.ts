@@ -19,17 +19,32 @@ export default async function test (_parent: unknown, {_id}: { _id: ObjectId }, 
         },
         ...TEST_PIPELINE,
         {
-            // Aggiunge le sottomissioni dell'utente corrente
+            // Aggiunge le sottomissioni
             $lookup: {
                 from: 'submissions',
-                let: { test_id: '$_id', user_id: user?._id },
+                let: { 
+                    test_id: '$_id', 
+                    user_id: user?._id,
+                    test_author_id: '$author_id'
+                },
                 pipeline: [
                     { $match: { $expr: { $and: [ 
                         { $eq: ['$test_id', '$$test_id'] },
-                        { $eq: ['$author_id', '$$user_id'] } ] } } },
-                    { $sort: { started_on: -1 } }
+                        { $or: [
+                                { $eq: ['$author_id', '$$user_id'] },
+                                { $eq: ['$$test_author_id', '$$user_id'] }
+                                ] }, 
+                        ]}}}, 
+                    { $sort: { started_on: -1 } },
+                    { $lookup: {
+                        from: 'users',
+                        localField: 'author_id',
+                        foreignField: '_id',
+                        as: 'author'
+                    }},
+                    { $unwind: '$author' }
                 ],
-                as: 'my_submissions'
+                as: 'submissions'
             }
         }
     ]).toArray()

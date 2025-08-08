@@ -38,7 +38,7 @@ type Test {
     author: User!
     open_on: Timestamp
     close_on: Timestamp
-    my_submissions: [Submission!]!
+    submissions: [Submission!]!
 }
 
 type AnswerItem {
