@@ -1,4 +1,5 @@
 "use client"
+import React, { useState } from 'react'
 import { gql, useQuery } from "@apollo/client"
 import Link from 'next/link'
 
@@ -8,8 +9,8 @@ import NewNoteButton from "./NewNoteButton"
 import { myTimestamp } from "@/lib/utils"
 
 const notesQuery = gql`
-    query Notes {
-        notes {
+    query Notes($mine: Boolean, $private: Boolean, $limit: Int) {
+        notes(mine: $mine, private: $private, limit: $limit) {
             _id
             title
             private
@@ -26,48 +27,56 @@ const notesQuery = gql`
     }
 `
 export default function Notes() {
-    const { loading, error, data } = useQuery(notesQuery)
-    if (loading) return <Loading />
-    if (error) return <Error error={error} />
+    const [filter, setFilter] = useState<'tutte' | 'mie' | 'private'>('tutte')
+    const { loading, error, data } = useQuery(notesQuery, {
+        variables: { mine: filter === 'mie', private: filter === 'private', limit: 20 } // Default values
+    })
+    const notes = data?.notes
+    const profile = data?.profile
 
-    const {notes, profile} = data
-
-    const public_notes = notes.filter((note: Note) => !note.private)   
-    const private_notes = notes.filter((note: Note) => note.private)
     return <>
-        <div className="flex justify-center">
-            <NewNoteButton />
+        <div className="flex flex-col items-center gap-2 mb-4">
+            <div className="flex items-center gap-3 w-full justify-start">
+                <h2 className="text-2xl font-bold">Note</h2>
+                <NewNoteButton />
+            </div>
+            <div className="flex gap-2 mt-2">
+                <Badge active={filter === 'tutte'} onClick={() => setFilter('tutte')}>Tutte</Badge>
+                <Badge active={filter === 'mie'} onClick={() => setFilter('mie')}>Mie</Badge>
+                <Badge active={filter === 'private'} onClick={() => setFilter('private')}>Private</Badge>
+            </div>
         </div>
 
-        { public_notes.length === 0 && private_notes.length === 0 && (
+        {loading && <Loading />}
+        <Error error={error} />
+        { notes && notes.length === 0 &&
             <div className="text-center text-gray-500">
-                Nessuna nota trovata. Crea la tua prima nota!
+                Nessuna nota trovata.
             </div>
-        )}
-        
-        { public_notes.length > 0 && <>
-                <h2 className="text-2xl font-bold text-center">Note</h2>
+        }
+
+        { notes && notes.length > 0 && <>
                 <div className="flex flex-col gap-4">
-                    {data.notes
-                        .filter((note: Note) => !note.private)
-                        .map((note: Note) =>
-                            <NoteItem key={note._id} note={note} profile={profile}/>
-                        )}
+                    {notes.map((note: Note) =>
+                        (<NoteItem note={note} profile={profile} key={note._id} />)
+                    )}
                 </div>
             </>
         }
-
-        { private_notes.length > 0 && <>
-            <h2 className="text-2xl font-bold text-center">Note private</h2>
-            <div className="flex flex-col gap-4">
-                {data.notes
-                    .filter((note: Note) => note.private)
-                    .map((note: Note) =>
-                        <NoteItem key={note._id} note={note} profile={profile}/>
-                    )}
-            </div>
-        </>}
     </>
+// Badge component
+function Badge({ active, children, onClick }: { active: boolean, children: React.ReactNode, onClick: () => void }) {
+    return (
+        <button
+            className={`px-3 py-1 rounded-full border text-sm font-semibold transition-colors ${
+                active ? 'bg-black text-white border-black' : 'bg-gray-100 text-gray-700 border-gray-300'
+            }`}
+            onClick={onClick}
+        >
+            {children}
+        </button>
+    )
+}
 }
 
 function NoteItem({ note, profile }: { note: Note, profile: Profile }) {

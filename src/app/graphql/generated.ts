@@ -127,6 +127,13 @@ export type QueryNoteArgs = {
 };
 
 
+export type QueryNotesArgs = {
+  limit: InputMaybe<Scalars['Int']['input']>;
+  mine: InputMaybe<Scalars['Boolean']['input']>;
+  private: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+
 export type QuerySubmissionArgs = {
   _id: Scalars['ObjectId']['input'];
 };
@@ -331,7 +338,7 @@ export type ProfileResolvers<ContextType = Context, ParentType extends Resolvers
 export type QueryResolvers<ContextType = Context, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = ResolversObject<{
   hello: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   note: Resolver<Maybe<ResolversTypes['Note']>, ParentType, ContextType, RequireFields<QueryNoteArgs, '_id'>>;
-  notes: Resolver<Array<ResolversTypes['Note']>, ParentType, ContextType>;
+  notes: Resolver<Array<ResolversTypes['Note']>, ParentType, ContextType, QueryNotesArgs>;
   profile: Resolver<Maybe<ResolversTypes['Profile']>, ParentType, ContextType>;
   submission: Resolver<Maybe<ResolversTypes['Submission']>, ParentType, ContextType, RequireFields<QuerySubmissionArgs, '_id'>>;
   test: Resolver<Maybe<ResolversTypes['Test']>, ParentType, ContextType, RequireFields<QueryTestArgs, '_id'>>;

@@ -1,6 +1,6 @@
 import { Context } from '../types'
 import { getNotesCollection } from '@/lib/models'
-import { Note } from '../generated'
+import { Note, QueryNotesArgs } from '../generated'
 
 export const NOTES_PIPELINE = [
   { $sort: { created_on: -1 } }, // Ordina per data di creazione della Note
@@ -35,7 +35,7 @@ export const NOTES_PIPELINE = [
   }
 ]
 
-export default async function notes (_parent: unknown, _args: unknown, context: Context) {
+export default async function notes (_parent: unknown, args: QueryNotesArgs, context: Context) {
     const userId = context.user?._id
     return await getNotesCollection(context.db)
     .aggregate<Note>([
@@ -44,8 +44,13 @@ export default async function notes (_parent: unknown, _args: unknown, context: 
             { private: { $ne: true } },
             ...(userId ? [{ author_id: userId }] : [])
             ]
-        }
+          }
         },
+        { $match: {
+            ...(args.mine ? { author_id: userId } : {}),
+            ...(args.private ? { private: true } : {}),
+        }},
+        ...(args.limit ? [{ $limit: args.limit }] : []),
         ...NOTES_PIPELINE
     ])
     .toArray()

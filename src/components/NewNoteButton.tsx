@@ -3,7 +3,7 @@ import { ObjectId } from "bson"
 
 import { useRouter } from "next/navigation"
 import { gql, useMutation } from "@apollo/client"
-import { Error, EDIT_BUTTON_CLASS } from "@/components/utils"
+import { Error } from "@/components/utils"
 
 const CREATE_NOTE = gql`
     mutation NewNote {
@@ -21,8 +21,14 @@ const NewNoteButton = function () {
 
     return (
         <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start" }}>
-            <button className={EDIT_BUTTON_CLASS} disabled={loading} onClick={() => createNote()}>
-                Nuova Nota
+            <button
+                className="bg-blue-600 hover:bg-blue-700 text-white rounded-full flex items-center justify-center font-bold shadow transition"
+                style={{ width: "40px", height: "40px", fontSize: "2rem", padding: 0 }}
+                disabled={loading}
+                onClick={() => createNote()}
+                aria-label="Nuova nota"
+            >
+                {"+"}
             </button>
             {error && <Error error={error} />}
         </div>
