@@ -50,6 +50,7 @@ export default async function notes (_parent: unknown, args: QueryNotesArgs, con
             ...(args.mine ? { author_id: userId } : {}),
             ...(args.private ? { private: true } : {}),
         }},
+        { $sort: { created_on: -1 } },
         ...(args.limit ? [{ $limit: args.limit }] : []),
         ...NOTES_PIPELINE
     ])

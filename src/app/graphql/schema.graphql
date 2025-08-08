@@ -71,7 +71,7 @@ type Query {
   notes(mine: Boolean, private: Boolean, limit: Int): [Note!]!
   profile: Profile
   test(_id: ObjectId!): Test
-  tests: [Test!]!
+  tests(mine: Boolean, open: Boolean, limit: Int): [Test!]!
   submission(_id: ObjectId!): Submission
 }
 

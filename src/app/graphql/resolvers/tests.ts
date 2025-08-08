@@ -1,6 +1,6 @@
 import { Context } from '../types'
 import { getTestsCollection } from '@/lib/models'
-import { Test } from '../generated'
+import { Test, QueryTestsArgs } from '../generated'
 
 export const TESTS_PIPELINE = [
   { $sort: { created_on: -1 } }, // Ordina per data di creazione del Test
@@ -18,8 +18,9 @@ export const TESTS_PIPELINE = [
   },
 ]
 
-export default async function tests (_parent: unknown, _args: unknown, context: Context) {
+export default async function tests (_parent: unknown, args: QueryTestsArgs, context: Context) {
     const userId = context.user?._id
+    const now = new Date()
     return await getTestsCollection(context.db)
         .aggregate<Test>([
             { $match: {
@@ -27,8 +28,30 @@ export default async function tests (_parent: unknown, _args: unknown, context: 
                 { private: { $ne: true } },
                 ...(userId ? [{ author_id: userId }] : [])
                 ]
-            }
-            },
+            }},
+            { $match: {
+                ...(args.mine ? { author_id: userId } : {}),
+                ...(args.open
+                  ? {
+                      $and: [
+                        {
+                          $or: [
+                            { open_on: null },
+                            { open_on: { $lte: now } }
+                          ]
+                        },
+                        {
+                          $or: [
+                            { close_on: null },
+                            { close_on: { $gte: now } }
+                          ]
+                        }
+                      ]
+                    }
+                  : {}),  
+            }},
+            { $sort: { created_on: -1 } },
+            ...(args.limit ? [{ $limit: args.limit }] : []),
             ...TESTS_PIPELINE
         ])
         .toArray()

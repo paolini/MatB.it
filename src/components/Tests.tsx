@@ -5,10 +5,12 @@ import Link from 'next/link'
 import { Loading, Error } from "@/components/utils"
 import { Profile, Test } from "@/app/graphql/generated"
 import { myTimestamp } from "@/lib/utils"
+import { useState } from "react"
+import Badge from "@/components/Badge"
 
-const notesQuery = gql`
-    query Tests {
-        tests {
+const testsQuery = gql`
+    query Tests($mine: Boolean, $open: Boolean, $limit: Int) {
+        tests(mine: $mine, open: $open, limit: $limit) {
             _id
             title
             created_on
@@ -25,13 +27,27 @@ const notesQuery = gql`
     }
 `
 export default function Tests() {
-    const { loading, error, data } = useQuery(notesQuery)
+    const [filter, setFilter] = useState<'tutti' | 'miei' | 'aperti'>('tutti')
+    const { loading, error, data } = useQuery(testsQuery, {
+        variables: { mine: filter === 'miei', open: filter === 'aperti', limit: 20 }
+    })
     if (loading) return <Loading />
     if (error) return <Error error={error} />
 
     const {tests, profile} = data
 
     return <>
+        <div className="flex flex-col gap-2">
+            <div className="flex items-center gap-3 w-full justify-start">
+                <h2 className="text-2xl font-bold">Test</h2>
+            </div>
+            <div className="flex gap-2">
+                <Badge active={filter === 'tutti'} onClick={() => setFilter('tutti')}>Tutti</Badge>
+                <Badge active={filter === 'miei'} onClick={() => setFilter('miei')}>Miei</Badge>
+                <Badge active={filter === 'aperti'} onClick={() => setFilter('aperti')}>Aperti</Badge>
+            </div>
+        </div>
+
         { tests.length === 0 && (
             <div className="text-center text-gray-500">
                 Nessun test trovato.
@@ -39,7 +55,6 @@ export default function Tests() {
         )}
         
         { tests.length > 0 && <>
-                <h2 className="text-2xl font-bold text-center">Test</h2>
                 <div className="flex flex-col gap-4">
                     {tests.map((test: Test) =>
                             <TestItem key={test._id} test={test} profile={profile}/>

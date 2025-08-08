@@ -1,5 +1,6 @@
 "use client"
 import React, { useState } from 'react'
+import Badge from "@/components/Badge"
 import { gql, useQuery } from "@apollo/client"
 import Link from 'next/link'
 
@@ -35,12 +36,12 @@ export default function Notes() {
     const profile = data?.profile
 
     return <>
-        <div className="flex flex-col items-center gap-2 mb-4">
+        <div className="flex flex-col items-center gap-2">
             <div className="flex items-center gap-3 w-full justify-start">
                 <h2 className="text-2xl font-bold">Note</h2>
                 <NewNoteButton />
             </div>
-            <div className="flex gap-2 mt-2">
+            <div className="flex gap-2">
                 <Badge active={filter === 'tutte'} onClick={() => setFilter('tutte')}>Tutte</Badge>
                 <Badge active={filter === 'mie'} onClick={() => setFilter('mie')}>Mie</Badge>
                 <Badge active={filter === 'private'} onClick={() => setFilter('private')}>Private</Badge>
@@ -64,19 +65,6 @@ export default function Notes() {
             </>
         }
     </>
-// Badge component
-function Badge({ active, children, onClick }: { active: boolean, children: React.ReactNode, onClick: () => void }) {
-    return (
-        <button
-            className={`px-3 py-1 rounded-full border text-sm font-semibold transition-colors ${
-                active ? 'bg-black text-white border-black' : 'bg-gray-100 text-gray-700 border-gray-300'
-            }`}
-            onClick={onClick}
-        >
-            {children}
-        </button>
-    )
-}
 }
 
 function NoteItem({ note, profile }: { note: Note, profile: Profile }) {
