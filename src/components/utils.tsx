@@ -72,4 +72,4 @@ export const SAVE_BUTTON_CLASS   = `${COMMON_BUTTON_CLASS} bg-green-600 text-whi
 export const BUTTON_CLASS        = `${COMMON_BUTTON_CLASS} bg-gray-200 text-gray-800 hover:bg-gray-300`
 export const EDIT_BUTTON_CLASS   = `${COMMON_BUTTON_CLASS} bg-blue-500 text-white hover:bg-blue-600`
 export const CANCEL_BUTTON_CLASS = `${COMMON_BUTTON_CLASS} bg-gray-300 text-gray-800 hover:bg-gray-400`
-export const DELETE_BUTTON_CLASS = `${COMMON_BUTTON_CLASS} bg-red-500 text-white hover:bg-red-600`
+export const DELETE_BUTTON_CLASS = `${COMMON_BUTTON_CLASS} bg-red-400 text-white hover:bg-red-500`

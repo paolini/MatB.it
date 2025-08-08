@@ -25,6 +25,7 @@ export type AnswerItem = {
   answer: Maybe<Scalars['Int']['output']>;
   correct_answer: Maybe<Scalars['Int']['output']>;
   note_id: Scalars['ObjectId']['output'];
+  permutation: Maybe<Array<Scalars['Int']['output']>>;
 };
 
 export type AnswerItemInput = {
@@ -35,6 +36,7 @@ export type AnswerItemInput = {
 export type Mutation = {
   __typename?: 'Mutation';
   deleteNote: Maybe<Scalars['Boolean']['output']>;
+  deleteSubmission: Maybe<Scalars['Boolean']['output']>;
   deleteTest: Maybe<Scalars['Boolean']['output']>;
   newNote: Scalars['ObjectId']['output'];
   newSubmission: Scalars['ObjectId']['output'];
@@ -45,6 +47,11 @@ export type Mutation = {
 
 
 export type MutationDeleteNoteArgs = {
+  _id: Scalars['ObjectId']['input'];
+};
+
+
+export type MutationDeleteSubmissionArgs = {
   _id: Scalars['ObjectId']['input'];
 };
 
@@ -96,7 +103,7 @@ export type Note = {
   created_on: Scalars['Timestamp']['output'];
   delta: Maybe<Scalars['JSON']['output']>;
   private: Scalars['Boolean']['output'];
-  tests: Array<Test>;
+  tests: Maybe<Array<Test>>;
   title: Scalars['String']['output'];
   updated_on: Scalars['Timestamp']['output'];
   variant: Maybe<Scalars['String']['output']>;
@@ -174,7 +181,7 @@ export type Test = {
   note: Note;
   note_id: Scalars['ObjectId']['output'];
   open_on: Maybe<Scalars['Timestamp']['output']>;
-  submissions: Array<Submission>;
+  submissions: Maybe<Array<Submission>>;
   title: Maybe<Scalars['String']['output']>;
 };
 
@@ -299,6 +306,7 @@ export type AnswerItemResolvers<ContextType = Context, ParentType extends Resolv
   answer: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   correct_answer: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   note_id: Resolver<ResolversTypes['ObjectId'], ParentType, ContextType>;
+  permutation: Resolver<Maybe<Array<ResolversTypes['Int']>>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
@@ -308,6 +316,7 @@ export interface JsonScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes
 
 export type MutationResolvers<ContextType = Context, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = ResolversObject<{
   deleteNote: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType, RequireFields<MutationDeleteNoteArgs, '_id'>>;
+  deleteSubmission: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType, RequireFields<MutationDeleteSubmissionArgs, '_id'>>;
   deleteTest: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType, RequireFields<MutationDeleteTestArgs, '_id'>>;
   newNote: Resolver<ResolversTypes['ObjectId'], ParentType, ContextType, MutationNewNoteArgs>;
   newSubmission: Resolver<ResolversTypes['ObjectId'], ParentType, ContextType, RequireFields<MutationNewSubmissionArgs, 'test_id'>>;
@@ -323,7 +332,7 @@ export type NoteResolvers<ContextType = Context, ParentType extends ResolversPar
   created_on: Resolver<ResolversTypes['Timestamp'], ParentType, ContextType>;
   delta: Resolver<Maybe<ResolversTypes['JSON']>, ParentType, ContextType>;
   private: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
-  tests: Resolver<Array<ResolversTypes['Test']>, ParentType, ContextType>;
+  tests: Resolver<Maybe<Array<ResolversTypes['Test']>>, ParentType, ContextType>;
   title: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   updated_on: Resolver<ResolversTypes['Timestamp'], ParentType, ContextType>;
   variant: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
@@ -375,7 +384,7 @@ export type TestResolvers<ContextType = Context, ParentType extends ResolversPar
   note: Resolver<ResolversTypes['Note'], ParentType, ContextType>;
   note_id: Resolver<ResolversTypes['ObjectId'], ParentType, ContextType>;
   open_on: Resolver<Maybe<ResolversTypes['Timestamp']>, ParentType, ContextType>;
-  submissions: Resolver<Array<ResolversTypes['Submission']>, ParentType, ContextType>;
+  submissions: Resolver<Maybe<Array<ResolversTypes['Submission']>>, ParentType, ContextType>;
   title: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;

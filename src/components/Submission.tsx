@@ -3,10 +3,11 @@ import { gql, useQuery, useMutation } from '@apollo/client'
 import { useState, useEffect } from 'react'
 
 import { Profile, Submission } from '@/app/graphql/generated'
-import { Loading, Error, BUTTON_CLASS, EDIT_BUTTON_CLASS } from '@/components/utils'
+import { Loading, Error, BUTTON_CLASS, EDIT_BUTTON_CLASS, DELETE_BUTTON_CLASS } from '@/components/utils'
 // ...existing code...
 import DocumentElement, { Context, ContextAnswer } from './DocumentElement'
 import { myTimestamp } from '@/lib/utils'
+import { useRouter } from 'next/navigation'
 
 const SubmissionQuery = gql`
     query Submission($_id: ObjectId!) {
@@ -17,6 +18,9 @@ const SubmissionQuery = gql`
                 title
                 open_on
                 close_on
+                author {
+                    _id
+                }
             }
             author {
                 _id
@@ -144,10 +148,24 @@ function SubmissionElement({submission, profile}: {
     </>
 }
 
+const deleteMutation = gql`
+    mutation DeleteSubmission($_id: ObjectId!) {
+        deleteSubmission(_id: $_id)
+    }
+`
+
 function Info({submission, profile}: {
     submission: Submission
     profile?: Profile
 }) {
+    const router = useRouter()
+    const [deleteSubmission, { loading: isDeleting, error: deleteError }] = useMutation(deleteMutation, {
+        variables: { _id: submission._id },
+        onCompleted: () => {
+            router.back()
+        }
+    })
+
     return <div style={{
         background: '#dbdbdbff',
         padding: '1em',
@@ -170,6 +188,18 @@ function Info({submission, profile}: {
         { submission.score != null && <><strong>Punteggio:</strong> {submission.score} <br /></> }
         Ogni risposta corretta vale <i>1</i> punto, ogni risposta lasciata in bianco vale <i>2/(n+1)</i> punti dove <i>n</i> è il numero di opzioni, 
         le risposte sbagliate danno <i>0</i> punti.
+        <br />
+        { submission.test.author._id === profile?._id && 
+            <div style={{ textAlign: 'right', marginTop: '1em' }}>
+                <button className={DELETE_BUTTON_CLASS}
+                    onClick={() => confirm('Sei sicuro di voler eliminare questa sottomissione?') && deleteSubmission()}
+                    disabled={isDeleting}
+                    >
+                    🗑
+                </button>
+            </div>
+        }
+        <Error error={deleteError} />
     </div>
 }
 

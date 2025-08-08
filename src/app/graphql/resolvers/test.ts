@@ -1,4 +1,5 @@
 import { ObjectId } from 'mongodb'
+import { UserInputError, ForbiddenError, AuthenticationError } from 'apollo-server-errors'
 
 import { Context } from '../types'
 import { Test } from '../generated'
@@ -49,7 +50,7 @@ export default async function test (_parent: unknown, {_id}: { _id: ObjectId }, 
         }
     ]).toArray()
 
-    if (tests.length === 0) throw new Error('Test not found')
+    if (tests.length === 0) throw new UserInputError('Test not found')
     const test = tests[0]
 
     return test

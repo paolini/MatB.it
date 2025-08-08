@@ -86,8 +86,8 @@ export type MongoSubmission = {
 
 export type MongoAnswer = {
     note_id: ObjectId // id della nota (HEAD) a cui si riferisce la risposta
-    permutation?: number[]
-    answer?: number // risposta depermutata 0-index
+    permutation: number[] | null
+    answer: number | null // risposta depermutata 0-index
 }
 
 export function getNotesCollection(db: Db) {
@@ -116,6 +116,10 @@ export function getDeletedTestsCollection(db: Db) {
 
 export function getSubmissionsCollection(db: Db) {
     return db.collection<OptionalId<MongoSubmission>>('submissions')
+}
+
+export function getDeletedSubmissionsCollection(db: Db) {
+    return db.collection<OptionalId<MongoSubmission>>('deleted_submissions')
 }
 
 export const TEST_PIPELINE = [
@@ -189,7 +193,16 @@ export const SUBMISSION_PIPELINE = [
       from: 'tests',
       localField: 'test_id',
       foreignField: '_id',
-      as: 'test'
+      as: 'test',
+      pipeline: [
+        { $lookup: {
+          from: 'users',
+          localField: 'author_id',
+          foreignField: '_id',
+          as: 'author'
+        }},
+        { $unwind: { path: '$author', preserveNullAndEmptyArrays: true }}
+      ]
     }
   }, {
     $unwind: { path: '$test', preserveNullAndEmptyArrays: true }

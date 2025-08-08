@@ -25,7 +25,7 @@ type Note {
   private: Boolean!
   created_on: Timestamp!
   updated_on: Timestamp!
-  tests: [Test!]!
+  tests: [Test!]
 }
 
 type Test {
@@ -38,13 +38,14 @@ type Test {
     author: User!
     open_on: Timestamp
     close_on: Timestamp
-    submissions: [Submission!]!
+    submissions: [Submission!]
 }
 
 type AnswerItem {
   note_id: ObjectId!
   answer: Int # per adesso solo choice è implementata
-  correct_answer: Int # per adesso solo choice è implementata
+  permutation: [Int!] # per le risposte a scelta multipla, contiene l'ordine delle risposte
+  correct_answer: Int
 }
 
 input AnswerItemInput {
@@ -82,7 +83,8 @@ type Mutation {
 
   newTest(note_id: ObjectId!, title: String): Boolean
   deleteTest(_id: ObjectId!): Boolean
-  newSubmission(test_id: ObjectId!): ObjectId!
 
+  newSubmission(test_id: ObjectId!): ObjectId!
   updateSubmission(_id: ObjectId!, answers: [AnswerItemInput!], completed: Boolean): Boolean
+  deleteSubmission(_id: ObjectId!): Boolean
 }

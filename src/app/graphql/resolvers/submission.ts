@@ -53,12 +53,14 @@ const submission = async function (_parent: unknown, {_id}: { _id: ObjectId }, c
                     correct_answer: show_correct_answers
                         ? inv[0] // assuming the first permuted option is the correct one
                         : null,
+                    permutation: null, // segreto!
                 } 
             } else {
                 return {
                     note_id: a.note_id,
                     answer: a.answer || null,
                     correct_answer: null,
+                    permutation: null,
                 }
             }
         }),
@@ -115,6 +117,7 @@ function shuffle_and_insert_answers(document: Document, answers: MongoAnswer[]) 
         let answer = map[note_id]
         if (answer) return answer
         answer = {
+            answer: null,
             note_id: new ObjectId(note_id),
             permutation: shuffle([...Array(n).keys()]),
         }
@@ -143,27 +146,3 @@ function inverse_permutation(array: number[]) {
   }
   return inv
 }
-
-
-/*
- toglie le permutazioni dal documento
-*/
-/*
-function strip_answers(document: Document) {
-    document.paragraphs.forEach(paragraph => {
-        if (paragraph.type === 'note-ref') {
-            if (paragraph.document) strip_answers(paragraph.document)
-        } else {
-            paragraph.line.nodes.forEach(strip_node)
-        }
-    })
-}
-
-function strip_node(node: Node) {
-    if (typeof node === 'string') return
-    else if (node.type === 'span') node.nodes.forEach(strip_node)
-    else if (node.type === 'list') {
-        node.
-    }
-} 
-    */
