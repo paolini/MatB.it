@@ -1,17 +1,12 @@
-import { ObjectId } from 'mongodb'
 import { Context } from '../types'
 import { getSubmissionsCollection, MongoAnswer, MongoSubmission } from '@/lib/models'
-import { Submission, AnswerItemInput } from '../generated'
+import { Submission, AnswerItemInput, MutationUpdateSubmissionArgs } from '../generated'
 
 import { SUBMISSION_PIPELINE } from '@/lib/models'
 
 const updateSubmission = async function (
   _parent: unknown,
-  args: { 
-    _id: ObjectId, 
-    answers?: { note_id: ObjectId, answer: number|null }[],
-    completed?: boolean,
-  },
+  args: MutationUpdateSubmissionArgs,
   context: Context
 ): Promise<boolean> {
   if (!context.user) throw new Error('Not authenticated')

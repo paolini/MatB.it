@@ -4,6 +4,7 @@ import { Resolvers } from './generated'
 
 import notes from './resolvers/notes'
 import note from './resolvers/note'
+import tests from './resolvers/tests'
 import test from './resolvers/test'
 import submission from './resolvers/submission'
 
@@ -29,6 +30,7 @@ export const resolvers = {
     note,
 
     test,
+    tests,
 
     submission,
   },

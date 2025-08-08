@@ -118,6 +118,7 @@ export type Query = {
   profile: Maybe<Profile>;
   submission: Maybe<Submission>;
   test: Maybe<Test>;
+  tests: Array<Test>;
 };
 
 
@@ -334,6 +335,7 @@ export type QueryResolvers<ContextType = Context, ParentType extends ResolversPa
   profile: Resolver<Maybe<ResolversTypes['Profile']>, ParentType, ContextType>;
   submission: Resolver<Maybe<ResolversTypes['Submission']>, ParentType, ContextType, RequireFields<QuerySubmissionArgs, '_id'>>;
   test: Resolver<Maybe<ResolversTypes['Test']>, ParentType, ContextType, RequireFields<QueryTestArgs, '_id'>>;
+  tests: Resolver<Array<ResolversTypes['Test']>, ParentType, ContextType>;
 }>;
 
 export type SubmissionResolvers<ContextType = Context, ParentType extends ResolversParentTypes['Submission'] = ResolversParentTypes['Submission']> = ResolversObject<{

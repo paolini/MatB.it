@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { Loading, Error } from "@/components/utils"
 import { Note, Profile } from "@/app/graphql/generated"
 import NewNoteButton from "./NewNoteButton"
+import { myTimestamp } from "@/lib/utils"
 
 const notesQuery = gql`
     query Notes {
@@ -73,21 +74,21 @@ function NoteItem({ note, profile }: { note: Note, profile: Profile }) {
     const isPrivate = note.private
     const isMine = note.author_id === profile?._id
 
-    const classColors = isMine ? "bg-green-50 hover:bg-green-100"
-        : isPrivate ? "bg-yellow-50 hover:bg-yellow-100"
-        : "bg-white hover:bg-gray-100"
     return <Link
                 href={`/note/${note._id}`}
-                className={`border p-4 rounded-md block ${classColors}`}
+                className={`border p-4 rounded-md block ${
+                    isPrivate ? "alert-color"
+                    : isMine ? "good-color"
+                    : "default-color"}`}
                 style={{ textDecoration: 'none', color: 'inherit' }}
             >
             <h3 className="text-xl font-bold">
                 {note.title}
             </h3>
             <p className="text-gray-500">
-                {note.author && <span>by {note.author.name}</span>}
-                {' '}created on {new Date(note.created_on).toLocaleDateString()}
-                {' '}modified on {new Date(note.updated_on).toLocaleDateString()}
+                {note.author && <span>di {note.author.name}</span>}
+                {' '}creata il {myTimestamp(new Date(note.created_on))}
+                {' '}modificata il {myTimestamp(new Date(note.updated_on))}
             </p>
     </Link>
 }

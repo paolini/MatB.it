@@ -71,6 +71,7 @@ type Query {
   notes: [Note!]!
   profile: Profile
   test(_id: ObjectId!): Test
+  tests: [Test!]!
   submission(_id: ObjectId!): Submission
 }
 
