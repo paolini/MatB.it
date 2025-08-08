@@ -1,4 +1,5 @@
 import { ObjectId } from 'mongodb'
+import { UserInputError, ForbiddenError, AuthenticationError } from 'apollo-server-errors'
 
 import { Context } from '../types'
 import { Submission } from '../generated'
@@ -16,18 +17,18 @@ const submission = async function (_parent: unknown, {_id}: { _id: ObjectId }, c
         ...SUBMISSION_PIPELINE,
     ]).toArray()
 
-    if (items.length === 0) throw new Error('Submission not found')
+    if (items.length === 0) throw new UserInputError('Submission not found')
     const submission = items[0]
     const test = submission.test
 
-    if (!user) throw new Error('Not authenticated')
+    if (!user) throw new AuthenticationError('Not authenticated')
     if (!(test.author_id.equals(user._id)) 
         && !(submission.author_id.equals(user._id))) {
-        throw new Error('Not authorized to view this submission')
+        throw new ForbiddenError('Not authorized to view this submission')
     }
 
     const note = await note_loader(test.note_id)
-    if (!note) throw new Error('Note not found')
+    if (!note) throw new UserInputError('Note not found')
 
     const options = {
         note_loader,
@@ -37,21 +38,31 @@ const submission = async function (_parent: unknown, {_id}: { _id: ObjectId }, c
     const document = await document_from_note(note, options)
     const answers = submission.answers || []
     const answers_must_be_saved = shuffle_and_insert_answers(document, answers)
-    
+    const show_correct_answers = !!submission.completed_on 
+
     if (answers_must_be_saved) await collection.updateOne({_id: submission._id}, { $set: { answers } })
 
     return {
         ...submission,
-        answers: answers.map((a:MongoAnswer) => (
-            a.permutation && typeof a.answer === 'number' ? {
-                note_id: a.note_id,
-                answer: a.permutation[a.answer],
-                permutation: a.permutation,
-            } : {
-                note_id: a.note_id,
-                answer: a.answer || null,
-            })),
-            document,
+        answers: answers.map((a:MongoAnswer) => {
+            if (a.permutation && typeof a.answer === 'number') {
+                const inv = inverse_permutation(a.permutation)
+                return {
+                    note_id: a.note_id,
+                    answer: a.answer,
+                    correct_answer: show_correct_answers
+                        ? inv[0] // assuming the first permuted option is the correct one
+                        : null,
+                } 
+            } else {
+                return {
+                    note_id: a.note_id,
+                    answer: a.answer || null,
+                    correct_answer: null,
+                }
+            }
+        }),
+        document,
     }
 
     async function note_loader(note_id: string): Promise<NoteData|null> {
@@ -91,7 +102,8 @@ function shuffle_and_insert_answers(document: Document, answers: MongoAnswer[]) 
                         }
                         node.lines = answer.permutation.map(i => node.lines[i])
                         if (answer.answer) {
-                            node.selected = answer.permutation[answer.answer]
+                            const inv = inverse_permutation(answer.permutation)
+                            node.selected = inv[answer.answer]
                         }
                     }
                 })
@@ -123,6 +135,15 @@ function shuffle(array: number[]) {
   }
   return array
 }
+
+function inverse_permutation(array: number[]) {
+  const inv = new Array(array.length)
+  for (let i = 0; i < array.length; i++) {
+    inv[array[i]] = i
+  }
+  return inv
+}
+
 
 /*
  toglie le permutazioni dal documento

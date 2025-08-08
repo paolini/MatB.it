@@ -15,9 +15,14 @@ declare global {
   }
 }
 
+export type ContextAnswer = {
+  answer: number,
+  correct_answer?: number,
+}
+
 export type Context = {
   parents: string[], // Array di ID dei genitori per evitare loop infiniti
-  answers: Record<string, number>,
+  answers: Record<string, ContextAnswer>,
   setAnswer: (id: string, answer: number) => void
 }
 
@@ -127,19 +132,33 @@ function ListElement({context, list}:{context: Context, list:List}) {
 function ChoiceElement({context, choice}:{context: Context, choice:Choice}) {
   const note_id = context?.parents.length>0 && context.parents[context.parents.length-1] || undefined
   const answer = note_id && context.answers ? context.answers[note_id] : undefined
+  
   return <ul className="delta-choice-list">
-    { choice.lines.map((line,i) => <li key={i} data-list="choice" style={{display: 'flex', alignItems: 'center', gap: '0.5em'}}>
+    { choice.lines.map((line,i) => <li 
+          key={i} 
+          data-list="choice" 
+          style={{...style(answer, i), padding: '1px', margin: '1px',borderRadius: '2px', display: 'flex', alignItems: 'center', gap: '0.5em'}}
+          >
         <input
           type="radio"
-          style={{marginRight: '0.5em'}}
-          checked={answer===i || (answer === undefined && i === 0)}
+          style={{marginRight: '0.5em', backgroundColor: 'lightgreen'}}
+          checked={answer?.answer===i || (answer === undefined && i === 0)}
           onChange={() => {
             if (!(note_id && context.setAnswer)) return;
             context.setAnswer(note_id, i)
           }}
         />
-        <LineElement context={context} nodes={line.nodes} />
+        <div>
+          <LineElement context={context} nodes={line.nodes} />
+        </div>
       </li>
     )}
   </ul>
+
+  function style(answer: ContextAnswer|undefined, i:number) {
+    if (answer?.correct_answer == null) return {} // undefined == null (!)
+    if (i === answer.correct_answer) return {backgroundColor: 'lightgreen'}
+    if (i === answer.answer && i !== answer?.correct_answer ) return {backgroundColor: 'lightcoral'}
+    return {}
+  }
 }

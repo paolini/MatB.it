@@ -44,6 +44,7 @@ type Test {
 type AnswerItem {
   note_id: ObjectId!
   answer: Int # per adesso solo choice è implementata
+  correct_answer: Int # per adesso solo choice è implementata
 }
 
 input AnswerItemInput {
@@ -61,6 +62,7 @@ type Submission {
     author: User!
     started_on: Timestamp!
     completed_on: Timestamp
+    score: Float
 }
 
 type Query {

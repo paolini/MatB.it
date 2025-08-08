@@ -23,6 +23,7 @@ export type Scalars = {
 export type AnswerItem = {
   __typename?: 'AnswerItem';
   answer: Maybe<Scalars['Int']['output']>;
+  correct_answer: Maybe<Scalars['Int']['output']>;
   note_id: Scalars['ObjectId']['output'];
 };
 
@@ -142,6 +143,7 @@ export type Submission = {
   author_id: Scalars['ObjectId']['output'];
   completed_on: Maybe<Scalars['Timestamp']['output']>;
   document: Scalars['JSON']['output'];
+  score: Maybe<Scalars['Float']['output']>;
   started_on: Scalars['Timestamp']['output'];
   test: Test;
   test_id: Scalars['ObjectId']['output'];
@@ -243,6 +245,7 @@ export type ResolversTypes = ResolversObject<{
   AnswerItem: ResolverTypeWrapper<AnswerItem>;
   AnswerItemInput: AnswerItemInput;
   Boolean: ResolverTypeWrapper<Scalars['Boolean']['output']>;
+  Float: ResolverTypeWrapper<Scalars['Float']['output']>;
   Int: ResolverTypeWrapper<Scalars['Int']['output']>;
   JSON: ResolverTypeWrapper<Scalars['JSON']['output']>;
   Mutation: ResolverTypeWrapper<{}>;
@@ -262,6 +265,7 @@ export type ResolversParentTypes = ResolversObject<{
   AnswerItem: AnswerItem;
   AnswerItemInput: AnswerItemInput;
   Boolean: Scalars['Boolean']['output'];
+  Float: Scalars['Float']['output'];
   Int: Scalars['Int']['output'];
   JSON: Scalars['JSON']['output'];
   Mutation: {};
@@ -278,6 +282,7 @@ export type ResolversParentTypes = ResolversObject<{
 
 export type AnswerItemResolvers<ContextType = Context, ParentType extends ResolversParentTypes['AnswerItem'] = ResolversParentTypes['AnswerItem']> = ResolversObject<{
   answer: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  correct_answer: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   note_id: Resolver<ResolversTypes['ObjectId'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
@@ -338,6 +343,7 @@ export type SubmissionResolvers<ContextType = Context, ParentType extends Resolv
   author_id: Resolver<ResolversTypes['ObjectId'], ParentType, ContextType>;
   completed_on: Resolver<Maybe<ResolversTypes['Timestamp']>, ParentType, ContextType>;
   document: Resolver<ResolversTypes['JSON'], ParentType, ContextType>;
+  score: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
   started_on: Resolver<ResolversTypes['Timestamp'], ParentType, ContextType>;
   test: Resolver<ResolversTypes['Test'], ParentType, ContextType>;
   test_id: Resolver<ResolversTypes['ObjectId'], ParentType, ContextType>;
