@@ -1,6 +1,6 @@
 import { Test } from '@/app/graphql/generated'
 
-export default function TestList({ tests }: { tests: Test[] }) {
+export default function TestList({ tests }: { tests: Test[] | null }) {
     if (!tests || tests.length === 0) return null
     return (
         <div className="mt-4">

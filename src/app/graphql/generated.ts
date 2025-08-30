@@ -83,6 +83,7 @@ export type MutationNewTestArgs = {
 export type MutationUpdateNoteArgs = {
   _id: Scalars['ObjectId']['input'];
   delta: InputMaybe<Scalars['JSON']['input']>;
+  hide_title: InputMaybe<Scalars['Boolean']['input']>;
   private: InputMaybe<Scalars['Boolean']['input']>;
   title: InputMaybe<Scalars['String']['input']>;
   variant: InputMaybe<Scalars['String']['input']>;
@@ -102,6 +103,7 @@ export type Note = {
   author_id: Scalars['ObjectId']['output'];
   created_on: Scalars['Timestamp']['output'];
   delta: Maybe<Scalars['JSON']['output']>;
+  hide_title: Scalars['Boolean']['output'];
   private: Scalars['Boolean']['output'];
   tests: Maybe<Array<Test>>;
   title: Scalars['String']['output'];
@@ -331,6 +333,7 @@ export type NoteResolvers<ContextType = Context, ParentType extends ResolversPar
   author_id: Resolver<ResolversTypes['ObjectId'], ParentType, ContextType>;
   created_on: Resolver<ResolversTypes['Timestamp'], ParentType, ContextType>;
   delta: Resolver<Maybe<ResolversTypes['JSON']>, ParentType, ContextType>;
+  hide_title: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   private: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   tests: Resolver<Maybe<Array<ResolversTypes['Test']>>, ParentType, ContextType>;
   title: Resolver<ResolversTypes['String'], ParentType, ContextType>;

@@ -20,6 +20,7 @@ export function extractNoteRef(insert: unknown): NoteRef | null {
 export type MongoNote = {
     _id: ObjectId
     title: string               // Title dell'ultima versione (HEAD)
+    hide_title: boolean         // Non mostrare il titolo quando si visualizza la nota
     delta: object               // Contenuto dell'ultima versione (HEAD) in formato Quill Delta
     variant?: string            // Tipo di contenuto dell'ultima versione (HEAD)
     author_id: ObjectId         // Chi controlla questo branch (può spostare il tip)
@@ -30,7 +31,7 @@ export type MongoNote = {
         first_contribution: Date
         last_contribution: Date
     }[]
-    private: boolean            // Controllo visibilità
+    private: boolean            // Solo l'autore può vederla
     created_on: Date
     description?: string        // Descrizione del branch
 }

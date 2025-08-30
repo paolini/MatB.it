@@ -9,7 +9,7 @@ const updateNote = async function (
       args: MutationUpdateNoteArgs,
       context: Context
     ): Promise<Note | null> {
-    const { _id, title, delta, private: isPrivate, variant } = args
+    const { _id, title, hide_title, delta, private: isPrivate, variant } = args
     const collection = getNotesCollection(context.db)
     const note = await collection.findOne({ _id })
     if (!note) throw new Error('Note not found')
@@ -19,12 +19,14 @@ const updateNote = async function (
     if (!note.author_id.equals(context.user._id)) throw new Error('Not authorized')
     
     const update: Partial<{
-    title: string;
-    delta: object;
-    private: boolean;
-    variant: string;
+      title: string
+      hide_title: boolean
+      delta: object
+      private: boolean
+      variant: string
     }> = {}
     if (typeof title === 'string') update.title = title
+    if (typeof hide_title === 'boolean') update.hide_title = hide_title
     if (delta) update.delta = delta
     if (typeof isPrivate === 'boolean') update.private = isPrivate
     if (typeof variant === 'string') update.variant = variant

@@ -9,10 +9,11 @@ import { Note } from '@/app/graphql/generated'
 const MyQuill = dynamic(() => import('@/lib/myquill/MyQuill'), { ssr: false });
 
 const UpdateNoteMutation = gql`
-mutation UpdateNote($_id: ObjectId!, $title: String, $delta: JSON, $private: Boolean, $variant: String) {
-  updateNote(_id: $_id, title: $title, delta: $delta, private: $private, variant: $variant) {
+mutation UpdateNote($_id: ObjectId!, $title: String, $hide_title: Boolean, $delta: JSON, $private: Boolean, $variant: String) {
+  updateNote(_id: $_id, title: $title, hide_title: $hide_title, delta: $delta, private: $private, variant: $variant) {
     _id
     title
+    hide_title
     delta
     variant
     private
@@ -35,6 +36,7 @@ export default function NoteForm({ note }: {
   const [title, setTitle] = useState(note.title)
   const [variant, setVariant] = useState(note.variant || 'default')
   const [isPrivate, setIsPrivate] = useState(note.private || false)
+  const [hideTitle, setHideTitle] = useState(note.hide_title || false)
 
   const [updateNote, { loading: isUpdating, error: updateError }] = useMutation(UpdateNoteMutation)
   const [deleteNote, { loading: isDeleting, error: deleteError }] = useMutation(DeleteNoteMutation)
@@ -43,7 +45,8 @@ export default function NoteForm({ note }: {
     await updateNote({ 
       variables: { 
         _id: note._id, 
-        title, 
+        title,
+        hide_title: hideTitle, 
         delta: currentDelta, 
         private: isPrivate, 
         variant 
@@ -83,8 +86,8 @@ export default function NoteForm({ note }: {
         </select>
       </div>
 
-      {/* Privacy */}
-      <div>
+      {/* Options */}
+      <div className="flex gap-8">
         <label className="flex items-center gap-2">
           <input
             type="checkbox"
@@ -93,6 +96,15 @@ export default function NoteForm({ note }: {
             className="rounded"
           />
           <span className="text-sm font-medium text-gray-700">Nota privata</span>
+        </label>
+        <label className="flex items-center gap-2">
+          <input
+            type="checkbox"
+            checked={hideTitle}
+            onChange={e => setHideTitle(e.target.checked)}
+            className="rounded"
+          />
+          <span className="text-sm font-medium text-gray-700">Nascondi titolo</span>
         </label>
       </div>
 

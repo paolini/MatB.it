@@ -14,6 +14,7 @@ const NoteQuery = gql`
         note(_id: $_id) {
             _id
             title
+            hide_title
             delta
             variant
             author {
@@ -61,9 +62,9 @@ function NoteView({note, profile}: {
 }) {
     return <div>
         <div className={`ql-variant-container ql-var-${note.variant || 'default'}`}>
-            <h1>
-                {note.title}
-            </h1>
+            {!note.hide_title &&
+                <h1>{note.title}</h1>
+            }
             <div className="delta">
                 <NoteContent note={note} />
             </div>
@@ -71,14 +72,16 @@ function NoteView({note, profile}: {
         </div>
         <TestList tests={note.tests} />
         <NoteFooter note={note} />
-        {note?.variant === 'test' && (
-            <CreateTestButton note={note} />
-        )}
+        <div className="flex gap-2">
         {note?.author?._id === profile?._id  && 
-            <a className={EDIT_BUTTON_CLASS} href={`?edit`} style={{ marginLeft: 8 }}>
+            <a className={EDIT_BUTTON_CLASS} href={`?edit`}>
                 Edit
             </a>
         }
+        {note?.variant === 'test' && (
+            <CreateTestButton note={note} />
+        )}
+        </div>
     </div>
 }
 
