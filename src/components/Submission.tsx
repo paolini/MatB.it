@@ -71,12 +71,15 @@ function SubmissionElement({submission, profile}: {
     submission: Submission,
     profile?: Profile
 }) {
-    const answers_map: Record<string, ContextAnswer> = Object
-        .fromEntries((submission.answers || [])
-        .map((answer) => [answer.note_id, { 
-            answer: answer.answer, 
-            correct_answer: answer.correct_answer, 
-        }]))
+    const entries: [string, ContextAnswer][] = (submission.answers || []).map(answer => [
+        answer.note_id,
+        {
+            answer: answer.answer ?? null,
+            correct_answer: answer.correct_answer ?? null
+        }
+    ])
+    const questionIds: string[] = entries.map(([id]) => id)
+    const answers_map: Record<string, ContextAnswer> = Object.fromEntries(entries)
     const [answers, setAnswers] = useState<Record<string, ContextAnswer>>(answers_map)
 
     // Reset answers state when submission changes
@@ -101,6 +104,7 @@ function SubmissionElement({submission, profile}: {
 
     const context: Context = {
         parents: [],
+        questionIds,
         answers,
         setAnswer: (id: string, answer: number) => {
             const answer_object = answers[id]

@@ -3,6 +3,7 @@ import type { MutationUpdateNoteArgs } from '../generated'
 import { Context } from '../types'
 import { Note } from '../generated'
 import { getNotesCollection, NOTE_PIPELINE } from '@/lib/models'
+import { QuillDelta } from '@/lib/myquill/document'
 
 const updateNote = async function (
       _parent: unknown,
@@ -21,13 +22,13 @@ const updateNote = async function (
     const update: Partial<{
       title: string
       hide_title: boolean
-      delta: object
+      delta: QuillDelta
       private: boolean
       variant: string
     }> = {}
     if (typeof title === 'string') update.title = title
     if (typeof hide_title === 'boolean') update.hide_title = hide_title
-    if (delta) update.delta = delta
+    if (delta) update.delta = delta as QuillDelta
     if (typeof isPrivate === 'boolean') update.private = isPrivate
     if (typeof variant === 'string') update.variant = variant
     if (Object.keys(update).length === 0) throw new Error('No fields to update')

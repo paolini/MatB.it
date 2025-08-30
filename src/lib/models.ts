@@ -1,4 +1,5 @@
 import { Db, ObjectId, OptionalId } from 'mongodb'
+import { QuillDelta } from './myquill/document'
 
 // Types for Note Reference in Quill Delta
 export type NoteRef = {
@@ -21,7 +22,7 @@ export type MongoNote = {
     _id: ObjectId
     title: string               // Title dell'ultima versione (HEAD)
     hide_title: boolean         // Non mostrare il titolo quando si visualizza la nota
-    delta: object               // Contenuto dell'ultima versione (HEAD) in formato Quill Delta
+    delta: QuillDelta           // Contenuto dell'ultima versione (HEAD) in formato Quill Delta
     variant?: string            // Tipo di contenuto dell'ultima versione (HEAD)
     author_id: ObjectId         // Chi controlla questo branch (può spostare il tip)
     note_version_id: ObjectId   // Punta alla versione corrente (HEAD)
@@ -39,7 +40,7 @@ export type MongoNote = {
 export type NoteVersion = {
     _id: ObjectId
     title: string
-    delta: object                // Contenuto in formato Quill Delta (JSON flessibile)
+    delta: QuillDelta            // Contenuto in formato Quill Delta
     variant: string            // Tipo di contenuto opzionale (es: teorema, dimostrazione, esercizio, etc.)
     author_id: ObjectId         // Chi ha creato questa versione
     parent_version_id?: ObjectId          // Primo parent (catena principale)

@@ -5,6 +5,7 @@ import { gql, useMutation } from '@apollo/client'
 import { useRouter } from 'next/navigation'
 
 import { Note } from '@/app/graphql/generated'
+import { QuillDelta } from '@/lib/myquill/document'
 
 const MyQuill = dynamic(() => import('@/lib/myquill/MyQuill'), { ssr: false });
 
@@ -41,7 +42,7 @@ export default function NoteForm({ note }: {
   const [updateNote, { loading: isUpdating, error: updateError }] = useMutation(UpdateNoteMutation)
   const [deleteNote, { loading: isDeleting, error: deleteError }] = useMutation(DeleteNoteMutation)
     
-  const handleSaveWithDelta = async (currentDelta: object) => {
+  const handleSaveWithDelta = async (currentDelta: any) => {
     await updateNote({ 
       variables: { 
         _id: note._id, 

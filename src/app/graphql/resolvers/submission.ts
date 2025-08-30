@@ -4,7 +4,7 @@ import { UserInputError, ForbiddenError, AuthenticationError } from 'apollo-serv
 import { Context } from '../types'
 import { Submission } from '../generated'
 import { getNotesCollection, getSubmissionsCollection, SUBMISSION_PIPELINE } from '@/lib/models'
-import { document_from_note, Document, Paragraph, NoteRef, Node, NoteData } from '@/lib/myquill/document'
+import { document_from_note, Document, Paragraph, NoteRef, Node, NoteData, QuillDelta } from '@/lib/myquill/document'
 import { MongoSubmission, MongoAnswer } from '@/lib/models'
 
 const submission = async function (_parent: unknown, {_id}: { _id: ObjectId }, context: Context): Promise<Submission | null> {
@@ -69,12 +69,14 @@ const submission = async function (_parent: unknown, {_id}: { _id: ObjectId }, c
 
     async function note_loader(note_id: string): Promise<NoteData|null> {
         const note = await notesCollection.findOne({ _id: new ObjectId(note_id) })
-        return note ? {
+        if (!note) return null
+            
+        return {
             delta: note.delta,
             variant: note.variant || null,
             title: note.title,
             _id: new ObjectId(note_id)
-        } : null
+        }
     }
 }
 

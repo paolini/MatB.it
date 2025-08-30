@@ -16,8 +16,8 @@ declare global {
 }
 
 export type ContextAnswer = {
-  answer: number,
-  correct_answer?: number,
+  answer: number | null,
+  correct_answer?: number | null,
 }
 
 export type Context = {
