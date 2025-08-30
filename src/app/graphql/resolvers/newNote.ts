@@ -35,6 +35,7 @@ const newNote = async function (
             last_contribution: now
         }],
         private: typeof args.private === 'boolean' ? args.private : false,
+        hide_title: typeof args.hide_title === 'boolean' ? args.hide_title : false,
         created_on: now
     }
     const result = await collection.insertOne(note)

@@ -39,5 +39,10 @@ jobs:
         docker tag paolini/matbit paolini/matbit:${{ steps.vars.outputs.version }}
         docker push paolini/matbit
         docker push paolini/matbit:${{ steps.vars.outputs.version }}
-#        ssh -o "StrictHostKeyChecking no" root@matb.it docker-compose -f docker/matbit/docker-compose.yml pull
-#        ssh -o "StrictHostKeyChecking no" root@matb.it docker-compose -f docker/matbit/docker-compose.yml up -d
+
+    - name: Deploy to production server
+      run: |
+        set -e
+        echo "Deploying version ${{ steps.vars.outputs.version }} to production..."
+        ssh -o "StrictHostKeyChecking no" root@contabo3.matb.it "cd docker/matbit && docker-compose pull && docker-compose up -d"
+        echo "Deployment completed successfully!"

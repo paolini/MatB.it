@@ -63,6 +63,7 @@ export type MutationDeleteTestArgs = {
 
 export type MutationNewNoteArgs = {
   delta: InputMaybe<Scalars['JSON']['input']>;
+  hide_title: InputMaybe<Scalars['Boolean']['input']>;
   private: InputMaybe<Scalars['Boolean']['input']>;
   title: InputMaybe<Scalars['String']['input']>;
   variant: InputMaybe<Scalars['String']['input']>;
