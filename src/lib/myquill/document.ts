@@ -1,6 +1,28 @@
 import { ObjectId } from 'bson'
 import { AttributeMap } from './myquill'
 
+// Tipi per Quill Delta
+export type DeltaInsert = string | {
+  formula: {
+    value: string
+    displaystyle?: boolean
+  }
+} | {
+  "note-ref": {
+    note_id: string
+    title?: string
+  }
+}
+
+export type DeltaOperation = {
+  insert: DeltaInsert
+  attributes?: AttributeMap
+}
+
+export type QuillDelta = {
+  ops: DeltaOperation[]
+}
+
 
 export type Formula = {
   type: "formula"
@@ -48,7 +70,7 @@ export type Paragraph = {
 export interface NoteData {
   title: string
   variant?: string | null
-  delta: unknown
+  delta: QuillDelta
   _id: ObjectId
 }
 
@@ -62,6 +84,7 @@ export type Options = {
 export type NoteRef = {
   type: "note-ref"
   note_id: string
+  title?: string
 }
 
 export type Document = {
@@ -208,6 +231,9 @@ async function push_note_ref(context: Context, document: Document, note_ref: obj
           type: "note-ref",
           note_id,
         }
+      if ('title' in note_ref && typeof note_ref.title === 'string') {
+        paragraph.title = note_ref.title
+      }
       document.paragraphs.push(paragraph)    
     }
   } else {
@@ -234,22 +260,21 @@ async function document_from_note_recurse(context: Context, note: NoteData): Pro
   const line: Line = { type: 'line', nodes: []}
   const delta = note.delta
 
-  for (const op of (delta as {ops: unknown[]}).ops) {
-    const operation = op as Record<string, unknown>
-    const insert = operation.insert
+  for (const op of delta.ops) {
+    const insert = op.insert
 //    console.log(JSON.stringify({insert}))
     if (typeof insert === 'string') {
       const chunks = insert.split('\n')
       for (let i=0; i<chunks.length; i++) {
-        if (i>0) push_newline(document, line, operation.attributes as AttributeMap | undefined)
-        push_text(line, chunks[i], operation.attributes as AttributeMap | undefined)
+        if (i>0) push_newline(document, line, op.attributes as AttributeMap | undefined)
+        push_text(line, chunks[i], op.attributes as AttributeMap | undefined)
       }
     } else if (typeof insert === 'object') {
       if (insert && 'formula' in insert) {
-        push_formula(line, (insert as Record<string, unknown>).formula as object, operation.attributes as AttributeMap | undefined)        
+        push_formula(line, (insert as Record<string, unknown>).formula as object, op.attributes as AttributeMap | undefined)        
       } else if (insert && 'note-ref' in insert) {
         if (line.nodes.length > 0) push_newline(document, line, {})
-        await push_note_ref(context, document, (insert as Record<string, unknown>)["note-ref"] as object, operation.attributes as AttributeMap | undefined)
+        await push_note_ref(context, document, (insert as Record<string, unknown>)["note-ref"] as object, op.attributes as AttributeMap | undefined)
       } else {
         push_error(line, `invalid insert object ${JSON.stringify(insert)}`)
       }

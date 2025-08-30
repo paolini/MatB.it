@@ -24,8 +24,9 @@ const NOTE_QUERY = gql`
   }
 `
 
-export default function NoteEmbed({context, note_id}: { 
+export default function NoteEmbed({context, note_id, title}: { 
   note_id: ObjectId
+  title?: string
   context: Context
 }) {
   const { data, loading, error } = useQuery(NOTE_QUERY, {
@@ -40,12 +41,14 @@ export default function NoteEmbed({context, note_id}: {
   return <NoteEmbedInner
       context={{...context, parents: [...context.parents, note_id.toString()]}}
       note={note}
+      title={title}
     />
 }
 
-export function NoteEmbedInner({ context, note }: {
+export function NoteEmbedInner({ context, note, title }: {
   context: Context
   note: Note
+  title?: string
 }) {
   const [showInfo, setShowInfo] = useState(false);
   
@@ -65,9 +68,9 @@ export function NoteEmbedInner({ context, note }: {
   const isQuestion = questionIndex !== -1;
   const questionNumber = questionIndex + 1;
   
-  const displayTitle = note.hide_title && isQuestion
+  const displayTitle = title || (note.hide_title && isQuestion
     ? `Domanda ${questionNumber}`
-    : note.title;
+    : note.title);
 
   return <DocumentEmbed variant={note.variant || undefined} title={displayTitle}>
     <div className="embedded-note-content">

@@ -265,3 +265,27 @@
   display: inline-block;
   line-height: 22px;
 }
+
+/* Note reference badges in editor */
+.ql-note-ref {
+  max-width: 350px !important;
+}
+
+.ql-note-ref button {
+  transition: all 0.2s ease !important;
+}
+
+.ql-note-ref button:hover {
+  background-color: rgba(0,0,0,0.1) !important;
+  opacity: 1 !important;
+}
+
+/* Dropdown menu styling */
+.note-ref-dropdown {
+  animation: fadeIn 0.15s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}

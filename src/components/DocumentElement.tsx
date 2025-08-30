@@ -43,7 +43,7 @@ function ParagraphElement({context,paragraph}:{context:Context, paragraph: Parag
     if (context.parents.includes(paragraph.note_id)) {
       return <span className="ql-note-ref-simple">[Circular reference to note: {`${paragraph.note_id}`}]</span>
     }
-    return <NoteEmbed note_id={new ObjectId(paragraph.note_id)} context={context} />
+    return <NoteEmbed note_id={new ObjectId(paragraph.note_id)} title={paragraph.title} context={context} />
   }
   if (paragraph.attribute === 'h1') return <h1 className="note"><LineElement context={context} nodes={paragraph.line.nodes} /></h1>
   if (paragraph.attribute === 'h2') return <h2 className="note"><LineElement context={context} nodes={paragraph.line.nodes} /></h2>
