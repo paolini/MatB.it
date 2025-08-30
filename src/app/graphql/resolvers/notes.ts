@@ -51,6 +51,7 @@ export default async function notes (_parent: unknown, args: QueryNotesArgs, con
             ...(args.private ? { private: true } : {}),
         }},
         { $sort: { created_on: -1 } },
+        ...(args.skip ? [{ $skip: args.skip }] : []),
         ...(args.limit ? [{ $limit: args.limit }] : []),
         ...NOTES_PIPELINE
     ])

@@ -1,7 +1,7 @@
 "use client"
 import React, { useState } from 'react'
 import Badge from "@/components/Badge"
-import { gql, useQuery } from "@apollo/client"
+import { gql, useQuery, NetworkStatus } from "@apollo/client"
 import Link from 'next/link'
 
 import { Loading, Error } from "@/components/utils"
@@ -10,8 +10,8 @@ import NewNoteButton from "./NewNoteButton"
 import { myTimestamp } from "@/lib/utils"
 
 const notesQuery = gql`
-    query Notes($mine: Boolean, $private: Boolean, $limit: Int) {
-        notes(mine: $mine, private: $private, limit: $limit) {
+    query Notes($mine: Boolean, $private: Boolean, $limit: Int, $skip: Int) {
+        notes(mine: $mine, private: $private, limit: $limit, skip: $skip) {
             _id
             title
             private
@@ -29,11 +29,43 @@ const notesQuery = gql`
 `
 export default function Notes() {
     const [filter, setFilter] = useState<'tutte' | 'mie' | 'private'>('tutte')
-    const { loading, error, data } = useQuery(notesQuery, {
-        variables: { mine: filter === 'mie', private: filter === 'private', limit: 20 } // Default values
+    
+    const NOTES_PER_PAGE = 20
+    
+    const { loading, error, data, fetchMore, networkStatus } = useQuery(notesQuery, {
+        variables: { 
+            mine: filter === 'mie', 
+            private: filter === 'private', 
+            limit: NOTES_PER_PAGE,
+            skip: 0
+        },
+        notifyOnNetworkStatusChange: true
     })
-    const notes = data?.notes
+    
+    const notes = data?.notes || []
     const profile = data?.profile
+    const hasMore = notes.length % NOTES_PER_PAGE === 0 && notes.length > 0
+    const loadingMore = networkStatus === NetworkStatus.fetchMore
+
+    const loadMore = async () => {
+        if (loadingMore || !hasMore) return
+        
+        await fetchMore({
+            variables: {
+                mine: filter === 'mie',
+                private: filter === 'private',
+                limit: NOTES_PER_PAGE,
+                skip: notes.length
+            },
+            updateQuery: (prev, { fetchMoreResult }) => {
+                if (!fetchMoreResult) return prev
+                return {
+                    ...prev,
+                    notes: [...prev.notes, ...fetchMoreResult.notes]
+                }
+            }
+        })
+    }
 
     return <>
         <div className="flex flex-col items-center gap-2">
@@ -62,6 +94,20 @@ export default function Notes() {
                         (<NoteItem note={note} profile={profile} key={note._id} />)
                     )}
                 </div>
+                
+                { notes.length } note visualizzate.
+                {/* Pulsante Carica di più */}
+                {hasMore && (
+                    <div className="flex justify-center">
+                        <button
+                            onClick={loadMore}
+                            disabled={loadingMore}
+                            className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                        >
+                            carica altre...
+                        </button>
+                    </div>
+                )}
             </>
         }
     </>

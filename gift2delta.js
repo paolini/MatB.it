@@ -176,7 +176,7 @@ rl.on('close', async () => {
         delta: ${Array.isArray(note.ops) ? JSON.stringify({ops:note.ops}, null, 2) : note.ops},
         note_version_id: versionResult.insertedId,
         created_on: ISODate(${JSON.stringify(now)}),
-        private: false,
+        private: true,
         author_id: ObjectId('683fe820c25aac9b42af9327')
       }`;
       console.log(`db.notes.insertOne(${noteDocStr})`);

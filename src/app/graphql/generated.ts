@@ -141,6 +141,7 @@ export type QueryNotesArgs = {
   limit: InputMaybe<Scalars['Int']['input']>;
   mine: InputMaybe<Scalars['Boolean']['input']>;
   private: InputMaybe<Scalars['Boolean']['input']>;
+  skip: InputMaybe<Scalars['Int']['input']>;
 };
 
 

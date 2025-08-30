@@ -70,7 +70,7 @@ type Submission {
 type Query {
   hello: String!
   note(_id: ObjectId!): Note
-  notes(mine: Boolean, private: Boolean, limit: Int): [Note!]!
+  notes(mine: Boolean, private: Boolean, limit: Int, skip: Int): [Note!]!
   profile: Profile
   test(_id: ObjectId!): Test
   tests(mine: Boolean, open: Boolean, limit: Int): [Test!]!

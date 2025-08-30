@@ -1,0 +1,2586 @@
+// question: 0  name: Switch category to $module$/top/logica, insiemi e funzioni
+$CATEGORY: $module$/top/logica, insiemi e funzioni
+
+
+// question: 49383  name: composizione
+::composizione::[html]<p>Sia \\( f\\colon \\\{1,2,3\\\}\\to \\\{1,2,3,4\\\} \\) la funzione definita da<br>$$<br>&nbsp; f \= \\\{ 1\\mapsto 3, 2\\mapsto 3, 3\\mapsto 1\\\}.<br>$$<br></p><p>Allora \\( (f\\circ f)(3) \\) è uguale a...</p>{
+	=<p>\\( 3 \\)</p>
+	~<p>\\( 1 \\)</p>
+	~<p>\\( 2 \\)</p>
+	~<p>\\( (1,1) \\)</p>
+}
+
+
+// question: 49382  name: controimmagine
+::controimmagine::[html]<p></p><p>Sia \\( f\\colon \\\{1,2,3\\\}\\to \\\{1,2,3,4\\\} \\) la funzione definita da<br>$$<br>&nbsp; f \= \\\{ 1\\mapsto 3, 2\\mapsto 3, 3\\mapsto 1\\\}.<br>$$<br>Allora l'insieme \\( f^\{-1\}(\\\{2,3\\\}) \\) è</p><p></p>{
+	=<p>\\( \\\{1,2\\\} \\)</p>
+	~<p>\\( \\\{2,3\\\} \\)</p>
+	~<p>\\( \\emptyset \\)</p>
+	~<p>\\( (1,2) \\)</p>
+}
+
+
+// question: 243  name: deduzione logica
+::deduzione logica::[html]<p>se vale<br>$$<br>(P \\lor Q) \\land (R \\lor Q)<br>$$<br>allora certamente possiamo dedurre che vale...</p>{
+	=<p>\\( (\\lnot Q) \\implies R \\)</p>
+	~<p>\\( P \\land R \\)</p>
+	~<p>\\( Q \\)</p>
+	~<p>\\( R \\implies Q\\)</p>
+}
+
+
+// question: 49213  name: definizione equivalente continuità
+::definizione equivalente continuità::[html]<p dir\="ltr" style\="text-align\: left;">Quale delle seguenti definizioni non è equivalente alla continuità della funzione \\( f \\colon A\\subset \\mathbb R \\to \\mathbb R \\) nel punto \\( x_0 \\)?</p>{
+	=<p dir\="ltr" style\="text-align\: left;">\\( \\forall \\varepsilon &gt;0 \\colon \\exists \\delta&gt;0 \\colon \\forall x \\in A \\colon \\lvert x - x_0\\rvert &lt; \\delta^3-2\\delta^2+\\delta \\implies \\lvert f(x) - f(x_0) \\rvert &lt; \\varepsilon \\)</p>
+	~<p dir\="ltr" style\="text-align\: left;"></p>\\( \\forall \\varepsilon &gt;0 \\colon \\exists \\delta&gt;0 \\colon \\forall x \\in A \\colon \\lvert x - x_0\\rvert \\le \\delta \\implies \\lvert f(x) - f(x_0) \\rvert &lt; 3\\varepsilon^2 \\)<p dir\="ltr" style\="text-align\: left;"></p>
+	~<p dir\="ltr" style\="text-align\: left;">\\( \\forall \\varepsilon &gt;0 \\colon \\exists \\delta&gt;0 \\colon \\forall x \\in A \\colon \\sqrt\{\\lvert x - x_0\\rvert\} \\le \\delta \\implies \\lvert f(x) - f(x_0) \\rvert \\le 2 \\varepsilon \\)</p>
+	~<p dir\="ltr" style\="text-align\: left;">\\( \\forall n\\in \\mathbb N \\colon \\exists q \\in \\mathbb Q \\colon \\forall x \\in A\\setminus\\\{x_0\\\} \\colon \\lvert x - x_0\\rvert &lt; q^2 \\implies n\\cdot \\lvert f(x) - f(x_0) \\rvert &lt; 1 \\)<br></p>
+}
+
+
+// question: 49385  name: immagine
+::immagine::[html]<p>Sia \\( f\\colon \\\{1,2,3\\\}\\to \\\{1,2,3,4\\\} \\) la funzione definita da&nbsp;<br>$$<br>&nbsp; f \= \\\{ 1\\mapsto 3, 2\\mapsto 3, 3\\mapsto 1\\\}.<br>$$<br></p><p>Allora l'insieme \\( f(\\\{1,2\\\})\\) è...</p>{
+	=<p>\\( \\\{3\\\} \\)</p>
+	~<p>\\( \\\{1,2\\\} \\)</p>
+	~<p>\\( \\\{ 1 \\\} \\)</p>
+	~<p>\\( \\\{1,2,3,4\\\} \\)</p>
+}
+
+
+// question: 250  name: iniettiva / suriettiva
+::iniettiva / suriettiva::[html]<p>Sia \\(f \\colon \\\{1,2,3\\\} \\to \\\{1,2\\\} \\) definita da&nbsp;<br>$$ f \= \\\{ 1 \\mapsto 2, 2 \\mapsto 2, 3 \\mapsto 1\\\}. $$</p><p>La funzione \\(f\\) è...</p>{
+	=<p>suriettiva ma non iniettiva</p>
+	~iniettiva ma non suriettiva<br>
+	~<p>bigettiva</p>
+	~<p>né iniettiva né suriettiva</p>
+}
+
+
+// question: 251  name: iniettiva / suriettiva
+::iniettiva / suriettiva::[html]<p><p>Sia \\(f \\colon \\\{1,2,3\\\} \\to \\\{1,2,3\\\} \\) definita da&nbsp;<br>$$ f \= \\\{ 1 \\mapsto 2, 2 \\mapsto 2, 3 \\mapsto 1\\\}. $$</p><p>La funzione \\(f\\) è...</p><br></p>{
+	=<p>né iniettiva né suriettiva</p>
+	~<p>iniettiva</p>
+	~<p>suriettiva</p>
+	~<p>bigettiva</p>
+}
+
+
+// question: 252  name: iniettiva / suriettiva
+::iniettiva / suriettiva::[html]<p><p>Sia \\(f \\colon \\\{1,2\\\} \\to \\\{1,2,3\\\} \\) definita da&nbsp;<br>$$ f \= \\\{ 1 \\mapsto 2, 2 \\mapsto 3\\\}. $$</p><p>La funzione \\(f\\) è...</p><br><br></p>{
+	=<p>iniettiva ma non suriettiva</p>
+	~<p>suriettiva ma non iniettiva</p>
+	~<p>bigettiva</p>
+	~<p>né iniettiva né suriettiva</p>
+}
+
+
+// question: 253  name: iniettiva / suriettiva
+::iniettiva / suriettiva::[html]<p><p>Sia \\(f \\colon \\\{1,2,3\\\} \\to \\\{1,2,3\\\} \\) definita da&nbsp;<br>$$ f \= \\\{ 1 \\mapsto 2, 2 \\mapsto 1, 3\\mapsto 3\\\}. $$</p><p>La funzione \\(f\\) è...</p><br><br></p>{
+	=<p>bigettiva</p>
+	~<p>iniettiva ma non suriettiva</p>
+	~<p>suriettiva ma non iniettiva</p>
+	~<p>né iniettiva né suriettiva</p>
+}
+
+
+// question: 246  name: iniettività / suriettività
+::iniettività / suriettività::[html]<p>Sia \\( f\\colon \\\{1,2,3\\\}\\to \\\{1,2,3\\\} \\) la funzione<br>$$<br>&nbsp; f \= \\\{ 1\\mapsto 3, 2 \\mapsto 3, 3\\mapsto 1)\\\}.<br>$$<br>Allora \\( f \\) è...</p>{
+	=<p>né iniettiva né suriettiva</p>
+	~<p>iniettiva ma non suriettiva</p>
+	~<p>suriettiva ma non iniettiva</p>
+	~<p>bigettiva</p>
+}
+
+
+// question: 242  name: insieme per specificazione con prodotto
+::insieme per specificazione con prodotto::[html]<p>Il seguente insieme&nbsp;<br>$$<br>\\\{ x\\in A \\colon (\\forall y \\in B \\colon (x,y) \\in A \\times B)\\\}<br>$$<br>è certamente uguale a...</p>{
+	=<p>\\( A \\)</p>
+	~<p>\\( \\emptyset \\)</p>
+	~<p>\\( A \\cap B \\)</p>
+	~<p>\\( A \\times B \\)</p>
+}
+
+
+// question: 245  name: insieme prodotto
+::insieme prodotto::[html]<p>Quanti elementi ha il seguente insieme?<br>$$<br>\\left\\\{(x,y)\\in \\\{1,2,3\\\} \\times \\\{1,4\\\} \\colon x\\neq y\\right\\\}<br>$$<br><br></p>{
+	=<p>5</p>
+	~<p>6</p>
+	~<p>3</p>
+	~<p>2</p>
+}
+
+
+// question: 54211  name: integrale funzione discontinua
+::integrale funzione discontinua::[html]<p>Fissato \\(\\alpha\\in \\mathbb R\\) si consideri la funzione<br>$$<br>f(x)\=\\begin\{cases\} \\cos(x) &amp; \\text\{se $x&gt;0$\},\\\\<br>-\\cos(x) &amp; \\text\{se $x&lt;0$\},\\\\<br>\\alpha &amp; \\text\{se $x\=0$\}.<br>\\end\{cases\}<br>$$</p>{
+	=<p>\\(f\\) è Riemann-integrabile e \\(\\int_0^x f \=\\sin(|x|)\\) per ogni \\(x\\) reale e per ogni \\(\\alpha\\)</p>
+	~<p>\\(f\\) non è Riemann-integrabile nell'intervallo \\([-1,1]\\).</p>
+	~<p>\\(f\\) è Riemann-integrabile su ogni intervallo, ma l'integrale dipende da \\(\\alpha\\)</p>
+	~<p>\\(f\\) è Riemann-integrabile e \\(\\int_0^x f\=\\sin(x)+\\alpha x\\) per ogni \\(x\\) reale e per ogni \\(\\alpha\\)</p>
+}
+
+
+// question: 237  name: negazione implicazione logica
+::negazione implicazione logica::[html]<p>La negazione logica \\(\\lnot\\) di<br>$$<br>P \\implies Q<br>$$<br>è...</p>{
+	=<p>\\( P \\land \\lnot Q \\)</p>
+	~<p>\\( P\\implies \\lnot Q \\)</p>
+	~<p>\\( \\lnot P \\implies \\lnot Q \\)</p>
+	~<p>\\( Q \\implies P \\)<br></p>
+}
+
+
+// question: 54136  name: negazione predicato
+::negazione predicato::[html]<p>La negazione logica \\(\\lnot\\) del seguente predicato<br>$$<br>\\forall x \\exists y\\colon P(x,y)<br>$$<br>è equivalente a...</p>{
+	=<p>\\(<br>\\exists x \\forall y\\colon \\lnot P(x,y)<br>\\)</p>
+	~<p>\\(<br>\\forall y \\exists x \\colon \\lnot P(x,y)<br>\\)</p>
+	~<p>\\(<br>\\exists x \\forall y\\colon P(x,y)<br>\\)</p>
+	~<p>\\(<br> \\forall y \\exists x \\colon P(x,y)<br>\\)</p>
+}
+
+
+// question: 241  name: semplificazione espressione insiemistica
+::semplificazione espressione insiemistica::[html]<p>Il seguente insieme<br>$$<br>A \\cap (B\\setminus C)<br>$$<br>è uguale a\:</p>{
+	=<p>\\( (A \\cap B) \\setminus C \\)</p>
+	~<p>\\( (C \\setminus A) \\cap B \\)</p>
+	~<p>\\( (A \\cup B) \\setminus C \\)</p>
+	~<p>\\( (A \\setminus C) \\cup B \\)</p>
+}
+
+
+// question: 238  name: semplificazione espressione logica
+::semplificazione espressione logica::[html]<p>L'espressione logica<br>$$<br>P \\land (Q \\lor \\lnot P)<br>$$<br>è...</p>{
+	=<p>equivalente a \\( P \\land Q \\)</p>
+	~<p>equivalente a \\( P \\lor Q \\)</p>
+	~<p>sempre falsa</p>
+	~<p>sempre vera</p>
+}
+
+
+// question: 21700  name: sistema formale
+::sistema formale::[html]<p></p><div><div>    Si consideri il sistema formale le cui formule&nbsp;<span style\="font-size\: 0.9375rem;">sono sequenze finite dei due simboli </span><strong style\="font-size\: 0.9375rem;">I</strong><span style\="font-size\: 0.9375rem;"> e </span><strong style\="font-size\: 0.9375rem;">&gt;</strong><span style\="font-size\: 0.9375rem;">. Una formula è </span><em style\="font-size\: 0.9375rem;">ben formata</em><span style\="font-size\: 0.9375rem;">&nbsp;se contiene una sola occorrenza del simbolo&nbsp;</span><strong style\="font-size\: 0.9375rem;">&gt;</strong><span style\="font-size\: 0.9375rem;">.</span></div><div>    Le regole di inferenza sono le seguenti\:</div><div><ol><li><span style\="font-size\: 0.9375rem;">si può rimpiazzare il simbolo <strong>&gt;&nbsp;</strong></span>con la sequenza <strong>I&gt;</strong>&nbsp;(ad esempio dalla formula <strong>I&gt;II</strong>&nbsp;possiamo dedurre <strong>II&gt;II</strong>);</li><li>si può rimpiazzare il simbolo <strong>&gt;</strong>&nbsp;con la sequenza <strong>I&gt;I</strong>&nbsp;(ad esempio dalla formula <strong>I&gt;II</strong>&nbsp;possiamo dedurre <strong>II&gt;III</strong>).</li></ol></div>Come unico assioma prendiamo\:&nbsp;<strong>I&gt;</strong>.<br><div><br></div><div>    Quale delle seguenti formule è un teorema?</div></div><br><p></p>{
+	=<b>IIIIII&gt;II</b>
+	~<p><b>II&gt;&gt;I</b></p>
+	~<p><b>III&gt;III</b></p>
+	~<p><b>III</b></p>
+}
+
+
+// question: 244  name: sottoinsieme
+::sottoinsieme::[html]<p>Quale dei seguenti <b>non</b>&nbsp;è un sottoinsieme del seguente insieme?<br>$$<br>\\\{ 1, 2, \\\{1, 2\\\}, \\\{1, 3\\\} \\\}<br>$$</p>{
+	=<p>\\( \\\{ 1,3\\\}\\)&nbsp;</p>
+	~<p>\\( \\\{1,2\\\} \\)</p>
+	~<p>\\( \\emptyset \\)</p>
+	~<p>\\( \\\{1,\\\{1,3\\\}\\\} \\)</p>
+}
+
+
+// question: 49281  name: studio di funzione
+::studio di funzione::[html]<p dir\="ltr" style\="text-align\: left;">L'equazione \\[ 3 x^5 + 3 x^2 - 4 \= 0 \\] ha</p>{
+	=<p dir\="ltr" style\="text-align\: left;">Una unica soluzione che è compresa tra \\( 0 \\) e \\(1\\)</p>
+	~<p dir\="ltr" style\="text-align\: left;">nessuna soluzione</p>
+	~<p dir\="ltr" style\="text-align\: left;">Una unica soluzione che è maggiore di \\( 1\\)</p>
+	~<p dir\="ltr" style\="text-align\: left;">Due soluzioni\: una minore di \\(0\\) e una maggiore di \\(1\\)</p>
+}
+
+
+// question: 49282  name: studio di funzione
+::studio di funzione::[html]<p dir\="ltr" style\="text-align\: left;">Quante soluzioni ha l'equazione\: \\[ 4 \\arctan(x^2) \= 2x^3+1 \\]</p>{
+	=<p dir\="ltr" style\="text-align\: left;">3</p>
+	~<p dir\="ltr" style\="text-align\: left;">0</p>
+	~<p dir\="ltr" style\="text-align\: left;">1</p>
+	~<p dir\="ltr" style\="text-align\: left;">2</p>
+}
+
+
+// question: 240  name: tabella di verità
+::tabella di verità::[html]<p>Nella seguente tabella la colonna \\( X \\) assume i valori di verità di quale espressione logica?<br>$$<br>\\begin\{array\}\{c|c|c\}<br>P &amp; Q &amp; X \\\\ \\hline<br>F &amp; F &amp; V \\\\<br>F &amp; V &amp; F \\\\<br>V &amp; F &amp; V \\\\<br>V &amp; V &amp; V <br>\\end\{array\}<br>$$</p>{
+	=<p>\\( P \\lor \\lnot Q \\)</p>
+	~<p>\\( P \\land \\lnot Q \\)</p>
+	~<p>\\( Q \\lor \\lnot P \\)</p>
+	~<p>\\( Q \\land \\lnot P \\)</p>
+}
+
+
+// question: 0  name: Switch category to $module$/top/reali
+$CATEGORY: $module$/top/reali
+
+
+// question: 282  name: disequazione
+::disequazione::[html]<p>Si può mostrare che per ogni \\(x&gt;0\\) esiste \\(y&gt;0\\) tale che \\(\\left(y^3+2y^2+3y\\right)^2 \\le x\\)? </p>{
+	=<p>Sì, basta prendere \\( y \= \\frac\{x\}\{36\} \\) quando \\(x\\le 36\\) e \\( y\= 1\\) quando \\( x &gt; 36\\)</p>
+	~<p>Sì, basta prendere \\( y \= -1 \\)</p>
+	~<p>Sì, basta prendere \\( y \= \\frac\{x\}\{100\}\\)</p>
+	~<p>No.</p>
+}
+
+
+// question: 21716  name: gruppo
+::gruppo::[html]<p>Si consideri l&rsquo;insieme \\(G\=\\mathbb R \\setminus \\\{1\\\}\\) con l&rsquo;operazione \\(*\\) definita da \\[ x*y \= x\\cdot (y-1)-y+2. \\] Rispetto a tale operazione </p>{
+	=<p>\\(G\\) è un gruppo commutativo con elemento neutro \\(2\\)</p>
+	~<p>non esiste un elemento neutro</p>
+	~<p>l&rsquo;operazione non è associativa</p>
+	~<p>non tutti gli elementi di \\(G\\) hanno inverso</p>
+}
+
+
+// question: 281  name: irrazionalità
+::irrazionalità::[html]<p>Quale di questi numeri è razionale? </p>{
+	=<p>\\(\\frac \{\\sqrt 2\}\{\\sqrt 8\}\\)</p>
+	~<p>\\(\\sqrt \{10\}\\)</p>
+	~<p>\\(\\sqrt \{8\} + \\sqrt \{2\}\\)</p>
+	~<p>\\((\\sqrt \{2\})^3\\)</p>
+}
+
+
+// question: 21715  name: larga monotonia
+::larga monotonia::[html]<p>Sia \\(f\\colon \\mathbb R\\to \\mathbb R\\) una funzione monotòna ma non strettamente monotòna. Allora possiamo affermare che\: </p>{
+	=<p>esistono \\(a,b,c\\in \\mathbb R\\) con \\(a&lt;b\\) tali che se \\(a\\le x \\le b\\) si ha \\(f(x) \= c\\)</p>
+	~<p>esistono \\(a,b,c\\in \\mathbb R\\) con \\(a&lt;b\\) tali che se \\(x&lt;a\\) o \\(x&gt;b\\) allora \\(f(x) \= c\\)</p>
+	~<p>\\(f\\) non è costante</p>
+	~<p>\\(f\\) è costante</p>
+}
+
+
+// question: 21711  name: max min inf sup
+::max min inf sup::[html]<p>Sia \\(A\=\\left \\\{\\frac 1 \{n+1\}\\colon n\\in \\mathbb N \\right \\\}\\subseteq \\mathbb R\\). Quale delle seguenti affermazioni è falsa?&nbsp;</p>{
+	=<p>\\(\\min A\\) esiste</p>
+	~<p>\\(\\inf A \= 0\\)</p>
+	~<p>\\(\\max A\\) esiste</p>
+	~<p>\\(\\sup A \= 1\\)</p>
+}
+
+
+// question: 21714  name: monotone
+::monotone::[html]<p>Sia \\(A\=\\\{1,2,3\\\}\\subset \\mathbb R\\). Quante sono le funzioni \\(f\\colon A \\to A\\) monotòne? </p>{
+	=<p>17</p>
+	~<p>14</p>
+	~<p>15</p>
+	~<p>16</p>
+}
+
+
+// question: 21976  name: numeri
+::numeri::[html]<p>Quale di questi numeri è il più grande? (non usare la calcolatrice!) </p>{
+	=<p>\\(2^\{10\}\\)</p>
+	~<p>\\(10^3\\)</p>
+	~<p>\\(\\log _2(100!)\\)</p>
+	~<p>\\(\\sqrt [3]\{10!\}\\)</p>
+}
+
+
+// question: 296  name: parte intera
+::parte intera::[html]<p>Quanto vale? \\[ \\lfloor 3\\cdot \\sqrt 7\\rfloor \\] (non usare la calcolatrice!) </p>{
+	=<p>7</p>
+	~<p>6</p>
+	~<p>5</p>
+	~<p>8</p>
+}
+
+
+// question: 277  name: prodotto notevole
+::prodotto notevole::[html]<p>Per ogni \\(x,y,z\\) in un campo, si ha che \\((x+y)\\cdot (x-y)\\) è uguale a </p>{
+	=<p>\\(x^2 - y^2\\)</p>
+	~<p>\\((x-y)^2\\)</p>
+	~<p>\\(x^2 + y^2\\)</p>
+	~<p>\\((x+y)^2\\)</p>
+}
+
+
+// question: 278  name: prodotto notevole
+::prodotto notevole::[html]<p>Per ogni \\(x,y,z\\) in un campo, si ha che \\((x+y)^2\\) è uguale a </p>{
+	=<p>\\(x^2+2xy + y^2\\)</p>
+	~<p>\\(x^2-y^2\\)</p>
+	~<p>\\(x^2 - xy + y^2\\)</p>
+	~<p>\\((x-y)^2\\)</p>
+}
+
+
+// question: 279  name: proprietà reali
+::proprietà reali::[html]<p>Quale delle seguenti proprietà dei numeri reali è falsa? </p>{
+	=<p>esiste \\(x&gt;0\\) tale che per ogni \\(y&gt;0\\) si ha \\(x^2&lt;y\\)</p>
+	~<p>per ogni \\(x\\) esiste \\(y\\) tale che \\(y&gt;x^2\\)</p>
+	~<p>esiste \\(x\\) tale che per ogni \\(y\\) si ha \\(y^2 &gt; x\\)</p>
+	~<p>per ogni \\(x&gt;0\\) esiste \\(y&gt;0\\) tale che \\(y&lt;x^2\\)</p>
+}
+
+
+// question: 54134  name: radice di 2
+::radice di 2::[html]<p>Sia \\(A\=\\left \\\{x\\in \\mathbb Q\\colon x^2 \\le 2\\right \\\}\\subset \\mathbb R\\). </p>\n<p>Quale delle seguenti affermazioni è falsa?</p>{
+	~<p>\\(A\\) è superiormente limitato in \\(\\mathbb R\\)</p>
+	~<p>\\(A\\) ha estremo superiore in \\(\\mathbb R\\)</p>
+	=<p>\\(A\\) ha massimo</p>
+	~<p>\\(A\\) è non vuoto</p>
+}
+
+
+// question: 280  name: radice quadrata
+::radice quadrata::[html]<p>Per ogni \\(x\\in \\mathbb R \\), \\(x\\ge 0\\) possiamo affermare che </p>{
+	=<p>\\(\\sqrt \{2x^2\} \= \\sqrt \{2\}\\cdot x\\)</p>
+	~<p>\\(\\sqrt \{(x-2)^2\} \= x-2\\)</p>
+	~<p>\\(\\sqrt \{2 + x\} \= \\sqrt \{2\} + \\sqrt \{x\}\\)</p>
+	~<p>\\(\\sqrt \{x^2+4\} \= 2 + x\\)</p>
+}
+
+
+// question: 54137  name: sup/inf con due parametri
+::sup/inf con due parametri::[html]<p dir\="ltr" style\="text-align\: left;">Sia $$<br>A \= \\left\\\{ \\frac\{n+m+1\}\{n^2+m^2+1\}\\colon n,m\\in \\mathbb N\\right\\\}<br>$$<br>(ricordiamo che per noi \\(0\\in \\mathbb N\\)). Allora sia ha</p>{
+	=<p dir\="ltr" style\="text-align\: left;">\\(\\max A \= 1\\).</p>
+	~<p dir\="ltr" style\="text-align\: left;">\\(A\\) non ha massimo</p>
+	~<p dir\="ltr" style\="text-align\: left;">\\(\\min A \= 0\\)</p>
+	~<p dir\="ltr" style\="text-align\: left;">\\(\\sup A \= \\sqrt 2\\)</p>
+}
+
+
+// question: 54138  name: sup/inf insieme con due parametri
+::sup/inf insieme con due parametri::[html]<p dir\="ltr" style\="text-align\: left;">Sia $$<br>A \= \\left\\\{ \\frac\{nm\}\{n^2+m^2+1\}\\colon m,n\\in \\mathbb N\\right\\\}<br>$$<br>(ricordiamo che per noi \\(0\\in \\mathbb N\\)). Calcolare estremo superiore ed estremo inferiore. Risulta</p>{
+	=<p dir\="ltr" style\="text-align\: left;">L'insieme \\(A\\) è limitato, ha minimo ma non ha massimo.</p>
+	~<p dir\="ltr" style\="text-align\: left;">L'insieme \\(A\\) è limitato, ha massimo e minimo.</p>
+	~<p dir\="ltr" style\="text-align\: left;">L'insieme \\(A\\) non è limitato.</p>
+	~<p dir\="ltr" style\="text-align\: left;">L'insieme \\(A\\) è limitato, ha massimo ma non ha minimo.</p>
+}
+
+
+// question: 21713  name: valore assoluto
+::valore assoluto::[html]<p>Il predicato \\(\\lvert x-y \\rvert &lt; \\varepsilon \\) non è equivalente a\: </p>{
+	=<p>\\(0 \\le x-y &lt; \\varepsilon \\)</p>
+	~<p>\\(x-\\varepsilon &lt; y &lt; x+\\varepsilon \\)</p>
+	~<p>\\(y-\\varepsilon &lt; x &lt; y+\\varepsilon \\)</p>
+	~<p>\\(-\\varepsilon &lt; y-x &lt; \\varepsilon \\)</p>
+}
+
+
+// question: 0  name: Switch category to $module$/top/induzione
+$CATEGORY: $module$/top/induzione
+
+
+// question: 293  name: binomiale
+::binomiale::[html]<p>Quale delle seguenti proprietà <SPAN STYLE\=&rdquo;text-decoration\: underline;&rdquo;>non</SPAN> è vera? </p>{
+	=<p>\\(\{n \\choose 2\} \= n^2-n\\)</p>
+	~<p>\\(\{n \\choose n-k\} \= \{n \\choose k\}\\)</p>
+	~<p>\\(\{n \\choose n\} \= 1\\)</p>
+	~<p>\\(\{n \\choose 1\} \= n\\)</p>
+}
+
+
+// question: 295  name: binomiale
+::binomiale::[html]<p>Calcolare \\(\{20\\choose 18\}\\) </p>{
+	=<p>190</p>
+	~<p>5044</p>
+	~<p>4040</p>
+	~<p>440</p>
+}
+
+
+// question: 292  name: fattoriale
+::fattoriale::[html]<p>Per quali \\(n\\in \\mathbb N\\) vale la seguente relazione? \\[ \\frac \{(2n)!\}\{n!\} \\ge n^n \\] </p>{
+	=<p>per ogni \\(n\\in \\mathbb N\\)</p>
+	~<p>solo per \\(n\\ge 2\\)</p>
+	~<p>solo per \\(n\\ge 5\\)</p>
+	~<p>per nessun \\(n\\in \\mathbb N\\)</p>
+}
+
+
+// question: 294  name: prodotto
+::prodotto::[html]<p>Quanto vale? \\[ \\left(\\prod _\{k\=1\}^n 2^k\\right)^2 \\] </p>{
+	=<p>\\(2^\{n^2+n\}\\)</p>
+	~<p>\\(4^\{n+1\}\\)</p>
+	~<p>\\(n^\{2n\}\\)</p>
+	~<p>\\(n^\{2n\}\\)</p>
+}
+
+
+// question: 49388  name: ricorrenza 1
+::ricorrenza 1::[html]<p>Si consideri la funzione \\(f\\colon \\mathbb N \\to \\mathbb N\\) definita per ricorrenza\: \\[ \\begin \{cases\} f(0) \= 0\\\\<br> f(n+1) \= f(n) + 2\\cdot n. \\end \{cases\} \\] Allora possiamo affermare che </p>{
+	=<p>\\(f(n) \= n\\cdot (n-1)\\)</p>
+	~<p>\\(f(n) \= n^2 - n + 1\\)</p>
+	~<p>\\(f(n) \= n\\cdot (n+1)\\)</p>
+	~<p>\\(f(n) \= n^2 + n + 1\\)</p>
+}
+
+
+// question: 49389  name: ricorsione 2
+::ricorsione 2::[html]<p>Si consideri la funzione \\(f\\colon \\mathbb N\\to \\mathbb N\\) definita per ricorrenza\: \\[ \\begin \{cases\} f(0) \= 2 \\\\<br> f(n+1) \= f(n) + 7. \\end \{cases\} \\] Quanto vale \\(f(6)\\)? </p>{
+	=<p>\\(44\\)</p>
+	~<p>\\(42\\)</p>
+	~<p>\\(35\\)</p>
+	~<p>\\(27\\)</p>
+}
+
+
+// question: 21703  name: ricorsione 3
+::ricorsione 3::[html]<p>Si consideri la funzione \\(g\\colon \\\{0,1,2,3\\\}\\to \\\{0,1,2,3\\\}\\) con \\(g(0)\=2\\), \\(g(1)\=0\\), \\(g(2)\=1\\), \\(g(3)\=0\\) e si consideri la funzione \\(f\\colon \\mathbb N\\to \\\{0,1,2,3\\\}\\) definita per ricorrenza\: \\[ \\begin \{cases\} f(0) \= 0\\\\<br> f(n+1) \= g(f(n)). \\end \{cases\} \\] Quanto vale \\(f(13)\\)? </p>{
+	=<p>\\(2\\)</p>
+	~<p>\\(0\\)</p>
+	~<p>\\(1\\)</p>
+	~<p>\\(3\\)</p>
+}
+
+
+// question: 21704  name: ricorsione 4
+::ricorsione 4::[html]<p>La funzione \\(f\\colon \\mathbb N \\to \\mathbb N\\) definita da \\(f(n) \= 2^n\\cdot n!\\) può essere definita ricorsivamente\: \\[ \\begin \{cases\} f(0) \= 1\\\\<br> f(n+1) \= g(n,f(n)) \\end \{cases\} \\] se la funzione \\(g\\colon \\mathbb N\\times \\mathbb N \\to \\mathbb N\\) è definita da...</p>{
+	=<p>\\(g(n,k) \= 2\\cdot (n+1)\\cdot k\\)</p>
+	~<p>\\(g(n,k) \= k + 2\\cdot n\\)</p>
+	~<p>\\(g(n,k) \= 2\\cdot k + n\\)</p>
+	~<p>\\(g(n,k) \= 2^n \\cdot k!\\)</p>
+}
+
+
+// question: 290  name: somma lineare
+::somma lineare::[html]<p>Calcolare \\[ \\sum _\{k\=1\}^\{2n\} 2k. \\] </p>{
+	=<p>\\(4n^2+2n\\)</p>
+	~<p>\\(4n^2+4n\\)</p>
+	~<p>\\(2n^2+n\\)</p>
+	~<p>\\(2n^2+4n\\)</p>
+}
+
+
+// question: 291  name: somma quadratica
+::somma quadratica::[html]<p>Calcolare \\[ \\sum _\{k\=1\}^\{10\} (k+1)^2. \\] </p>{
+	=<p>505</p>
+	~<p>500</p>
+	~<p>495</p>
+	~<p>496</p>
+}
+
+
+// question: 0  name: Switch category to $module$/top/funzioni reali
+$CATEGORY: $module$/top/funzioni reali
+
+
+// question: 54153  name: disequazione quadratica
+::disequazione quadratica::[html]<p>La disequazione \\[ 5x^2+2 &gt; 5x \\]</p>{
+	=<p>è verificata per ogni \\(x\\) reale</p>
+	~<p>non è soddisfatta da nessun \\(x\\) reale</p>
+	~<p>è verificata per un solo valore di \\(x\\) reale</p>
+	~<p>è verificata per tutti i valori di \\(x\\) reali tranne uno</p>
+}
+
+
+// question: 301  name: equazioni secondo grado
+::equazioni secondo grado::[html]<p>Trovare le due soluzioni \\(x_1 &lt; x_2\\) dell&rsquo;equazione \\[ x^2 + 4 \= 3 \\sqrt 2 x. \\] Il rapporto \\(\\frac \{x_2\}\{x_1\}\\) vale </p>{
+	=<p>\\(2\\)</p>
+	~<p>\\(3\\)</p>
+	~<p>\\(\\sqrt 2\\)</p>
+	~<p>\\(4\\)</p>
+}
+
+
+// question: 54157  name: minimo quadratico
+::minimo quadratico::[html]<p>Calcolare \\[ \\min \\\{x^2+x+1\\colon x\\in \\mathbb R \\\} . \\]</p>{
+	=<p>\\(\\frac \{3\}\{4\}\\)</p>
+	~<p>\\(\\frac \{\\sqrt 5\}\{2\}\\)</p>
+	~<p>\\(1\\)</p>
+	~<p>\\(-\\sqrt 2\\)</p>
+}
+
+
+// question: 298  name: monotonia
+::monotonia::[html]<p>La funzione \\(f\\colon [0, +\\infty )\\to \\mathbb R\\) definita da \\[ f(x) \= \\left (1-\\sqrt \{\\sqrt x+(x^2+1)^4\}\\right )^4-\\frac \{1\}\{\\sqrt \{x+1\}\} \\] </p>{
+	=<p>è strettamente crescente</p>
+	~<p>è strettamente decrescente</p>
+	~<p>è monotona ma non strettamente monotona</p>
+	~<p>non è monotona</p>
+}
+
+
+// question: 299  name: monotonia
+::monotonia::[html]<p>La funzione \\(f\\colon \\mathbb R \\to \\mathbb R\\) definita da \\[ f(x) \= x \\cdot \\max \\\{0,x^2-1\\\} \\] </p>{
+	=<p>è monotona ma non strettamente monotona</p>
+	~<p>è strettamente crescente</p>
+	~<p>è strettamente decrescente</p>
+	~<p>non è monotona</p>
+}
+
+
+// question: 300  name: retta
+::retta::[html]<p>Qual è l&rsquo;equazione della retta che si ottiene facendo la riflessione della retta di equazione \\[ y \= 3x-1 \\] rispetto alla retta di equazione? \\[ y \= -x \\] </p>{
+	=<p>\\(y\=\\frac \{x-1\}\{3\}\\)</p>
+	~<p>\\(y\=\\frac \{1-x\}\{3\}\\)</p>
+	~<p>\\(y\=1-3x\\)</p>
+	~<p>\\(y\=3x-1\\)</p>
+}
+
+
+// question: 297  name: simmetrie
+::simmetrie::[html]<p>La funzione (si provi a disegnarne il grafico) \\(f\\colon \\mathbb R \\to \\mathbb R\\) \\[ f(x) \= \\left \\lvert x - 2 \\left \\lfloor \\frac \{x+1\}\{2\}\\right \\rfloor \\right \\rvert \\] </p>{
+	=<p>è pari e periodica</p>
+	~<p>è periodica ma non è pari</p>
+	~<p>è pari ma non è periodica</p>
+	~<p>non è né pari né periodica</p>
+}
+
+
+// question: 0  name: Switch category to $module$/top/numeri complessi e successioni
+$CATEGORY: $module$/top/numeri complessi e successioni
+
+
+// question: 308  name: carattere
+::carattere::[html]<p>Quale delle seguenti successioni ha un carattere diverso dalle altre? </p>{
+	=<p>\\(1-\\frac 1 n\\)</p>
+	~<p>\\(-n\\)</p>
+	~<p>\\(n!\\)</p>
+	~<p>\\(\\sqrt n\\)</p>
+}
+
+
+// question: 309  name: definitivamente
+::definitivamente::[html]<p>Al variare di \\(n\\in \\mathbb N\\) il predicato\: \\[ \\sqrt n \\in \\mathbb Z \\] </p>{
+	=<p>è frequentemente vero e frequentemente falso</p>
+	~<p>è definitivamente vero</p>
+	~<p>è definitivamente falso</p>
+	~<p>non è frequentemente vero</p>
+}
+
+
+// question: 307  name: definizioni di limite
+::definizioni di limite::[html]<p>Quale delle seguenti proprietà è equivalente alla definizione di limite \\(a_n \\to \\ell \\) con \\(\\ell \\in \\mathbb R\\). </p>{
+	=<p>\\(\\forall N\\in \\mathbb Z \\colon \\exists q \\in \\mathbb Q \\colon \\forall n\\in \\mathbb N \\colon n&gt;q \\implies N^2(a_n-\\ell )^2\\le 2\\)</p>
+	~<p>\\(\\forall \\varepsilon &gt; 0\\colon \\exists N\\in \\mathbb N\\colon \\forall n&gt;N \\colon \\lvert a_n-\\ell \\rvert &lt; \\sqrt \{\\varepsilon ^2+1\}\\)</p>
+	~<p>\\(\\forall \\delta \\ge 0 \\colon \\exists N\\in \\mathbb Q \\colon \\forall n\\in \\mathbb N\\colon n&gt;N \\implies \\lvert a_n-\\ell \\rvert &lt;2\\delta ^2\\)</p>
+	~<p>\\(\\forall \\varepsilon &gt; 0 \\colon \\exists N\\in \\mathbb N \\colon \\forall n\\in \\mathbb N\\colon n&lt;N \\implies \\lvert a_n-\\ell \\rvert \\ge \\varepsilon ^2\\)</p>
+}
+
+
+// question: 304  name: espressione complessi
+::espressione complessi::[html]<p>Quanto vale? \\[ \\frac \{i-\\overline \{(1+i)^2\}\}\{(i-3)^3\} \\] </p>{
+	=<p>\\(0.078-0.054i\\)</p>
+	~<p>\\(0.079-0.055i\\)</p>
+	~<p>\\(0.078-0.055i\\)</p>
+	~<p>\\(0.079-0.054i\\)</p>
+}
+
+
+// question: 310  name: limite
+::limite::[html]<p>Si consideri la successione \\(a_n\\) \\[ a_n \= \\sqrt \{n\} - \\lfloor \\sqrt n \\rfloor , \\qquad n\\in \\mathbb N \\] Allora </p>{
+	=<p>\\(\\min a_n \= 0\\), \\(\\max a_n\\) non esiste</p>
+	~<p>\\(\\min a_n \= 0\\), \\(\\max a_n\=1\\)</p>
+	~<p>\\(\\min a_n\\) non esiste, \\(\\max a_n \=1\\)</p>
+	~<p>\\(\\min a_n\\) non esiste, \\(\\max a_n\\) non esiste</p>
+}
+
+
+// question: 306  name: modulo complessi
+::modulo complessi::[html]<p>Quante soluzioni \\(z\\in \\mathbb C\\) ha l&rsquo;equazione? \\[ \\lvert z \\rvert \= \\lvert z-i \\rvert \\] </p>{
+	=<p>infinite</p>
+	~<p>nessuna</p>
+	~<p>1</p>
+	~<p>2</p>
+}
+
+
+// question: 305  name: potenze complessi
+::potenze complessi::[html]<p>Quanti elementi ha l’insieme\: \\[ \\left\\\{\\frac \{(1+i\\sqrt 3)^n\}\{2^n\} \\colon n \\in \\mathbb N\\right \\\}. \\] </p>{
+	=<p>6</p>
+	~<p>infiniti</p>
+	~<p>2</p>
+	~<p>3</p>
+}
+
+
+// question: 0  name: Switch category to $module$/top/limiti: operazioni con i limiti
+$CATEGORY: $module$/top/limiti: operazioni con i limiti
+
+
+// question: 311  name: 1 limite apparentemente spaventoso n->oo
+::1 limite apparentemente spaventoso n->oo::[html]<p>Calcolare, se esiste, il seguente \\[ \\lim _\{n\\to +\\infty \} \\frac \{\\displaystyle \\left (\\frac \{\\left (\\frac 1 n+2\\right )^2-2\} \{1+\\frac \{\\left (1+\\frac \{1\}\{n!\}\\right )^3\}\{2^n\}\}\\right )^3 - \\left (\\frac \{\\left (1-\\frac \{1\}\{n!\}\\right )^3\}\{(n+2)^2+3-\\frac \{2\}\{n\}\}\\right )^2\} \{\\displaystyle \\left (1+\\frac \{1\}\{1+\\frac \{1+\\frac 1 n\}\{n\}\}\\right )^6 -\\left (\\frac \{1+\\frac \{1\}\{1+n!\}\}\{n+\\frac \{n\}\{1+\\frac \{1\}\{3^n\}\}\}\\right )^3\} \\] </p>{
+	~<p>\\(0\\)</p>
+	=<p>\\(\\frac 1 8\\)</p>
+	~<p>\\(1\\)</p>
+	~<p>\\(+\\infty \\)</p>
+}
+
+
+// question: 312  name: 2 limite x->oo forme indeterminate
+::2 limite x->oo forme indeterminate::[html]<p>Calcolare, se esiste, il seguente \\[ \\lim _\{x\\to +\\infty \} \\frac \{ \\left (\\frac \{1+\\frac 1 x\}\{1-\\frac 1 x\}\\right )^2 -\\frac \{1+\\frac 1 \{x^2\}\}\{1-\\frac 1 x\}\}\{\\frac x \{x-1\} - \\frac x \{x+1\}\} \\] </p>{
+	~<p>\\(0\\)</p>
+	=<p>\\(\\frac 3 2\\)</p>
+	~<p>\\(+\\infty \\)</p>
+	~<p>non esiste</p>
+}
+
+
+// question: 313  name: 3 limite n->oo forse non esiste
+::3 limite n->oo forse non esiste::[html]<p>Calcolare, se esiste, il seguente \\[ \\lim _\{n\\to +\\infty \}\\frac \{2+(-1)^n\}\{(-2)^n-1\} \\] </p>{
+	=<p>\\(0\\)</p>
+	~<p>\\(\\frac 1 2\\)</p>
+	~<p>\\(+\\infty \\)</p>
+	~<p>non esiste</p>
+}
+
+
+// question: 314  name: 4 continuità limite con f generica
+::4 continuità limite con f generica::[html]<p>Sia \\(f\\colon \\mathbb R \\to \\mathbb R\\) una funzione continua, positiva. Calcolare, se esiste, \\[ \\lim _\{x\\to 0 \} \\frac \{f(1+f(x))\} \{f\\left (f(0)+\\frac \{f\\left (1+x^2<span style\="font-size\: 0.9375rem;">)\}\{f(1-x)\}\\right )\} \\]</span></p>{
+	=<p>\\(1\\)</p>
+	~<p>\\(\\frac \{1\}\{8\}\\)</p>
+	~<p>\\(+\\infty \\)</p>
+	~<p>non esiste</p>
+}
+
+
+// question: 0  name: Switch category to $module$/top/limiti 2
+$CATEGORY: $module$/top/limiti 2
+
+
+// question: 325  name: 3 carattere
+::3 carattere::[html]<p>Quale delle seguenti successioni è indeterminata? </p>{
+	~<p>\\(\\frac \{(-1)^n-n\}\{n\}\\)</p>
+	~<p>\\(n^2 - 3 n\\cdot (-1)^n\\)</p>
+	=<p>\\(\\frac \{n+1\}\{n\\cdot (-1)^n\}\\)</p>
+	~<p>\\(\\frac \{1\}\{(-2)^n - (-4)^n\}\\)</p>
+}
+
+
+// question: 326  name: 4 punti limite e radice complessa
+::4 punti limite e radice complessa::[html]<p>Quanti elementi ha l&rsquo;insieme dei punti limite della successione \\(a_n \= \\lvert 1-i^n \\rvert \\)? (si noti che \\(i\\) è l&rsquo;unità immaginaria ma \\(a_n\\) è una successione di numeri reali) </p>{
+	~<p>\\(1\\)</p>
+	=<p>\\(3\\)</p>
+	~<p>\\(4\\)</p>
+	~<p>infiniti</p>
+}
+
+
+// question: 324  name: limite (raccoglimento)
+::limite (raccoglimento)::[html]<p>Calcolare, se esiste \\[ \\lim _\{n\\to +\\infty \} \\frac \{\\displaystyle \\frac 1 n - \\frac \{1\}\{n^2\} + \\frac \{1\}\{n^3\}\}\{\\displaystyle \\frac \{1\}\{n\}+\\frac \{1\}\{n^2\} -\\frac \{1\}\{n^3\}\} \\] </p>{
+	~<p>\\(0\\)</p>
+	=<p>\\(1\\)</p>
+	~<p>\\(+\\infty \\)</p>
+	~<p>non esiste</p>
+}
+
+
+// question: 323  name: limite (sostituzione)
+::limite (sostituzione)::[html]<p>Calcolare, se esiste \\[ \\lim _\{n\\to +\\infty \} \\frac \{\\displaystyle n-\\frac \{n\}\{n+\\frac 1 n\}\} \{\\displaystyle \\frac \{n+2\}\{n\} - \\frac \{3-\\frac \{4\}\{n\}\}\{n+5\}\} \\] </p>{
+	~<p>\\(-\\infty \\)</p>
+	~<p>\\(0\\)</p>
+	~<p>\\(1\\)</p>
+	=<p>\\(+\\infty \\)</p>
+}
+
+
+// question: 0  name: Switch category to $module$/top/limiti notevoli
+$CATEGORY: $module$/top/limiti notevoli
+
+
+// question: 327  name: 1 limite e
+::1 limite e::[html]<p>Calcolare, se esiste \\[ \\lim _\{n\\to +\\infty \} \\left (1-\\frac \{n+1\}\{n!\}\\right )^\{(n-1)!\} \\] </p>{
+	=<p>\\(\\frac 1 e\\)</p>
+	~<p>\\(0\\)</p>
+	~<p>\\(+\\infty \\)</p>
+	~<p>\\(\\sqrt e\\)</p>
+}
+
+
+// question: 328  name: 2 ordini di infinito
+::2 ordini di infinito::[html]<p>Calcolare, se esiste \\[ \\lim _\{n\\to +\\infty \} \\frac \{\\left (\\frac \{n!\}\{\\sqrt n + n^n\}+2^n\\right )^2-n!\}\{\\sqrt \{(n!)^2 - n!\}\} \\] </p>{
+	=<p>\\(-1\\)</p>
+	~<p>\\(+\\infty \\)</p>
+	~<p>\\(0\\)</p>
+	~<p>\\(-\\infty \\)</p>
+}
+
+
+// question: 329  name: 3 rapporto
+::3 rapporto::[html]<p>Calcolare, se esiste \\[ \\lim _\{n\\to +\\infty \} \\frac \{(2n)!\}\{(2n)^n\}. \\] Suggerimento\: utilizzare il criterio del rapporto. </p>{
+	=<p>\\(+\\infty \\)</p>
+	~<p>\\(0\\)</p>
+	~<p>\\(1\\)</p>
+	~<p>\\(\\frac 1 e\\)</p>
+}
+
+
+// question: 330  name: 4 ordini di infinito
+::4 ordini di infinito::[html]<p>Calcolare, se esiste \\[ \\lim _\{n\\to +\\infty \} \\left (\\frac \{n^e-e^n\}\{n^2-2^n\}\\right )^\{\\frac e n\} \\] </p>{
+	=<p>\\(\\left (\\frac \{e\}\{2\}\\right )^e\\)</p>
+	~<p>\\(\\sqrt \{e+1\}\\)</p>
+	~<p>\\(\\frac \{e-1\}\{2\}\\)</p>
+	~<p>\\(\\frac 1 \{e^e\}\\)</p>
+}
+
+
+// question: 331  name: 5 esponenziale
+::5 esponenziale::[html]<p>Calcolare, se esiste \\[ \\lim _\{n\\to +\\infty \} n \\cdot (\\sqrt [n]\{2\}-1) \\] </p>{
+	=<p>\\(\\ln 2\\)</p>
+	~<p>\\(e\\)</p>
+	~<p>\\(1\\)</p>
+	~<p>\\(+\\infty \\)</p>
+}
+
+
+// question: 332  name: 6 limite e
+::6 limite e::[html]<p>Calcolare, se esiste \\[ \\lim _\{n\\to +\\infty \} \\left (\\frac \{\\sqrt \{n^2+1\}\}\{n\}\\right )^\{(n^2)\} \\] </p>{
+	=<p>\\(\\sqrt e\\)</p>
+	~<p>\\(0\\)</p>
+	~<p>\\(e^2\\)</p>
+	~<p>\\(+\\infty \\)</p>
+}
+
+
+// question: 0  name: Switch category to $module$/top/limiti 3
+$CATEGORY: $module$/top/limiti 3
+
+
+// question: 339  name: 1. ordini infinito
+::1. ordini infinito::[html]<p>Scegliere l&rsquo;unica affermazione corretta. </p>{
+	~<p>\\(\\sqrt \{n!\} \\ll 2^n\\)</p>
+	~<p>\\(\\ln (\\sqrt \{n\}+\\sqrt \{n^n\}) \\ll \\sqrt \{n\}\\)</p>
+	~<p>\\(2^\{(2^n)\} \\ll n!\\)</p>
+	=<p>\\((n!)!\\ll (n!)^\{n!\}\\)</p>
+}
+
+
+// question: 340  name: 2. rapporto 1
+::2. rapporto 1::[html]<p>Calcolare, se esiste \\[ \\lim _\{n\\to +\\infty \} \\frac \{(2n)!\}\{(n!)^2\}. \\] </p>{
+	~<p>\\(0\\)</p>
+	~<p>\\(1\\)</p>
+	=<p>\\(+\\infty \\)</p>
+	~<p>non esiste</p>
+}
+
+
+// question: 341  name: 3. rapporto/radice
+::3. rapporto/radice::[html]<p>Calcolare, se esiste \\[ \\lim _\{n\\to +\\infty \} \\sqrt [n]\{\\frac \{(2n)!\}\{(n!)^2\}\} \\] </p>{
+	~<p>\\(1\\)</p>
+	~<p>\\(2\\)</p>
+	=<p>\\(4\\)</p>
+	~<p>\\(8\\)</p>
+}
+
+
+// question: 342  name: 4. ricorrenza
+::4. ricorrenza::[html]<p>Qual è il limite della successione definita per ricorrenza \\[ \\begin \{cases\} a_0 \= 0\\\\<br> a_\{n+1\} \= \\frac \{a_n-1\}\{2\} \\end \{cases\} \\] </p>{
+	=<p>\\(-1\\)</p>
+	~<p>\\(1\\)</p>
+	~<p>\\(+\\infty \\)</p>
+	~<p>\\(-\\infty \\)</p>
+}
+
+
+// question: 343  name: 5. invariante
+::5. invariante::[html]<p>Si consideri la funzione \\(f\\colon \\mathbb R\\setminus \\\{\\sqrt 2,-\\sqrt 2\\\}\\to \\mathbb R\\), \\(f(x) \= \\frac \{1\}\{2-x^2\}\\). Quale dei seguenti insiemi è invariante per \\(f\\)? </p>{
+	~<p>\\([2,+\\infty )\\)</p>
+	~<p>\\(\\mathbb R\\setminus \\\{\\sqrt 2,-\\sqrt 2\\\}\\)</p>
+	~<p>\\((-1,0]\\)</p>
+	=<p>\\(\\mathbb Q\\)</p>
+}
+
+
+// question: 344  name: 6. punto fisso
+::6. punto fisso::[html]<p>Quanti sono i punti fissi della funzione \\(f\\colon \\mathbb R\\to \\mathbb R\\), \\(f(x)\=\\lfloor x\\rfloor \\)? </p>{
+	~<p>\\(0\\)</p>
+	~<p>\\(1\\)</p>
+	~<p>\\(2\\)</p>
+	=<p>infiniti</p>
+}
+
+
+// question: 0  name: Switch category to $module$/top/serie
+$CATEGORY: $module$/top/serie
+
+
+// question: 351  name: 1. geometrica
+::1. geometrica::[html]<p>Calcolare la somma\: \\[ \\sum _\{k\=0\}^\{+\\infty \} \\frac \{2^k+3^k\}\{6^k\} \\] </p>{
+	~<p>\\(\\frac 1 3\\)</p>
+	~<p>\\(\\frac 6 5\\)</p>
+	=<p>\\(\\frac 7 2\\)</p>
+	~<p>\\(+\\infty \\)</p>
+}
+
+
+// question: 352  name: 2. geometrica
+::2. geometrica::[html]<p>Calcolare la somma \\[ \\sum _\{k\=0\}^\{+\\infty \} e^\{1-2k\} \\] </p>{
+	=<p>\\(\\frac \{e^3\}\{e^2-1\}\\)</p>
+	~<p>\\(e\\)</p>
+	~<p>\\(\\frac \{1\}\{1-e^2\}\\)</p>
+	~<p>\\(+\\infty \\)</p>
+}
+
+
+// question: 353  name: 3. telescopica
+::3. telescopica::[html]<p>Trovare la somma della serie telescopica \\[ \\sum _\{k\=0\}^\{+\\infty \} \\frac \{k\}\{(k+1)!\} \\] </p>{
+	=<p>\\(1\\)</p>
+	~<p>\\(0\\)</p>
+	~<p>\\(2\\)</p>
+	~<p>\\(+\\infty \\)</p>
+}
+
+
+// question: 354  name: 4. condizione necessaria
+::4. condizione necessaria::[html]<p>La serie \\[ \\sum _\{n\=42\}^\{+\\infty \} \\frac \{n^2-n^n\}\{2^n+3^n\} \\] </p>{
+	~<p>converge</p>
+	~<p>diverge a \\(+\\infty \\)</p>
+	=<p>diverge a \\(-\\infty \\)</p>
+	~<p>è indeterminata</p>
+}
+
+
+// question: 355  name: 5. termini positivi
+::5. termini positivi::[html]<p>La serie \\[ \\sum _n \\sqrt \{1+(-1)^n\} \\] </p>{
+	~<p>è convergente</p>
+	=<p>diverge a \\(+\\infty \\)</p>
+	~<p>diverge a \\(-\\infty \\)</p>
+	~<p>è indeterminata</p>
+}
+
+
+// question: 356  name: 6. confronto
+::6. confronto::[html]<p>La serie \\[ \\sum _\{n\} \\frac \{n!-e^n\}\{\\sqrt \{n^7+n^3+2\}\} \\] </p>{
+	~<p>è convergente</p>
+	=<p>diverge a \\(+\\infty \\)</p>
+	~<p>diverge a \\(-\\infty \\)</p>
+	~<p>è indeterminata</p>
+}
+
+
+// question: 357  name: 7. confronto asintotico
+::7. confronto asintotico::[html]<p>La serie \\[ \\sum _n \\left (\\sqrt [n]\{\\sqrt [n]\{2\}\}-1\\right ) \\] </p>{
+	=<p>è convergente</p>
+	~<p>è divergente</p>
+	~<p>ha somma \\(1\\)</p>
+	~<p>è indeterminata</p>
+}
+
+
+// question: 27822  name: sere con parametro
+::sere con parametro::[html]<p>Per quali \\(x\\in \\mathbb R\\) la seguente serie converge? \\[ \\sum _n \\frac \{x^n+2^n\}\{n\\cdot 3^n\} \\] </p>{
+	=<p>\\(-3 \\le x &lt; 3\\)</p>
+	~<p>\\(\\lvert x \\rvert &lt; 1\\)</p>
+	~<p>ogni \\(x\\)</p>
+	~<p>\\(\\lvert x \\rvert &lt; 2\\)</p>
+}
+
+
+// question: 27809  name: serie
+::serie::[html]<p>Determinare il carattere della serie \\[ \\sum _n \\left [\\frac 1 \{\\sqrt n\} - \\frac 1 \{\\sqrt \{n+1\}\}\\right ] \\] </p>{
+	=<p>convergente</p>
+	~<p>divergente</p>
+	~<p>indeterminata</p>
+}
+
+
+// question: 27810  name: serie
+::serie::[html]<p>Determinare il carattere della serie \\[ \\sum _n \\frac \{1\}\{n^2+2^n\} \\] </p>{
+	=<p>convergente</p>
+	~<p>divergente</p>
+	~<p>indeterminata</p>
+}
+
+
+// question: 27811  name: serie
+::serie::[html]<p>Determinare il carattere della serie \\[ \\sum _n \\frac \{\\sqrt [3]\{n\}\}\{\\sqrt \{n^3-2n+1\}\} \\] </p>{
+	=<p>convergente</p>
+	~<p>divergente</p>
+	~<p>indeterminata</p>
+}
+
+
+// question: 27812  name: serie
+::serie::[html]<p>Determinare il carattere della serie \\[ \\sum _n \\frac \{n!\}\{n^n\} \\] </p>{
+	=<p>convergente</p>
+	~<p>divergente</p>
+	~<p>indeterminata</p>
+}
+
+
+// question: 27820  name: serie
+::serie::[html]<p>Determinare il carattere della serie \\[ \\sum _n \\left (1-\\frac 1 n\\right )^n \\] </p>{
+	=<p>divergente</p>
+	~<p>convergente</p>
+	~<p>indeterminata</p>
+}
+
+
+// question: 27821  name: serie
+::serie::[html]<p>Determinare il carattere della serie \\[ \\sum _n n!\\cdot (1-n)^\{1-n\} \\] </p>{
+	=<p>convergente</p>
+	~<p>non convergente</p>
+}
+
+
+// question: 27823  name: serie
+::serie::[html]<p>Determinare il carattere della serie \\[ \\sum _n \\frac \{n^n - n!\}\{n!-2^n\} \\] </p>{
+	=<p>divergente</p>
+	~<p>convergente</p>
+	~<p>indeterminata</p>
+}
+
+
+// question: 27826  name: serie a segni alterni
+::serie a segni alterni::[html]<p>Determinare il carattere della serie \\[ \\sum _n \\frac \{(-1)^n\}\{n\\cdot \\ln n\} \\] </p>{
+	=<p>convergente</p>
+	~<p>divergente</p>
+	~<p>indeterminata</p>
+}
+
+
+// question: 49422  name: serie con parametro
+::serie con parametro::[html]<p>Per quali \\(x\\in \\mathbb R\\) la seguente serie è convergente? \\[ \\sum _n \\frac \{1-x^n\}\{n^2+n\} \\] </p>{
+	=<p>\\(\\lvert x \\rvert \\le 1\\)</p>
+	~<p>\\(-1\\le x &lt; 1\\)</p>
+	~<p>ogni \\(x\\)</p>
+	~<p>\\(x\\le 0\\)</p>
+}
+
+
+// question: 49420  name: serie con parametro
+::serie con parametro::[html]<p>Per quali \\(\\alpha \\in \\mathbb R\\) la seguente serie è convergente? \\[ \\sum _n \\left [ \\sqrt [n]\{n\} - \\sqrt [n]\{2\}\\right ]^\\alpha \\] </p>{
+	=<p>\\(\\alpha &gt;1\\)</p>
+	~<p>\\(\\alpha &gt;0\\)</p>
+	~<p>ogni \\(\\alpha \\)</p>
+	~<p>\\(\\alpha &gt;-1\\)</p>
+}
+
+
+// question: 49419  name: serie con parametro
+::serie con parametro::[html]<p>Per quali \\(\\alpha \\in \\mathbb R\\) la seguente serie è convergente? \\[ \\sum _n \\frac \{1\}\{n\\cdot \\ln ^\\alpha n\} \\] </p>{
+	=<p>\\(\\alpha &gt;1\\)</p>
+	~<p>\\(\\alpha &gt;0\\)</p>
+	~<p>ogni \\(\\alpha \\)</p>
+	~<p>\\(\\alpha &gt;-1\\)</p>
+}
+
+
+// question: 49417  name: serie con parametro
+::serie con parametro::[html]<p>Per quali \\(\\alpha \\in \\mathbb R\\) la seguente serie è convergente? \\[ \\sum _n \\frac \{1\}\{n^\\alpha \\cdot \\ln n\} \\] </p>{
+	=<p>\\(\\alpha &gt;1\\)</p>
+	~<p>\\(\\alpha &gt;0\\)</p>
+	~<p>ogni \\(\\alpha \\)</p>
+	~<p>\\(\\alpha &gt;-1\\)</p>
+}
+
+
+// question: 49418  name: serie con parametro
+::serie con parametro::[html]<p>Per quali \\(\\alpha \\in \\mathbb R\\) la seguente serie è convergente? \\[ \\sum _n \\frac \{1\}\{(n\\cdot \\ln n)^\\alpha \} \\] </p>{
+	=<p>\\(\\alpha &gt;1\\)</p>
+	~<p>\\(\\alpha &gt;0\\)</p>
+	~<p>ogni \\(\\alpha \\)</p>
+	~<p>\\(\\alpha &gt;-1\\)</p>
+}
+
+
+// question: 27824  name: serie con parametro
+::serie con parametro::[html]<p>Per quali \\(x\\in \\mathbb R\\) la seguente serie converge? \\[ \\sum _n \\frac \{x^n\}\{\\sqrt n + n \\ln n\} \\] </p>{
+	=<p>\\(-1\\le x &lt; 1\\)</p>
+	~<p>\\(\\lvert x \\rvert &lt; 1\\)</p>
+	~<p>\\(\\lvert x \\rvert \\le 1\\)</p>
+	~<p>ogni \\(x\\)</p>
+}
+
+
+// question: 27825  name: serie con parametro
+::serie con parametro::[html]<p>Per quali \\(x\\in \\mathbb R\\) la seguente serie converge? \\[ \\sum _n x^\{2n\}\\cdot \\left (\\sqrt \{n+1\}-\\sqrt n\\right ) \\] </p>{
+	~<p>\\(-1\\le x &lt; 1\\)</p>
+	=<p>\\(\\lvert x \\rvert &lt; 1\\)</p>
+	~<p>\\(\\lvert x \\rvert \\le 1\\)</p>
+	~<p>ogni \\(x\\)</p>
+}
+
+
+// question: 27815  name: serie geometrica
+::serie geometrica::[html]<p>Calcolare \\[ \\sum _\{n\=0\}^\{+\\infty \} \\frac \{3^n + (-1)^n\\cdot 2^n\}\{5^n\} \\] </p>{
+	=<p>\\(\\frac \{45\}\{14\}\\)</p>
+	~<p>\\(\\frac \{42\}\{18\}\\)</p>
+	~<p>\\(\\frac \{46\}\{15\}\\)</p>
+	~<p>\\(\\frac \{49\}\{15\}\\)</p>
+}
+
+
+// question: 27813  name: serie telescopica
+::serie telescopica::[html]<p>Calcolare \\[ \\sum _\{n\=1\}^\{+\\infty \} \\frac \{1\}\{(n-1)!\\cdot (n+1)\} \\] </p>{
+	=<p>\\(1\\)</p>
+	~<p>\\(e\\)</p>
+	~<p>\\(e-1\\)</p>
+	~<p>\\(+\\infty \\)</p>
+}
+
+
+// question: 0  name: Switch category to $module$/top/serie 2
+$CATEGORY: $module$/top/serie 2
+
+
+// question: 358  name: 1.
+::1.::[html]<p>La serie \\[ \\sum _k \\frac \{(-1)^k\\cdot k - \\ln k\}\{k^2\\ln k\} \\] </p>{
+	~<p>è assolutamente convergente</p>
+	=<p>convergente ma non assolutamente</p>
+	~<p>non è convergente</p>
+}
+
+
+// question: 359  name: 2
+::2::[html]<p>La serie \\[ \\sum _\{k\=2\}^\{+\\infty \} \\frac \{1\}\{1+k\\cdot (-1)^k\} \\] </p>{
+	~<p>è assolutamente convergente</p>
+	=<p>è convergente ma non assolutamente</p>
+	~<p>non è convergente</p>
+}
+
+
+// question: 360  name: 3
+::3::[html]<p>La serie \\[ \\sum _\{k\=2\}^\{+\\infty \} \\frac \{1\}\{1+k\\cdot (-1)^k\} \\] </p>{
+	=<p>ha somma negativa</p>
+	~<p>ha somma minore di \\(\\frac 1 3\\) e maggiore di zero</p>
+	~<p>ha somma \\(\\frac 1 3\\)</p>
+	~<p>ha somma maggiore di \\(\\frac 1 3\\)</p>
+}
+
+
+// question: 361  name: 4.
+::4.::[html]<p>Determinare la rappresentazione grafica dell’insieme dei punti \\((x,y)\\) per i quali la serie \\[ \\sum _k \\frac \{x^k\}\{1+ky^k\}. \\] converge. </p>{
+	=<p><IMG SRC\="data\:image/png;base64,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\= \n"></p>
+	~<p><IMG SRC\="data\:image/png;base64,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\=\= \n"></p>
+	~<p><IMG SRC\="data\:image/png;base64,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\= \n"></p>
+	~<p><img src\="data\:image/png;base64,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 \nDwAAAABJRU5ErkJggg\=\= \n"></p>
+}
+
+
+// question: 362  name: 5.
+::5.::[html]<p>Per quali \\(x\\in \\mathbb R\\) la serie complessa \\[ \\sum _k \\frac \{(x+i)^k\}\{2^k\\cdot \\ln k\} \\] è convergente? </p>{
+	=<p>\\(x\\in [-\\sqrt 3, \\sqrt 3]\\)</p>
+	~<p>\\(x\\in [-1,1]\\)</p>
+	~<p>\\(x\\in [-1,1)\\)</p>
+	~<p>\\(x &gt;0\\)</p>
+}
+
+
+// question: 27799  name: sere con parametro
+::sere con parametro::[html]<p>Per quali \\(x\\in \\mathbb R\\) la seguente serie converge? \\[ \\sum _n \\frac \{x^n+2^n\}\{n\\cdot 3^n\} \\] </p>{
+	=<p>\\(-3 \\le x &lt; 3\\)</p>
+	~<p>\\(\\lvert x \\rvert &lt; 1\\)</p>
+	~<p>ogni \\(x\\)</p>
+	~<p>\\(\\lvert x \\rvert &lt; 2\\)</p>
+}
+
+
+// question: 27786  name: serie
+::serie::[html]<p>Determinare il carattere della serie \\[ \\sum _n \\left [\\frac 1 \{\\sqrt n\} - \\frac 1 \{\\sqrt \{n+1\}\}\\right ] \\] </p>{
+	=<p>convergente</p>
+	~<p>divergente</p>
+	~<p>indeterminata</p>
+}
+
+
+// question: 27787  name: serie
+::serie::[html]<p>Determinare il carattere della serie \\[ \\sum _n \\frac \{1\}\{n^2+2^n\} \\] </p>{
+	=<p>convergente</p>
+	~<p>divergente</p>
+	~<p>indeterminata</p>
+}
+
+
+// question: 27788  name: serie
+::serie::[html]<p>Determinare il carattere della serie \\[ \\sum _n \\frac \{\\sqrt [3]\{n\}\}\{\\sqrt \{n^3-2n+1\}\} \\] </p>{
+	=<p>convergente</p>
+	~<p>divergente</p>
+	~<p>indeterminata</p>
+}
+
+
+// question: 27789  name: serie
+::serie::[html]<p>Determinare il carattere della serie \\[ \\sum _n \\frac \{n!\}\{n^n\} \\] </p>{
+	=<p>convergente</p>
+	~<p>divergente</p>
+	~<p>indeterminata</p>
+}
+
+
+// question: 27797  name: serie
+::serie::[html]<p>Determinare il carattere della serie \\[ \\sum _n \\left (1-\\frac 1 n\\right )^n \\] </p>{
+	=<p>divergente</p>
+	~<p>convergente</p>
+	~<p>indeterminata</p>
+}
+
+
+// question: 27798  name: serie
+::serie::[html]<p>Determinare il carattere della serie \\[ \\sum _n n!\\cdot (1-n)^\{1-n\} \\] </p>{
+	=<p>convergente</p>
+	~<p>non convergente</p>
+}
+
+
+// question: 27800  name: serie
+::serie::[html]<p>Determinare il carattere della serie \\[ \\sum _n \\frac \{n^n - n!\}\{n!-2^n\} \\] </p>{
+	=<p>divergente</p>
+	~<p>convergente</p>
+	~<p>indeterminata</p>
+}
+
+
+// question: 27803  name: serie a segni alterni
+::serie a segni alterni::[html]<p>Determinare il carattere della serie \\[ \\sum _n \\frac \{(-1)^n\}\{n\\cdot \\ln n\} \\] </p>{
+	=<p>convergente</p>
+	~<p>divergente</p>
+	~<p>indeterminata</p>
+}
+
+
+// question: 27791  name: serie con parametro
+::serie con parametro::[html]<p>Per quali \\(x\\in \\mathbb R\\) la seguente serie è convergente? \\[ \\sum _n \\frac \{1-x^n\}\{n^2+n\} \\] </p>{
+	=<p>\\(\\lvert x \\rvert \\le 1\\)</p>
+	~<p>\\(-1\\le x &lt; 1\\)</p>
+	~<p>ogni \\(x\\)</p>
+	~<p>\\(x\\le 0\\)</p>
+}
+
+
+// question: 54190  name: serie con parametro
+::serie con parametro::[html]<p>Per quali \\(\\alpha \\in \\mathbb R\\) la seguente serie è convergente? \\[ \\sum _n \\left ( \\sqrt [n]\{n\} - \\sqrt [n]\{2\}\\right )^\\alpha \\]</p>{
+	=<p>\\(\\alpha &gt;1\\)</p>
+	~<p>\\(\\alpha &gt;0\\)</p>
+	~<p>ogni \\(\\alpha \\)</p>
+	~<p>\\(\\alpha &gt;-1\\)</p>
+}
+
+
+// question: 27794  name: serie con parametro
+::serie con parametro::[html]<p>Per quali \\(\\alpha \\in \\mathbb R\\) la seguente serie è convergente? \\[ \\sum _n \\frac \{1\}\{n\\cdot \\ln ^\\alpha n\} \\] </p>{
+	=<p>\\(\\alpha &gt;1\\)</p>
+	~<p>\\(\\alpha &gt;0\\)</p>
+	~<p>ogni \\(\\alpha \\)</p>
+	~<p>\\(\\alpha &gt;-1\\)</p>
+}
+
+
+// question: 27795  name: serie con parametro
+::serie con parametro::[html]<p>Per quali \\(\\alpha \\in \\mathbb R\\) la seguente serie è convergente? \\[ \\sum _n \\frac \{1\}\{n^\\alpha \\cdot \\ln n\} \\] </p>{
+	=<p>\\(\\alpha &gt;1\\)</p>
+	~<p>\\(\\alpha &gt;0\\)</p>
+	~<p>ogni \\(\\alpha \\)</p>
+	~<p>\\(\\alpha &gt;-1\\)</p>
+}
+
+
+// question: 27796  name: serie con parametro
+::serie con parametro::[html]<p>Per quali \\(\\alpha \\in \\mathbb R\\) la seguente serie è convergente? \\[ \\sum _n \\frac \{1\}\{(n\\cdot \\ln n)^\\alpha \} \\] </p>{
+	=<p>\\(\\alpha &gt;1\\)</p>
+	~<p>\\(\\alpha &gt;0\\)</p>
+	~<p>ogni \\(\\alpha \\)</p>
+	~<p>\\(\\alpha &gt;-1\\)</p>
+}
+
+
+// question: 27801  name: serie con parametro
+::serie con parametro::[html]<p>Per quali \\(x\\in \\mathbb R\\) la seguente serie converge? \\[ \\sum _n \\frac \{x^n\}\{\\sqrt n + n \\ln n\} \\] </p>{
+	=<p>\\(-1\\le x &lt; 1\\)</p>
+	~<p>\\(\\lvert x \\rvert &lt; 1\\)</p>
+	~<p>\\(\\lvert x \\rvert \\le 1\\)</p>
+	~<p>ogni \\(x\\)</p>
+}
+
+
+// question: 27802  name: serie con parametro
+::serie con parametro::[html]<p>Per quali \\(x\\in \\mathbb R\\) la seguente serie converge? \\[ \\sum _n x^\{2n\}\\cdot \\left (\\sqrt \{n+1\}-\\sqrt n\\right ) \\] </p>{
+	~<p>\\(-1\\le x &lt; 1\\)</p>
+	=<p>\\(\\lvert x \\rvert &lt; 1\\)</p>
+	~<p>\\(\\lvert x \\rvert \\le 1\\)</p>
+	~<p>ogni \\(x\\)</p>
+}
+
+
+// question: 27792  name: serie geometrica
+::serie geometrica::[html]<p>Calcolare \\[ \\sum _\{n\=0\}^\{+\\infty \} \\frac \{3^n + (-1)^n\\cdot 2^n\}\{5^n\} \\] </p>{
+	=<p>\\(\\frac \{45\}\{14\}\\)</p>
+	~<p>\\(\\frac \{42\}\{18\}\\)</p>
+	~<p>\\(\\frac \{46\}\{15\}\\)</p>
+	~<p>\\(\\frac \{49\}\{15\}\\)</p>
+}
+
+
+// question: 27790  name: serie telescopica
+::serie telescopica::[html]<p>Calcolare \\[ \\sum _\{n\=1\}^\{+\\infty \} \\frac \{1\}\{(n-1)!\\cdot (n+1)\} \\] </p>{
+	=<p>\\(1\\)</p>
+	~<p>\\(e\\)</p>
+	~<p>\\(e-1\\)</p>
+	~<p>\\(+\\infty \\)</p>
+}
+
+
+// question: 0  name: Switch category to $module$/top/varie
+$CATEGORY: $module$/top/varie
+
+
+// question: 367  name: 1. sviluppo funzione iperbolica
+::1. sviluppo funzione iperbolica::[html]<p>Usando lo sviluppo in serie di potenze di \\(e^x\\) trovare lo sviluppo in serie di potenze di \\(\\cosh x\\). </p>{
+	=<p>\\(\\displaystyle \\sum _\{k\=0\}^\{+\\infty \} \\frac \{x^\{2k\}\}\{(2k)!\}\\)</p>
+	~<p>\\(\\displaystyle \\sum _\{k\=0\}^\{+\\infty \} \\frac \{x^\{2k\}\}\{k!\}\\)</p>
+	~<p>\\(\\displaystyle \\sum _\{k\=0\}^\{+\\infty \} \\frac \{x^\{4k\}\}\{(4k)!\}\\)</p>
+	~<p>\\(\\displaystyle \\sum _\{k\=0\}^\{+\\infty \} (-1)^k\\frac \{x^\{2k\}\}\{(2k)!\}\\)</p>
+}
+
+
+// question: 368  name: 2. funzione iperbolica inversa
+::2. funzione iperbolica inversa::[html]<p>La funzione \\(\\mathrm \{setttanh\} y\\) è la funzione inversa della funzione \\(\\tanh x \= \\frac \{\\sinh x\}\{\\cosh x\}\\). Risolvendo in \\(x\\) l&rsquo;equazione \\(\\tanh x \= y\\) si trova che \\(\\mathrm \{setttanh\} y\\) è uguale a\: </p>{
+	=<p>\\(\\displaystyle \\ln \\sqrt \{\\frac \{1+y\}\{1-y\}\}\\)</p>
+	~<p>\\(\\displaystyle \\frac \{\\ln (1+y)\}\{\\ln (1-y)\}\\)</p>
+	~<p>\\(\\displaystyle \\frac \{e^y-e^\{-y\}\}\{e^y+e^\{-y\}\}\\)</p>
+	~<p>\\(\\displaystyle \\ln \\frac \{\\sqrt \{1-y^2\}\}\{\\sqrt \{1+y^2\}\}\\)</p>
+}
+
+
+// question: 369  name: 3. Weierstrass
+::3. Weierstrass::[html]<p>Solamente una delle seguenti funzioni non ammette minimo. Quale? (si ragioni per esclusione) </P><P>Si intende che ogni espressione rappresenta una funzione definita sull&rsquo;insieme di definizione della espressione. </p>{
+	=<p>\\(\\frac \{\\mathrm \{arcsin\} x\}\{\\sin x\}\\)</p>
+	~<p>\\(\\mathrm \{arcsin\} x + \\sqrt \{1-x^2\}\\)</p>
+	~<p>\\(\\frac \{1-\\mathrm \{arcsin x\}\}\{1+x^2\}\\)</p>
+	~<p>\\(\\frac \{\\mathrm \{arcsin\} x + 2 \\mathrm \{arccos\} x\}\{2-x^2\}\\)</p>
+}
+
+
+// question: 370  name: 4. teorema fondamentale dell'algebra
+::4. teorema fondamentale dell'algebra::[html]<p>Sia \\[ P(x) \= x^6 + 17 x^4 + 88 x^2 + 144. \\] Si verifichi che nel campo complesso si ha \\(P(2i)\=P(-2i)\=P(3i)\=P(-3i)\=0\\). Allora possiamo affermare (senza svolgere la divisione) che \\(P(x)\\) è divisibile per il polinomio\: </p>{
+	=<p>\\((x^2+4)\\cdot (x^2+9)\\)</p>
+	~<p>\\((x-2)^2\\cdot (x-3)^2\\)</p>
+	~<p>\\((x+2)\\cdot (x+3)\\)</p>
+	~<p>\\((x+2)^2\\cdot (x+3)^2\\)</p>
+}
+
+
+// question: 371  name: 5. divisione
+::5. divisione::[html]<p>Il polinomio dell&rsquo;esercizio precedente si può annullare in al massimo 6 punti del piano complesso (radici complesse del polinomio). Oltre a \\(\\pm 2i\\) e \\(\\pm 3i\\) quali sono le altre due radici complesse? (si svolga la divisione suggerita dall&rsquo;esercizio precedente) </p>{
+	=<p>non ci sono altre radici, alcune di quelle già trovate sono radici multiple</p>
+	~<p>ci sono altre due radici con parte reale maggiore di \\(3\\)</p>
+	~<p>ci sono altre due radici con parte reale compresa tra \\(2\\) e \\(3\\)</p>
+	~<p>ci sono altre due radici con parte reale minore di \\(2\\)</p>
+}
+
+
+// question: 0  name: Switch category to $module$/top/limite di funzione
+$CATEGORY: $module$/top/limite di funzione
+
+
+// question: 372  name: 1 tan exp
+::1 tan exp::[html]<p>Calcolare, se esiste, \\[ \\lim _\{x\\to +\\infty \} \\frac \{\\mathrm\{tg\}\\, x\}\{2^x\} \\] </p>{
+	~<p>\\(0\\)</p>
+	~<p>\\(1\\)</p>
+	~<p>\\(+\\infty \\)</p>
+	=<p>non esiste</p>
+}
+
+
+// question: 54186  name: 2 tan arcsin
+::2 tan arcsin::[html]<p>Calcolare, se esiste, \\[ \\lim _\{x\\to 1\} \\mathrm\{tg\}( \\arcsin x) \\]</p>{
+	~<p>\\(0\\)</p>
+	~<p>\\(1\\)</p>
+	=<p>\\(+\\infty \\)</p>
+	~<p>non esiste</p>
+}
+
+
+// question: 374  name: 3 potenza logaritmo
+::3 potenza logaritmo::[html]<p>Calcolare, se esiste, \\[ \\lim _\{x\\to 0^+\} x^\{\\frac \{1\}\{1+\\ln x\}\} \\] </p>{
+	~<p>\\(1\\)</p>
+	=<p>\\(e\\)</p>
+	~<p>\\(+\\infty \\)</p>
+	~<p>non esiste</p>
+}
+
+
+// question: 54189  name: 4 cos atan
+::4 cos atan::[html]<p>Calcolare, se esiste, \\[ \\lim _\{x\\to 1\} \\cos \\left(\\mathrm\{arctg\}\\, \\frac \{x^2+1\}\{x^2-1\} \\right)\\]</p>{
+	=<p>\\(0\\)</p>
+	~<p>\\(\\frac \\pi 2\\)</p>
+	~<p>\\(+\\infty \\)</p>
+	~<p>non esiste</p>
+}
+
+
+// question: 376  name: 5 parte intera seno
+::5 parte intera seno::[html]<p>Calcolare, se esiste, \\[ \\lim _\{x\\to \\pi \} \\lceil \\sin ^2 x \\rceil \\] </p>{
+	~<p>\\(0\\)</p>
+	=<p>\\(1\\)</p>
+	~<p>\\(\\pi \\)</p>
+	~<p>non esiste</p>
+}
+
+
+// question: 0  name: Switch category to $module$/top/derivate
+$CATEGORY: $module$/top/derivate
+
+
+// question: 377  name: 1.
+::1.::[html]<p>Se \\[ f(x) \= \\left ((x^2+1)^3 - 4x +2\\right )^2 \\] Calcolare \\(f&rsquo;(0)\\). </p>{
+	~<p>\\(0\\)</p>
+	~<p>\\(2\\)</p>
+	=<p>\\(-24\\)</p>
+	~<p>\\(42\\)</p>
+}
+
+
+// question: 378  name: 2.
+::2.::[html]<p>Se \\[ f(x) \= \\left (e^\{\\sin (\\mathrm\{arctg\}\\, x)\}\\right )^2 \\] calcolare \\(f’(1)\\) </p>{
+	~<p>\\(\\sqrt \{2\}\\cdot e\\)</p>
+	~<p>\\(\\sqrt \{2\}\\cdot e^2\\)</p>
+	~<p>\\(2 \\cdot \\sqrt \{e\}\\)</p>
+	=<p>\\(\\frac\{e^\{\\sqrt 2\}\}\{\\sqrt 2\}\\)</p>
+}
+
+
+// question: 379  name: 3.
+::3.::[html]<p>Sia \\(f\\colon \\mathbb R\\to \\mathbb R\\) una funzione derivabile tale che \\(f(1)\=1\\) e \\(f&rsquo;(1)\=2\\). Posto \\[ g(x) \= f(f(x)\\cdot f(1/x)) \\] calcolare \\(g&rsquo;(1)\\). </p>{
+	=<p>\\(0\\)</p>
+	~<p>\\(1\\)</p>
+	~<p>\\(2\\)</p>
+	~<p>\\(\\sqrt 2\\)</p>
+}
+
+
+// question: 380  name: 4.
+::4.::[html]<p>Posto \\[ f(x) \= \\begin \{cases\} x^2\\cdot \\sin \\frac 1 x &amp; \\text \{se \\(x\\neq 0\\)\} \\\\<br> 0 &amp; \\text \{se \\(x\=0\\)\} \\end \{cases\} \\] calcolare, se esiste, \\(f’(0)\\). </p>{
+	=<p>\\(0\\)</p>
+	~<p>\\(1\\)</p>
+	~<p>\\(\\frac 3 2\\)</p>
+	~<p>non esiste</p>
+}
+
+
+// question: 381  name: 5.
+::5.::[html]<p>Sia \\(f\\colon \\mathbb R\\to \\mathbb R\\) \\[ f(x) \= x+x^3+x^7. \\] Dimostrare che \\(f\\) è derivabile, strettamente crescente, bigettiva con inversa derivabile. Se \\(g\\colon \\mathbb R\\to \\mathbb R\\) è la funzione inversa calcolare \\(g&rsquo;(3)\\). </p>{
+	~<p>\\(3\\)</p>
+	~<p>\\(\\sqrt [7]\{3\}\\)</p>
+	=<p>\\(\\frac 1 \{11\}\\)</p>
+	~<p>\\(33\\)</p>
+}
+
+
+// question: 382  name: 6.
+::6.::[html]<p>Trovare il massimo volume che può avere un cilindro di raggio \\(r\\) e altezza \\(h\\) con \\(r+h\=1\\). </P><P></p>{
+	~<p>\\(\\frac \{9\}\{4\}\\pi \\)</p>
+	~<p>\\(\\frac \{3\}\{5\}\\pi \\)</p>
+	=<p>\\(\\frac \{4\}\{27\}\\pi \\)</p>
+	~<p>\\(\\frac \{5\}\{9\}\\pi \\)</p>
+}
+
+
+// question: 54193  name: derivabilità
+::derivabilità::[html]<p dir\="ltr" style\="text-align\: left;">La funzione \\(f\\colon \\mathbb R\\to \\mathbb R\\)<span style\="font-size\: 0.9375rem;"> definita da <br></span><span style\="font-size\: 0.9375rem;">\\[ f(x) \= \\sqrt[3]\{x-\\sin x\} \\]</span><span style\="font-size\: 0.9375rem;"><br>è</span></p>{
+	=<p dir\="ltr" style\="text-align\: left;">derivabile con derivata continua</p>
+	~<p dir\="ltr" style\="text-align\: left;">derivabile con derivata non continua</p>
+	~<p dir\="ltr" style\="text-align\: left;">continua ma non derivabile</p>
+	~<p dir\="ltr" style\="text-align\: left;">non continua</p>
+}
+
+
+// question: 49272  name: derivabilità
+::derivabilità::[html]<p dir\="ltr" style\="text-align\: left;">La funzione \\(f\\colon \\mathbb R \\to \\mathbb R\\) definita da<br>\\[ f(x) \= \\begin\{cases\}<br>\\sin x &amp; \\text\{per $x\\ge 0$\}\\\\<br>\\arctan x &amp; \\text\{per $x &lt; 0$\}<br>\\end\{cases\}\\]<br>è</p>{
+	=<p dir\="ltr" style\="text-align\: left;">di classe \\(C^2\\) (derivata seconda continua) ma non \\(C^3\\)</p>
+	~di classe \\(C^3\\) (derivata terza continua)
+	~<p dir\="ltr" style\="text-align\: left;">di classe \\(C^1\\) (derivata continua) ma non \\(C^2\\)</p>
+	~<p dir\="ltr" style\="text-align\: left;">di classe \\(C^0\\) (continua) ma non \\(C^1\\)</p>
+}
+
+
+// question: 49273  name: derivabilità
+::derivabilità::[html]<p dir\="ltr" style\="text-align\: left;">La funzione \\(f\\colon\\mathbb R\\to\\mathbb R\\) definita da <br>\\[<br>f(x) \= \\begin\{cases\}<br>x^2\\sin\\frac 1\{x^2\} &amp; \\text\{per $x&gt;0$\}\\\\<br>0 &amp; \\text\{per $x\\le 0$\}<br>\\end\{cases\}<br>\\]<br>è</p>{
+	=<p dir\="ltr" style\="text-align\: left;">derivabile con derivata non continua</p>
+	~<p dir\="ltr" style\="text-align\: left;">derivabile con derivata continua</p>
+	~<p dir\="ltr" style\="text-align\: left;">continua ma non derivabile</p>
+	~<p dir\="ltr" style\="text-align\: left;">non continua</p>
+}
+
+
+// question: 54194  name: derivabilità
+::derivabilità::[html]<p dir\="ltr" style\="text-align\: left;">La funzione \\(f\\colon\\mathbb R\\to\\mathbb R\\) definita da \\[<br>f(x) \= \\max\\\{\\sin x, \\cos x\\\}\\]<br>è</p>{
+	=<p dir\="ltr" style\="text-align\: left;">continua ma non derivabile</p>
+	~<p dir\="ltr" style\="text-align\: left;">non continua</p>
+	~<p dir\="ltr" style\="text-align\: left;">derivabile con derivata non continua</p>
+	~<p dir\="ltr" style\="text-align\: left;">derivabile con derivata continua</p>
+}
+
+
+// question: 54195  name: derivabilità
+::derivabilità::[html]<p dir\="ltr" style\="text-align\: left;">La funzione \\(f\\colon\\mathbb R\\to\\mathbb R\\) definita da \\[<br>f(x) \= \\begin\{cases\}<br>\\cos^2(x^2) &amp; \\text\{per $x\\ge 0$\}\\\\<br>x-\\sin x &amp; \\text\{per $x&lt;0$\}<br>\\end\{cases\}\\]<br>è</p>{
+	=<p dir\="ltr" style\="text-align\: left;">non continua</p>
+	~<p dir\="ltr" style\="text-align\: left;">continua ma non derivabile</p>
+	~<p dir\="ltr" style\="text-align\: left;">derivabile con derivata non continua</p>
+	~<p dir\="ltr" style\="text-align\: left;">derivabile infinite volte</p>
+}
+
+
+// question: 0  name: Switch category to $module$/top/studio funzione
+$CATEGORY: $module$/top/studio funzione
+
+
+// question: 53995  name: 1. Quante soluzioni
+::1. Quante soluzioni::[html]<p>Quante soluzioni reali ha l’equazione? \\[ 13 x^\{17\}+1\=17x^\{13\} \\] </p>{
+	~<p>1</p>
+	~<p>2</p>
+	=<p>3</p>
+	~<p>17</p>
+}
+
+
+// question: 384  name: 2.
+::2.::[html]<p>L’insieme \\[ \\\{x&gt;0 \\colon \\ln x &gt; x^2-1\\\} \\] può essere scritto nella forma\: </p>{
+	=<p>\\((a,1)\\)</p>
+	~<p>\\((0,a)\\cup (1,+\\infty )\\)</p>
+	~<p>\\([a,1]\\)</p>
+	~<p>\\((0,a]\\cup [1,+\\infty )\\)</p>
+}
+
+
+// question: 385  name: 3.
+::3.::[html]<p>Quante soluzioni ha l&rsquo;equazione? \\[ x \\cdot \\mathrm \{arctg\}\\, x \= 1 + \\ln \\sqrt \{1+x^2\} \\] </p>{
+	~<p>0</p>
+	~<p>1</p>
+	=<p>2</p>
+	~<p>3</p>
+}
+
+
+// question: 386  name: 4.
+::4.::[html]<p>L&rsquo;equazione \\(x^3+x^2\=1\\) ha una unica soluzione \\(x_1\\) con </p>{
+	~<p>\\(0.5\\le x_1 &lt; 0.6\\)</p>
+	~<p>\\(0.6\\le x_1 &lt; 0.7\\)</p>
+	=<p>\\(0.7\\le x_1 &lt; 0.8\\)</p>
+	~<p>\\(0.8\\le x_1 &lt; 0.9\\)</p>
+}
+
+
+// question: 387  name: 5.
+::5.::[html]<p>Calcolare \\[ \\sup _\{x\\in \\mathbb R\} \\frac \{2x+2\}\{x^2+1\} \\] </p>{
+	=<p>\\(1+\\sqrt 2\\)</p>
+	~<p>\\(1\\)</p>
+	~<p>\\(+\\infty \\)</p>
+	~<p>\\(\\sqrt 3\\)</p>
+}
+
+
+// question: 388  name: 6.
+::6.::[html]<p>Sia \\(x\\) la soluzione di \\[ x^2 \= e^x. \\] Calcolare \\(\\lfloor x^2+2\\ln \\lvert x \\rvert +1\\rfloor \\). </p>{
+	=<p>\\(0\\)</p>
+	~<p>\\(1\\)</p>
+	~<p>\\(2\\)</p>
+	~<p>\\(3\\)</p>
+}
+
+
+// question: 0  name: Switch category to $module$/top/sviluppi di Taylor
+$CATEGORY: $module$/top/sviluppi di Taylor
+
+
+// question: 54202  name: 1.
+::1.::[html]<p>Approssimare \\(\\sin (0.3)\\) tramite il polinomio di Taylor di ordine \\(n\=3\\) centrato in \\(0\\). Cosa si ottiene?</p>{
+	~<p>\\(0.0992\\)</p>
+	~<p>\\(0.2154\\)</p>
+	=<p>\\(0.2955\\)</p>
+	~<p>\\(0.3033\\)</p>
+}
+
+
+// question: 48702  name: 1.
+::1.::[html]<p>Calcolare\: \\[ \\lim _\{x\\to 0\} \\frac \{x^3-(\\sin x)\\cdot \\sin (x^2)\}\{x^5\}. \\] </p>{
+	=<p>\\(\\frac 1 6\\)</p>
+	~<p>\\(\\frac 1 2\\)</p>
+	~<p>\\(0\\)</p>
+	~<p>\\(1\\)</p>
+}
+
+
+// question: 390  name: 2.
+::2.::[html]<p>Il resto di Lagrange ci garantisce che se approssimiamo \\(\\sin (0.3)\\)&nbsp;<span style\="font-size\: 0.9375rem;">usando il polinomio di Taylor di ordine \\(n\=4\\)&nbsp;</span><span style\="font-size\: 0.9375rem;">commettiamo un errore non superiore a\:&nbsp;</span><span style\="font-size\: 0.9375rem;">(scegliere la più piccola tra le risposte corrette)</span></p><p><br></p>{
+	=<p>\\(10^\{-4\}\\)</p>
+	~<p>\\(0\\)</p>
+	~<p>\\(10^\{-5\}\\)</p>
+	~<p>\\(10^\{-2\}\\)</p>
+}
+
+
+// question: 48703  name: 2.
+::2.::[html]<p>Calcolare \\[ \\lim _\{x\\to 0\}\\frac \{1-\\left (\\cos (x^2)\\right )^2\}\{x^4\}. \\] </p>{
+	=<p>\\(1\\)</p>
+	~<p>\\(\\frac 1 2\\)</p>
+	~<p>\\(2\\)</p>
+	~<p>\\(0\\)</p>
+}
+
+
+// question: 391  name: 3.
+::3.::[html]<p>Scrivere il polinomio di Taylor di ordine \\(3\\) centrato in \\(x_0\=0\\) per la funzione \\(f(x) \= \\sqrt [5]\{1+x\}\\). </p>{
+	=<p>\\(1+\\frac x 5 - \\frac \{2\}\{25\}x^2 + \\frac \{6\}\{125\}x^3\\)</p>
+	~<p>\\(1+\\frac x 5 + \\frac \{1\}\{25\}x^2 + \\frac \{6\}\{125\}x^3\\)</p>
+	~<p>\\(1+ x - \\frac \{1\}\{25\}x^2 + \\frac \{3\}\{125\}x^3\\)</p>
+	~<p>\\(1+ x + \\frac \{2\}\{25\}x^2 + \\frac \{6\}\{125\}x^3\\)</p>
+}
+
+
+// question: 48704  name: 3.
+::3.::[html]<p>Si scriva il polinomio di Taylor di ordine \\(n\=3\\) centrato in \\(x_0\=0\\) per la funzione \\(f(x) \= 1+x^4\\). </p>{
+	=<p>\\(1\\)</p>
+	~<p>\\(1+x^4\\)</p>
+	~<p>\\(1+x+x^2+x^3\\)</p>
+	~<p>\\(1-x+x^2-x^3\\)</p>
+}
+
+
+// question: 392  name: 4.
+::4.::[html]<p>Si consideri la funzione \\(f(x)\= \\frac \{1\}\{1+x\}\\) e se ne scriva la corrispondente serie di Taylor \\[ \\sum _\{k\=0\}^\{+\\infty \} \\frac \{f^\{(k)\}(0)\}\{k!\}x^k. \\] Per \\(x\=1\\) la serie\: </P><P></p>{
+	=<p>non converge</p>
+	~<p>ha somma \\(\\frac 1 2\\)</p>
+	~<p>converge ad un numero molto vicino a \\(\\frac 1 2\\)</p>
+	~<p>dovrebbe avere somma \\(\\frac 1 2\\) ma non saprei come giustificarlo</p>
+}
+
+
+// question: 48705  name: 4.
+::4.::[html]<p>Calcolare \\[ \\lim _\{x\\to 0\}\\frac \{1-\\left (\\cos (x^7)\\right )^5\}\{x^\{14\}\}. \\] (suggerimento\: basta considerare il polinomio di Taylor del secondo ordine per \\(f(x) \= \\cos x\\) e il polinomio di Taylor del primo ordine per \\(g(x)\=(1+x)^5\\)) </p>{
+	=<p>\\(\\frac 5 2\\)</p>
+	~<p>\\(\\frac 1 2\\)</p>
+	~<p>\\(\\frac 3 2\\)</p>
+	~<p>\\(\\frac 2 7\\)</p>
+}
+
+
+// question: 393  name: 5.
+::5.::[html]<p>Si scriva il polinomio di Taylor di ordine \\(n\=3\\) centrato in \\(x_0\=0\\) per la funzione \\(f(x) \= 1+x^4\\). </p>{
+	=<p>\\(1\\)</p>
+	~<p>\\(1+x^4\\)</p>
+	~<p>\\(1+x+x^2+x^3\\)</p>
+	~<p>\\(1-x+x^2-x^3\\)</p>
+}
+
+
+// question: 48706  name: 5.
+::5.::[html]<p>Scrivere il polinomio di Taylor di ordine \\(3\\) centrato in \\(x_0\=0\\) per la funzione \\(f(x) \= \\sqrt [5]\{1+x\}\\). </p>{
+	=<p>\\(1+\\frac x 5 - \\frac \{2\}\{25\}x^2 + \\frac \{6\}\{125\}x^3\\)</p>
+	~<p>\\(1+\\frac x 5 + \\frac \{1\}\{25\}x^2 + \\frac \{6\}\{125\}x^3\\)</p>
+	~<p>\\(1+ x - \\frac \{1\}\{25\}x^2 + \\frac \{3\}\{125\}x^3\\)</p>
+	~<p>\\(1+ x + \\frac \{2\}\{25\}x^2 + \\frac \{6\}\{125\}x^3\\)</p>
+}
+
+
+// question: 394  name: 6.
+::6.::[html]<p>Si scriva il polinomio di Taylor di ordine \\(n\=6\\) centrato in \\(x_0\=0\\) per la funzione \\(f(x)\= e^\{(x^4)\}-\\cos (x^3)\\). </p>{
+	=<p>\\(x^4+\\frac \{x^6\}\{2\}\\)</p>
+	~<p>\\(x^2-x^4+\\frac \{x^6\}\{6\}\\)</p>
+	~<p>\\(x^4\\)</p>
+	~<p>\\(-x^4+\\frac \{x^6\}\{6\}\\)</p>
+}
+
+
+// question: 48707  name: 6.
+::6.::[html]<p>Si consideri la funzione \\(f(x)\= \\frac \{1\}\{1+x\}\\) e se ne scriva la corrispondente serie di Taylor \\[ \\sum _\{k\=0\}^\{+\\infty \} \\frac \{f^\{(k)\}(0)\}\{k!\}x^k. \\] Per \\(x\=1\\) la serie\: </P><P></p>{
+	=<p>non converge</p>
+	~<p>ha somma \\(\\frac 1 2\\)</p>
+	~<p>converge ad un numero molto vicino a \\(\\frac 1 2\\)</p>
+	~<p>dovrebbe avere somma \\(\\frac 1 2\\) ma non saprei come giustificarlo</p>
+}
+
+
+// question: 395  name: 7.
+::7.::[html]<p>Posto \\(f(x)\= e^\{(x^4)\}-\\cos (x^3)\\) calcolare \\(f^\{(6)\}(0)\\). </p>{
+	=<p>\\(360\\)</p>
+	~<p>\\(\\frac \{\\pi \}\{6\}\\)</p>
+	~<p>\\(42\\)</p>
+	~<p>\\(-1\\)</p>
+}
+
+
+// question: 0  name: Switch category to $module$/top/riepilogo secondo compitino
+$CATEGORY: $module$/top/riepilogo secondo compitino
+
+
+// question: 54218  name: 1.
+::1.::[html]<p>Calcolare \\[ \\inf _\{y\\in \\mathbb R \} \\sup _\{x\\in \\mathbb R \}\\frac \{x\}\{1+x^2+y^2\} \\]</p>{
+	~<p>\\(\\frac 1 4\\)</p>
+	=<p>\\(0\\)</p>
+	~<p>\\(-\\infty \\)</p>
+	~<p>\\(1\\)</p>
+}
+
+
+// question: 397  name: 2.
+::2.::[html]<p>Calcolare \\[ \\lim _\{x\\to 0\} \\frac \{x^4\}\{\\frac \{4\\cos (\\frac 1 2 \\mathrm \{arctg\}\\,\\frac 1 \{x^2\})\}\{\\sqrt \{\\cos x + \\cos (3x)\}\}-\\sqrt [3]\{8+42x^2\}\} \\] </p>{
+	~<p>\\(\\frac \{84\}\{845\}\\)</p>
+	~<p>\\(\\frac \{48\}\{845\}\\)</p>
+	~<p>\\(\\frac \{84\}\{485\}\\)</p>
+	=<p>\\(\\frac \{48\}\{485\}\\)</p>
+}
+
+
+// question: 398  name: 3.
+::3.::[html]<p>Per quali valori del parametro \\(\\alpha \\in \\mathbb R\\) la seguente serie è convergente? \\[ \\sum _\{k\}\\left (e-\\left (1+\\frac 1 k\\right )^k\\right )^\\alpha \\] </p>{
+	~<p>\\(\\alpha &gt;0\\)</p>
+	~<p>\\(\\alpha &lt;0\\)</p>
+	=<p>\\(\\alpha &gt;1\\)</p>
+	~<p>\\(\\alpha &lt;1\\)</p>
+}
+
+
+// question: 54219  name: studio di funzione
+::studio di funzione::[html]<p dir\="ltr" style\="text-align\: left;">Per ogni \\( a&gt;0 \\) l'equazione \\( e^x \= a x^2\\) ha almeno una soluzione. Dire quale dei seguenti valori di \\(x\\) è, per una opportuna scelta di \\(a&gt;0\\), la più grande delle soluzioni di tale equazione.</p>{
+	~<p dir\="ltr" style\="text-align\: left;">\\(x\=-\\frac 1 2\\)</p>
+	=<p dir\="ltr" style\="text-align\: left;">\\(x\=2\\)</p>
+	~<p dir\="ltr" style\="text-align\: left;">\\(x\=\\frac 1 2\\)</p>
+	~<p dir\="ltr" style\="text-align\: left;">\\(x\=1\\)</p>
+}
+
+
+// question: 54217  name: taylor
+::taylor::[html]<p dir\="ltr" style\="text-align\: left;">Sia \\[ f(x) \= \\ln(\\cos x)\\cdot \\arctan x.\\] Calcolare \\( f^\{(5)\}(0)\\).</p>{
+	=<p dir\="ltr" style\="text-align\: left;">10</p>
+	~<p dir\="ltr" style\="text-align\: left;">5</p>
+	~<p dir\="ltr" style\="text-align\: left;">4</p>
+	~<p dir\="ltr" style\="text-align\: left;">2</p>
+}
+
+
+// question: 0  name: Switch category to $module$/top/integrale definizione
+$CATEGORY: $module$/top/integrale definizione
+
+
+// question: 48739  name: 1. definizione integrale di Riemann
+::1. definizione integrale di Riemann::[html]<p>Sia \\(f\\colon [0,4]\\to \\mathbb R\\), \\(f(x)\=(x-2)^2\\) e si consideri la suddivisione di Riemann \\(P\=\\\{0,1,3,4\\\}\\) dell&rsquo;intervallo \\([0,4]\\). Calcolare \\[ S^*(f,P) - S_*(f,P). \\] </p>{
+	~<p>\\(0\\)</p>
+	~<p>\\(\\frac 1 2\\)</p>
+	~<p>\\(1\\)</p>
+	=<p>\\(8\\)</p>
+}
+
+
+// question: 48740  name: 2. integrale funzione lineare
+::2. integrale funzione lineare::[html]<p>Dimostrare, tramite la definizione di integrale di Riemann, che \\[ \\int _a^b (mx+q)\\, dx \= \\frac 1 2 (b-a)(ma+mb+2q). \\] Per \\(f(x) \= mx+q\\), \\(m\=2\\), \\(q\=-1\\), \\(a\=1\\), \\(b\=3\\), \\[ P\=\\\{1,1.2,1.4,1.6,1.8,2,2.2,2.4,2.6,2.8,3\\\} \\] calcolare \\(S_*(f,P)\\). </p>{
+	=<p>\\(5.6\\)</p>
+	~<p>\\(5.8\\)</p>
+	~<p>\\(5.9\\)</p>
+	~<p>\\(6\\)</p>
+}
+
+
+// question: 400  name: 3. additività integrale
+::3. additività integrale::[html]<p>Posto \\[ f(x) \= \\begin \{cases\} 1 &amp; \\text \{se \\(x(x+1)(x-2)&gt;0\\)\}\\\\<br> 0 &amp; \\text \{altrimenti\} \\end \{cases\} \\] calcolare \\[ \\int _\{-2\}^\{3\} f(x)\\,dx. \\] </p>{
+	~<p>\\(0\\)</p>
+	~<p>\\(1\\)</p>
+	=<p>\\(2\\)</p>
+	~<p>non esiste</p>
+}
+
+
+// question: 399  name: 4. additività integrale
+::4. additività integrale::[html]<p>Calcolare \\[ \\int _\{-5\}^4 \\left (\\Big \\lvert \\big \\lvert \\lvert x\\rvert -1\\big \\rvert -2\\Big \\rvert -1\\right )\\, dx \\] </p>{
+	~<p>\\(-1\\)</p>
+	~<p>\\(0\\)</p>
+	=<p>\\(\\frac 1 2\\)</p>
+	~<p>\\(1\\)</p>
+}
+
+
+// question: 402  name: 5. limite dell'integrale
+::5. limite dell'integrale::[html]<p>Calcolare \\[ \\lim _\{h\\to 0\} \\frac 1 h \\int _0^h \\cos (x^2)\\, dx. \\] </p>{
+	~<p>non esiste</p>
+	~<p>\\(0\\)</p>
+	=<p>\\(1\\)</p>
+	~<p>\\(+\\infty \\)</p>
+}
+
+
+// question: 0  name: Switch category to $module$/top/integrali 1
+$CATEGORY: $module$/top/integrali 1
+
+
+// question: 403  name: 1
+::1::[html]<p>Calcolare \\[ \\int _0^1 x(x-1)(x-2)\\, dx \\] </p>{
+	=<p>\\(\\frac 1 4\\)</p>
+	~<p>\\(4\\)</p>
+	~<p>\\(\\frac 1 3\\)</p>
+	~<p>\\(3\\)</p>
+}
+
+
+// question: 404  name: 2
+::2::[html]<p>Calcolare \\[ \\int _0^1 \\frac \{1\}\{1+(1-x)^2\}\\, dx \\] </p>{
+	=<p>\\(\\frac \\pi 4\\)</p>
+	~<p>\\(-\\frac \\pi 4\\)</p>
+	~<p>\\(\\frac \\pi 2\\)</p>
+	~<p>\\(-\\frac \\pi 2\\)</p>
+}
+
+
+// question: 405  name: 3
+::3::[html]<p>Calcolare \\[ \\int _0^1 \\sqrt [5]\{\\sqrt \{x\}\\cdot \\sqrt [3]\{x\}\}\\, dx \\] </p>{
+	=<p>\\(\\frac 6 7\\)</p>
+	~<p>\\(\\frac 5 6\\)</p>
+	~<p>\\(\\frac 7 6\\)</p>
+	~<p>\\(\\frac 6 5\\)</p>
+}
+
+
+// question: 406  name: 4
+::4::[html]<p>Calcolare \\[ \\int _0^\{\\frac \\pi 3\} \\frac \{\\sin x \\cdot \\ln \\cos x\}\{\\cos x\}\\, dx \\] </p>{
+	=<p>\\(-\\frac \{\\ln ^2 2\}\{2\}\\)</p>
+	~<p>\\(0\\)</p>
+	~<p>\\(1\\)</p>
+	~<p>\\(-\\frac \\pi 4\\)</p>
+}
+
+
+// question: 407  name: 5
+::5::[html]<p>Calcolare \\[ \\int _0^1 x \\cdot \\sqrt [3]\{1-x^2\}\\, dx \\] </p>{
+	=<p>\\(\\frac 3 8\\)</p>
+	~<p>\\(-\\frac 3 8\\)</p>
+	~<p>\\(\\frac 8 3\\)</p>
+	~<p>\\(-\\frac 8 3\\)</p>
+}
+
+
+// question: 0  name: Switch category to $module$/top/integrali che si riconducono a funzioni razionali
+$CATEGORY: $module$/top/integrali che si riconducono a funzioni razionali
+
+
+// question: 49477  name: 1.
+::1.::[html]<p>Calcolare \\[ \\int _0^1 \\frac \{e^x-1\}\{(1+e^\{x-1\})^2\}\\, dx \\]</p><p></p><p><br></p><p></p>{
+	=<p>\\(\\ln \\frac \{2\}\{1+e\} + \\frac \{e-1\}\{2\}\\)</p>
+	~<p>\\(0\\)</p>
+	~<p>\\(\\frac \{\\ln 2\}\{1-e\} + 1\\)</p>
+	~<p>\\(\\ln \\frac \{1-e\}\{1+e\}-\\frac 1 e\\)</p>
+}
+
+
+// question: 49478  name: 2.
+::2.::[html]<p>Calcolare \\[ \\int _\{\\frac \\pi 6\}^\{\\frac \\pi 3\} \\frac \{1+\\sin ^2(x)\}\{\\sin (x)\\cos (x)\}\\, dx \\]</p>{
+	=<p>\\(\\frac \{3\}\{2\}\\ln 3\\)</p>
+	~<p>\\(0\\)</p>
+	~<p>\\(2 \\ln 2\\)</p>
+	~<p>\\(\\frac \\pi 3 -\\ln 2\\)</p>
+}
+
+
+// question: 49479  name: 3.
+::3.::[html]<p>Calcolare \\[ \\int _0^\{\\frac \{\\pi \}\{3\}\} \\frac \{1\}\{\\cos x\}\\, dx \\]</p><br><p></p>{
+	=<p>\\(\\ln \\frac \{\\sqrt 3 + 1\}\{\\sqrt 3 - 1\}\\)</p>
+	~<p>\\(0\\)</p>
+	~<p>\\(\\frac \{\\ln (1+\\sqrt 3)\}\{\\ln (1-\\sqrt 3)\}\\)</p>
+	~<p>\\(\\ln \\frac \{1\}\{\\sqrt 3 -1\}\\)</p>
+}
+
+
+// question: 0  name: Switch category to $module$/top/integrali impropri
+$CATEGORY: $module$/top/integrali impropri
+
+
+// question: 411  name: 1.
+::1.::[html]<p>Quale tra le scelte proposte dei parametri \\(\\alpha ,\\beta \\) rende convergente il seguente integrale improprio? \\[ \\int _\{0\}^\{+\\infty \} \\frac \{1\}\{(1+x)^\\alpha \\cdot x^\\beta \}\\, dx \\] </p>{
+	=<p>\\(\\alpha \=\\frac 2 3\\), \\(\\beta \=\\frac 2 3\\)</p>
+	~<p>\\(\\alpha \=\\frac 1 3\\), \\(\\beta \=\\frac 3 2\\)</p>
+	~<p>\\(\\alpha \=\\frac 2 3\\), \\(\\beta \=\\frac 3 2\\)</p>
+	~<p>\\(\\alpha \=\\frac 1 3\\), \\(\\beta \= \\frac 2 3\\)</p>
+}
+
+
+// question: 412  name: 2.
+::2.::[html]<p>Il seguente integrale improprio \\[ \\int _\{-1\}^\{+\\infty \} \\frac \{x^2-1\}\{x^2+1\}\\, dx \\] </p>{
+	=<p>è divergente</p>
+	~<p>è convergente</p>
+	~<p>è indeterminato</p>
+	~<p>non può essere calcolato perché la funzione integranda non è localmente integrabile</p>
+}
+
+
+// question: 413  name: 3.
+::3.::[html]<p>Quale, tra quelli proposti, è il più grande intervallo su cui il seguente integrale improprio risulta convergente? \\[ \\int _a^b \\frac \{1\}\{\\sqrt \{\\lvert \\ln x \\rvert \}\}\\, dx \\] </p>{
+	=<p>\\((a,b] \= (0,2]\\)</p>
+	~<p>\\((a,b] \= \\left (0,\\frac 1 2\\right ]\\)</p>
+	~<p>\\((a,b) \= (1,+\\infty )\\)</p>
+	~<p>\\((a,b) \= (0,+\\infty )\\)</p>
+}
+
+
+// question: 414  name: 4.
+::4.::[html]<p>Per quali \\(p,q\\in \\mathbb R\\) il seguente integrale converge? \\[ \\int _2^\{+\\infty \} \\frac \{1\}\{x^p\\cdot (\\ln x)^q\}\\, dx \\] </p>{
+	=<p>\\(p&gt;1\\) oppure \\(p\=1\\) e \\(q&gt;1\\)</p>
+	~<p>\\(p&gt;1\\)</p>
+	~<p>\\(q&gt;1\\)</p>
+	~<p>\\(p&gt;1\\) e \\(q&gt;1\\)</p>
+}
+
+
+// question: 415  name: 5.
+::5.::[html]<p>Per quali \\(p,q\\in \\mathbb R\\) il seguente integrale converge? \\[ \\int _\{0\}^\{\\frac 1 2\} \\frac \{1\}\{x^p\\cdot \\lvert \\ln x\\rvert ^q\}\\, dx \\] </p>{
+	=<p>\\(p&lt;1\\) oppure \\(p\=1\\) e \\(q&gt;1\\)</p>
+	~<p>\\(p&lt;1\\) oppure \\(p\=1\\) e \\(q&lt;1\\)</p>
+	~<p>\\(q&gt;1\\)</p>
+	~<p>\\(p&lt;1\\) e \\(q&gt;1\\)</p>
+}
+
+
+// question: 416  name: 6.
+::6.::[html]<p>Per quali \\(p,q\\in \\mathbb R\\) il seguente integrale converge? \\[ \\int _\{\\frac 1 2\}^2 \\frac \{1\}\{x^p\\cdot \\lvert \\ln x\\rvert ^q\}\\, dx \\] </p>{
+	=<p>\\(q&lt;1\\)</p>
+	~<p>\\(p&lt;1\\) oppure \\(p\=1\\) e \\(q&lt;1\\)</p>
+	~<p>\\(p&lt;1\\) oppure \\(p\=1\\) e \\(q&gt;1\\)</p>
+	~<p>\\(p&lt;1\\)</p>
+}
+
+
+// question: 0  name: Switch category to $module$/top/integrali impropri 2
+$CATEGORY: $module$/top/integrali impropri 2
+
+
+// question: 417  name: 1.
+::1.::[html]<p>Calcolare \\[ \\lim _\{x\\to 0^+\} \\frac \{1\}\{x\} \\int _x^\{2x\} \\frac \{1\}\{\\sin t\}\\, dt \\] </p>{
+	=<p>\\(+\\infty\\)</p>
+	~<p>\\(2\\)</p>
+	~<p>\\(1\\)</p>
+	~<p>\\(\\pi \\)</p>
+}
+
+
+// question: 418  name: 2.
+::2.::[html]<p>Calcolare \\[ \\lim _\{x\\to 0\} \\frac \{1\}\{x^4\} \\int _\{\\sin ^2 x\}^\{\\sin x\} \\frac \{2 - t \\sin t - 2\\cos t\}\{e^t -1\}\\, dt \\] </p>{
+	=<p>\\(\\frac 1 \{48\}\\)</p>
+	~<p>\\(\\frac 1 2\\)</p>
+	~<p>\\(1\\)</p>
+	~<p>\\(\\frac 1 6\\)</p>
+}
+
+
+// question: 419  name: 3.
+::3.::[html]<p>Posto \\[ I \= \\int _\{-\\infty \}^\{+\\infty \} e^\{-x^2\}\\, dx \\] calcolare \\[ \\int _\{-\\infty \}^\{+\\infty \} x^2 e^\{-x^2\}\\, dx. \\] </p>{
+	=<p>\\(\\frac \{I\}\{2\}\\)</p>
+	~<p>\\(I^2\\)</p>
+	~<p>\\(\\sqrt I\\)</p>
+	~<p>\\(I-1\\)</p>
+}
+
+
+// question: 0  name: Switch category to $module$/top/equazioni differenziali
+$CATEGORY: $module$/top/equazioni differenziali
+
+
+// question: 521  name: 1
+::1::[html]<p>Sia \\(u(x)\\) tale che \\[ \\begin \{cases\} u’ - 2x u + 2x \=0 \\\\<br> u(0) \= 0. \\end \{cases\} \\] Quanto vale \\(u(1)\\)? </p>{
+	=<p>\\(1-e\\)</p>
+	~<p>\\(e-1\\)</p>
+	~<p>\\(e\\)</p>
+	~<p>\\(1+e\\)</p>
+}
+
+
+// question: 522  name: 2
+::2::[html]<p>Sia \\(u(x)\\) tale che \\[ \\begin \{cases\} u’ \= xe^\{u\} \\\\<br> u(0) \= \\ln 2. \\end \{cases\} \\] Quanto vale \\(u\\left (\\frac 1 2 \\right )\\)? </p>{
+	~<p>\\(\\ln \{ \\frac 3 8\}\\)</p>
+	=<p>\\(\\ln \{\\frac 8 3\}\\)</p>
+	~<p>\\(\\ln \{\\frac 5 3\}\\)</p>
+	~<p>\\(\\ln \{\\frac 3 5\}\\)</p>
+}
+
+
+// question: 523  name: 3
+::3::[html]<p>Sia \\(u(x)\\) tale che \\[ \\begin \{cases\} u'''' - 2u'' + u \= e^x \\\\<br> u(0) \= 0,\\quad u’(0) \= \\frac 7 8, \\quad u''(0) \= -2, \\quad u'''(0) \= \\frac \{27\}\{8\} \\end \{cases\} \\] Quanto vale \\(u(1)\\)? </p>{
+	=<p>\\(\\frac 1 e\\)</p>
+	~<p>\\(e\\)</p>
+	~<p>\\(e^2-e\\)</p>
+	~<p>\\(1-e\\)</p>
+}
+
+
+// question: 524  name: 4
+::4::[html]<p>Sia \\(u(x)\\) tale che \\[ \\begin \{cases\} u'' + u \= \\sin (x+1), \\\\<br> u(0) \= 0, \\quad u’(0) \= 0. \\end \{cases\} \\] Quanto vale \\(u(\\pi )\\)? </p>{
+	=<p>\\(\\frac \{\\pi \}\{2\}\\cos 1\\)</p>
+	~<p>\\(\\frac \{\\pi \}\{2\\cos 1\}\\)</p>
+	~<p>\\(\\pi \\cos 1 - \\sin 1\\)</p>
+	~<p>\\(\\frac \{\\cos 1\}\{2\\pi \}\\)</p>
+}
+
+
+// question: 54248  name: equazione terzo ordine non omogenea
+::equazione terzo ordine non omogenea::[html]<p>Una soluzione dell'equazione<br>\\[<br>u'''(x)+8u(x)\=x+e^x<br>\\]<br>è</p>{
+	=<p>\\(\\frac\{1\}\{e^\{2x\}\}+e^x \\cos(\\sqrt 3 x+1)+\\frac\{x\}\{8\}+\\frac\{e^x\}\{9\}\\)</p>
+	~<p>\\( \\frac\{1\}\{e^\{x\}\}+e^x\\sin(1-x)+\\frac\{x\}\{9\}+\\frac\{e^x\}\{8\}\\)</p>
+	~<p>\\( \\frac\{1\}\{e^\{x\}\}+e^\{-x\}\\sin(1-x)+\\frac\{x\}\{9\}+\\frac\{e^x\}\{8\}\\)</p>
+	~<p>\\( \\frac\{9\}\{e^\{2x\}\}+e^\{2x\} \\cos(\\sqrt 3 x+2)+\\frac\{e^x\}\{9\}\\)</p>
+}
+
+
+// question: 54244  name: lineare non omogenea
+::lineare non omogenea::[html]<p>Sia \\(u(x)\\) la soluzione del problema di Cauchy<br>\\begin\{cases\}<br>u''(x) + u(x) \= \\sin x,\\\\<br>u(0)\=1,\\\\<br>u'(0)\=0.<br>\\end\{cases\}<span style\="font-size\: 1rem; text-align\: initial;"><br>Calcolare \\(u(100\\pi)\\).</span></p>{
+	=<p>\\(1-50\\pi\\)</p>
+	~<p>\\(0\\)</p>
+	~<p>\\(\\frac 1 2 - 10 \\pi\\)</p>
+	~<p>\\(\\frac 1 2 - 49\\pi\\)</p>
+}
+
+
+// question: 49284  name: lineare primo ordine
+::lineare primo ordine::[html]<p dir\="ltr" style\="text-align\: left;">Sia \\(u\=u(x)\\) una funzione tale che&nbsp;<br><span style\="font-size\: 0.9375rem;">\\[\\begin\{cases\}u' + \\sin(x)\\cdot u \= \\sin(2x)\\\\ u(\\pi/2) \= 1\\end\{cases\}\\]</span></p><p dir\="ltr" style\="text-align\: left;"><span style\="font-size\: 0.9375rem;">Quanto vale \\(u(\\pi)\\)?</span></p>{
+	=<p dir\="ltr" style\="text-align\: left;">\\(-1/e\\)</p>
+	~<p dir\="ltr" style\="text-align\: left;">\\(\\pi/2-e\\)</p>
+	~<p dir\="ltr" style\="text-align\: left;">\\(e-1\\)</p>
+	~<p dir\="ltr" style\="text-align\: left;">\\(0\\)</p>
+}
+
+
+// question: 49514  name: non unicità
+::non unicità::[html]<p dir\="ltr" style\="text-align\: left;"></p><p>Sia \\(u\\colon \\mathbb R\\to \\mathbb R\\) una funzione tale che&nbsp;<br>$$\\begin\{cases\}<br>&nbsp; u'(x) \= 4x \\cdot \\sqrt\{u(x)\}\\\\<br>&nbsp; u(-2)\=9\\end\{cases\}<br>$$<br></p><p></p><span style\="font-size\: 0.9375rem;">Allora \\(u(2)\\)\:</span><br>{
+	=<p dir\="ltr" style\="text-align\: left;">potrebbe essere uguale a 7</p>
+	~<p dir\="ltr" style\="text-align\: left;">potrebbe essere uguale a 17</p>
+	~<p dir\="ltr" style\="text-align\: left;">deve essere uguale a 16</p>
+	~<p dir\="ltr" style\="text-align\: left;">potrebbe essere uguale a -16</p>
+}
+
+
+// question: 49285  name: variabili separabili implicita
+::variabili separabili implicita::[html]<p dir\="ltr" style\="text-align\: left;">Sia \\(u\=u(x)\\) una funzione tale che&nbsp;<br>\\[<br>\\begin\{cases\}<br>\\ln(u') \= u+x\\\\<br>u(1)\=0.\\end\{cases\}<br>\\]</p><p dir\="ltr" style\="text-align\: left;">Quanto vale \\(u(0)\\)?</p>{
+	=<p dir\="ltr" style\="text-align\: left;">\\(-1\\)</p>
+	~<p dir\="ltr" style\="text-align\: left;">\\(-1/e\\)</p>
+	~<p dir\="ltr" style\="text-align\: left;">\\(-e-1\\)</p>
+	~<p dir\="ltr" style\="text-align\: left;">\\(e-1\\)</p>
+}
+
+
+// question: 0  name: Switch category to $module$/top/riepilogo terzo compitino
+$CATEGORY: $module$/top/riepilogo terzo compitino
+
+
+// question: 4223  name: 1.
+::1.::[html]<p>Posto \\[ F(x) \= \\int _x^\{2x\} \\frac \{\\sin t\}\{t\}\\, dt \\] possiamo affermare che il limite \\[ \\lim _\{x\\to +\\infty \} F(x) \\] </p>{
+	=<p>è \\(0\\)</p>
+	~<p>non esiste</p>
+	~<p>è \\(+\\infty \\)</p>
+	~<p>è \\(\\sqrt 2\\)</p>
+}
+
+
+// question: 8278  name: 1.
+::1.::[html]<p>L&rsquo;integrale \\[ \\int _0^\{+\\infty \} \\cos (x^2)\\, dx \\] </p>{
+	=<p>converge semplicemente ma non assolutamente</p>
+	~<p>converge assolutamente</p>
+	~<p>diverge</p>
+	~<p>è indeterminato</p>
+}
+
+
+// question: 4224  name: 2
+::2::[html]<p>L&rsquo;integrale improprio \\[ \\int _0^\{+\\infty \} \\frac \{1\}\{x\\cdot \\sqrt \{\\left \\lvert \\ln x \\right \\rvert + \\left \\lvert \\ln x \\right \\rvert ^4\}\}\\, dx \\] </p>{
+	=<p>è convergente</p>
+	~<p>è divergente</p>
+	~<p>è indeterminato</p>
+	~<p>è nullo</p>
+}
+
+
+// question: 8279  name: 2.
+::2.::[html]<p>Ogni soluzione dell’equazione differenziale \\[ \\sqrt \{x\} \\cdot \\sqrt [3]\{u'' - 6u' + 9u\} \= e^x \\] si scrive nella forma </p>{
+	=<p>\\((-4\\sqrt x + c_1 + c_2 x) e^\{3x\}\\)</p>
+	~<p>\\((2x\\sqrt x + c_1 + c_2 x) e^\{3x\}\\)</p>
+	~<p>\\((2 c_1 x\\sqrt x + c_2) e^\{3x\}\\)</p>
+	~<p>\\(\\sqrt [3]\{c_1 e^\{x\} + c_2 e^\{3x\}\}\\)</p>
+}
+
+
+// question: 4225  name: 3
+::3::[html]<p>\nSia \\(u(x)\\) la soluzione del problema di Cauchy \\[ \\begin\{cases\} u'' - u \= 2\\frac \{e^\{x+1\}\}\{1+e^x\} \\\\ u(0) \= 0 \\\\ u’(0) \= 0 \\end\{cases\} \\] Calcolare \\(u(1)\\).\n</p>{
+	=<p>\\(1 - e + e^2 + (e^2-1)\\ln 2 - (e^2-1)\\ln (1+e)\\)</p>
+	~%50%<p>sì, più o meno mi è venuto</p>
+	~%50%<p>mi sono perso nei conti</p>
+	~%-100%<p>troppa fatica</p>
+}
+
+
+// question: 8280  name: 3
+::3::[html]<p>Si consideri il problema di Cauchy \\[ \\begin\{cases\} u’ \= \\frac \{\\sqrt \{1-u^2\}\}\{x\}\\\\<br> u(2)\=1 \\end \{cases\}. \\] Quale delle seguenti affermazioni è corretta? </p>{
+	=<p>per ogni \\(0 &lt; x &lt; 2\\), esiste una soluzione \\( u \\) tale che \\(u( x/100)\=-1\\) e \\(u(x)\=1\\)</p>
+	~<p>\\(u(1)\=1\\) per ogni soluzione \\(u\\)</p>
+	~<p>per ogni \\(n\\in \\mathbb N\\) esiste una soluzione tale che \\(u(n)\=-1\\)</p>
+	~<p>non esistono soluzioni definite per ogni \\(x&gt;0\\)</p>
+}
+
+
+// question: 0  name: Switch category to $module$/top/limiti 1
+$CATEGORY: $module$/top/limiti 1
+
+
+// question: 27752  name: 1 limite sostituzione
+::1 limite sostituzione::[html]<p>Calcolare, se esiste, il seguente \\[ \\lim _\{x\\to 1\} \\frac \{1+2^\{-x\}-\\frac \{x+2\}\{x-3\}\}\{\\sqrt \{\\frac \{3\}\{2x\}+\\frac \{1\}\{1+\\frac \{1\}\{3x\}\}\}\} \\] </p>{
+	=<p>\\(2\\)</p>
+	~<p>\\(-1\\)</p>
+	~<p>\\(0\\)</p>
+	~<p>\\(+\\infty \\)</p>
+}
+
+
+// question: 27753  name: 2 limite sostituzione
+::2 limite sostituzione::[html]<p>Calcolare, se esiste, il seguente \\[ \\lim _\{x\\to 8\} \\sqrt \{\\frac \{2x+1\}\{1+\\frac \{1\}\{1+\\frac 1 x\}\}\} \\] </p>{
+	=<p>\\(3\\)</p>
+	~<p>\\(17\\)</p>
+	~<p>\\(\\sqrt \{5\}\\)</p>
+	~<p>non esiste</p>
+}
+
+
+// question: 27754  name: 3 limite monstre
+::3 limite monstre::[html]<p>Calcolare, se esiste, il seguente \\[ \\lim _\{x\\to +\\infty \} \\frac \{\\displaystyle \\left (\\frac \{\\left (\\frac 1 x+2\\right )^2-2\} \{1+\\frac \{\\left (1+\\frac \{1\}\{\\log _2 x\}\\right )^3\}\{2^x\}\}\\right )^3 - \\left (\\frac \{\\left (1-\\frac \{1\}\{\\sqrt x\}\\right )^3\}\{(x+2)^2+3-\\frac \{2\}\{x\}\}\\right )^2\} \{\\displaystyle \\left (1+\\frac \{1\}\{1+\\frac \{1+\\frac 1 x\}\{x\}\}\\right )^6 -\\left (\\frac \{1+\\frac \{1\}\{1+x^2\}\}\{x+\\frac \{x\}\{1+\\frac \{1\}\{3^x\}\}\}\\right )^3\} \\] </p>{
+	~<p>\\(0\\)</p>
+	=<p>\\(\\frac 1 8\\)</p>
+	~<p>\\(1\\)</p>
+	~<p>\\(+\\infty \\)</p>
+}
+
+
+// question: 27755  name: 4 limite forma indeterminata
+::4 limite forma indeterminata::[html]<p>Calcolare, se esiste, il seguente \\[ \\lim _\{x\\to 0^+\} \\frac \{x^2+2x+3\\sqrt x\}\{3x^2+\\sqrt \{x+x^3\}\} \\] </p>{
+	=<p>\\(3\\)</p>
+	~<p>\\(2\\)</p>
+	~<p>\\(+\\infty \\)</p>
+	~<p>non esiste</p>
+}
+
+
+// question: 27756  name: 5 limite parte intera
+::5 limite parte intera::[html]<p>Calcolare, se esiste, il seguente \\[ \\lim _\{x\\to 1^+\} \\frac \{\\lceil x+1\\rceil \}\{\\lfloor 3-x\\rfloor \} \\] </p>{
+	=<p>\\(3\\)</p>
+	~<p>\\(1\\)</p>
+	~<p>\\(-\\infty \\)</p>
+	~<p>non esiste</p>
+}
+
+
+// question: 27757  name: 6 limite forma indeterminata
+::6 limite forma indeterminata::[html]<p>Calcolare, se esiste, il seguente \\[ \\lim _\{x\\to +\\infty \} \\frac \{ \\left (\\frac \{1+\\frac 1 x\}\{1-\\frac 1 x\}\\right )^2 -\\frac \{1+\\frac 1 \{x^2\}\}\{1-\\frac 1 x\}\}\{\\frac x \{x-1\} - \\frac x \{x+1\}\} \\] </p>{
+	~<p>\\(0\\)</p>
+	=<p>\\(\\frac 3 2\\)</p>
+	~<p>\\(+\\infty \\)</p>
+	~<p>non esiste</p>
+}
+
+
+// question: 27758  name: 7 limite valore assoluto
+::7 limite valore assoluto::[html]<p>Calcolare, se esiste, il seguente \\[ \\lim _\{x\\to 1\} \\frac \{x-1\}\{\\lvert x^2-1\\rvert \}. \\] </p>{
+	=<p>non esiste</p>
+	~<p>\\(3\\)</p>
+	~<p>\\(+\\infty \\)</p>
+	~<p>\\(0\\)</p>
+}
+
+
+// question: 27759  name: 8 funzione composta
+::8 funzione composta::[html]<p>Calcolare, se esiste, il seguente limite \\[ \\lim _\{x\\to 0\} \\frac \{\\sqrt \{\\frac \{1+x\}\{(x+x^2)^2\}+2 \\left (\\frac \{1+x\}\{(x+x^2)^2\}\\right )^2\}\} \{3\\frac \{1+x\}\{(x+x^2)^2\}+4\\sqrt \{\\frac \{1+x\}\{(x+x^2)^2\}\}\} \\] </p>{
+	=<p>\\(\\frac \{\\sqrt 2\}\{3\}\\)</p>
+	~<p>\\(\\frac 1 3\\)</p>
+	~<p>non esiste</p>
+	~<p>\\(1\\)</p>
+}
+
+
+// question: 27760  name: 9 continuità
+::9 continuità::[html]<p>Sia \\(f\\colon \\mathbb R \\to \\mathbb R\\) una funzione continua, positiva. Calcolare, se esiste, \\[ \\lim _\{x\\to 0\} \\frac \{f\\left (1+f(x)\\right )\} \{f\\left (f(0)+\\frac \{f(1-x^2)\}\{f(1+x)\}\\right )\} \\] </p>{
+	=<p>\\(1\\)</p>
+	~<p>\\(\\frac \{1\}\{8\}\\)</p>
+	~<p>\\(+\\infty \\)</p>
+	~<p>non esiste</p>
+}
+
+
+// question: 0  name: Switch category to $module$/top/ordini di infinito
+$CATEGORY: $module$/top/ordini di infinito
+
+
+// question: 27782  name: criterio del rapporto
+::criterio del rapporto::[html]<p>Ordinare le seguenti successioni per \\(n\\to +\\infty \\)\: \\[ a_n \= 6^n\\cdot (n!)^3 \\qquad b_n \= n^n \\cdot (2n)! \\qquad c_n \= (n!)^2 \\cdot 3^n \\cdot n^n \\] </p>{
+	=<p>\\(a_n \\ll c_n \\ll b_n\\)</p>
+	~<p>\\(c_n \\ll a_n \\ll b_n\\)</p>
+	~<p>\\(a_n \\ll b_n \\ll c_n\\)</p>
+	~<p>\\(c_n \\ll b_n \\ll a_n\\)</p>
+}
+
+
+// question: 27784  name: liminf
+::liminf::[html]<p>Posto \\[ A_n \= \\\{2^k\\colon k\\in \\mathbb N\\\} \\cap [n,10n] \\] calcolare \\[ \\liminf_\{n\\to +\\infty \} \\,\\\# A_n. \\] </p>{
+	=<p>\\(3\\)</p>
+	~<p>\\(+\\infty \\)</p>
+	~<p>\\(0\\)</p>
+	~<p>\\(4\\)</p>
+}
+
+
+// question: 27783  name: limite ordini di infinito
+::limite ordini di infinito::[html]<p>Calcolare \\[ \\lim _\{n\\to +\\infty \} \\frac \{\\ln ((4^\{\\ln n\}+\\sqrt n)^n+n^n)\}\{\\ln (n!+n^n)\} \\] </p>{
+	=<p>\\(\\ln 4\\)</p>
+	~<p>\\(0\\)</p>
+	~<p>\\(+\\infty \\)</p>
+	~<p>\\(1\\)</p>
+}
+
+
+// question: 27779  name: ordini di infinito
+::ordini di infinito::[html]<p>Calcolare \\[ \\lim _\{n\\to +\\infty \} \\frac \{4^n\\cdot \\sqrt \{n^2+n!\}\}\{n!+n^4\} \\] </p>{
+	=<p>\\(0\\)</p>
+	~<p>\\(+\\infty \\)</p>
+	~<p>\\(1\\)</p>
+	~<p>\\(e\\)</p>
+}
+
+
+// question: 27780  name: ordini di infinito
+::ordini di infinito::[html]<p>Calcolare \\[ \\lim _\{n\\to +\\infty \} \\frac \{\\ln (n^2+2^n)\}\{\\sqrt \{n^2+n+1\}\} \\] </p>{
+	=<p>\\(\\ln 2\\)</p>
+	~<p>\\(0\\)</p>
+	~<p>\\(+\\infty \\)</p>
+	~<p>\\(e\\)</p>
+}
+
+
+// question: 27781  name: ordini di infinito
+::ordini di infinito::[html]<p>Calcolare \\[ \\lim _\{n\\to +\\infty \} \\frac \{(n^n)^n\}\{(n!)!\} \\] </p>{
+	=<p>\\(0\\)</p>
+	~<p>\\(+\\infty \\)</p>
+	~<p>\\(1\\)</p>
+	~<p>\\(e\\)</p>
+}
+
+
+// question: 27785  name: punti limite successione per ricorrenza
+::punti limite successione per ricorrenza::[html]<p>Si consideri la successione definita per ricorrenza\: \\[ \\begin \{cases\} a_0 \= 3, \\\\<br> a_\{n+1\} \= \\begin \{cases\} a_n^2+1 &amp;\\text \{se \\(a_n&lt;10\\)\},\\\\<br> a_n -10 &amp;\\text \{se \\(a_n\\ge 10\\)\}. \\end \{cases\} \\end \{cases\} \\] Quanti elementi ha l’insieme dei punti limite? </p>{
+	=<p>\\(16\\)</p>
+	~<p>\\(10\\)</p>
+	~<p>infiniti</p>
+	~<p>\\(17\\)</p>
+}
+
+
+// question: 0  name: Switch category to $module$/top/successioni ricorsive
+$CATEGORY: $module$/top/successioni ricorsive
+
+
+// question: 49436  name: divisione tra polinomi
+::divisione tra polinomi::[html]<p dir\="ltr" style\="text-align\: left;">Si consideri la successione definita per ricorrenza<br>$$\\begin\{cases\} a_0 \= 1\\\\<br>a_\{n+1\} \= 1 + \\frac\{4\}\{a_n^2\}.<br>\\end\{cases\}$$.</p><p dir\="ltr" style\="text-align\: left;">Tale successione...</p>{
+	=<p dir\="ltr" style\="text-align\: left;">Converge a \\(2\\)</p>
+	~<p dir\="ltr" style\="text-align\: left;">Converge a \\(0\\)</p>
+	~<p dir\="ltr" style\="text-align\: left;">Diverge a \\(+\\infty\\)</p>
+	~<p dir\="ltr" style\="text-align\: left;">Ha due diversi punti limite</p>
+}
+
+
+// question: 27827  name: ricorrenza
+::ricorrenza::[html]<p>Calcolare, se esiste, il limite della successione definita per ricorrenza \\[ \\begin \{cases\} a_0 \= 0\\\\<br> a_\{n+1\} \= \\frac \{a_n-1\}\{2\} \\end \{cases\} \\] </p>{
+	=<p>\\(-1\\)</p>
+	~<p>\\(1\\)</p>
+	~<p>\\(-\\infty \\)</p>
+	~<p>non esiste</p>
+}
+
+
+// question: 27829  name: ricorrenza crescente
+::ricorrenza crescente::[html]<p>Calcolare, se esiste, il limite della successione definita per ricorrenza \\[ \\begin \{cases\} a_0 \= 0\\\\<br> a_\{n+1\} \= \\frac \{1\}\{4-4a_n\}-1 \\end \{cases\} \\] </p>{
+	=<p>\\(-\\frac \{\\sqrt 3\} 2\\)</p>
+	~<p>\\(\\frac \{\\sqrt 3\} 2\\)</p>
+	~<p>non esiste</p>
+	~<p>\\(-\\infty \\)</p>
+}
+
+
+// question: 49432  name: ricorrenza crescente
+::ricorrenza crescente::[html]<p>Calcolare, se esiste, il limite della successione definita per ricorrenza \\[ \\begin \{cases\} a_0 \= 2022/2023\\\\<br> a_\{n+1\} \= \\frac \{1\}\{4-4a_n\}-1 \\end \{cases\} \\] </p>{
+	=<p>\\(-\\frac \{\\sqrt 3\} 2\\)</p>
+	~<p>\\(\\frac \{\\sqrt 3\} 2\\)</p>
+	~<p>non esiste</p>
+	~<p>\\(-\\infty \\)</p>
+}
+
+
+// question: 27831  name: ricorrenza crescente
+::ricorrenza crescente::[html]<p>Si osservi che per \\(\\alpha \= \\frac 7 8\\) la seguente definizione per ricorrenza \\[ \\begin \{cases\} a_0 \= \\alpha \\\\<br> a_\{n+1\} \= \\frac \{1\}\{4-4a_n\}-1 \\end \{cases\} \\] non definisce una successione in quanto si trova \\(a_1 \= 1\\) ma nel calcolare \\(a_2\\) ci ritroviamo di fronte ad una divisione per zero. Si consideri l’insieme di tutti gli \\(\\alpha \\) che non possono essere scelti come dato iniziale. Tale insieme... </p>{
+	=<p>ha \\(\\frac \{\\sqrt 3\} 2\\) come unico punto di accumulazione</p>
+	~<p>ha 4 elementi</p>
+	~<p>è denso in \\(\\mathbb R\\)</p>
+	~<p>è l&rsquo;insieme \\(\\\{1,\\frac 7 8\\\}\\)</p>
+}
+
+
+// question: 27828  name: ricorrenza esplicita
+::ricorrenza esplicita::[html]<p>Si consideri la successione definita per ricorrenza\: \\[ \\begin \{cases\} a_0 \= 0\\\\<br> a_\{n+1\} \= \\frac \{a_n-1\}\{2\} \\end \{cases\} \\] Quanto vale \\(a_5\\)? </p>{
+	=<p>\\(-\\frac \{31\}\{32\}\\)</p>
+	~<p>\\(-\\frac \{16\}\{17\}\\)</p>
+	~<p>\\(-\\frac \{14\}\{15\}\\)</p>
+	~<p>\\(-\\frac \{29\}\{32\}\\)</p>
+}
+
+
+// question: 27833  name: ricorsione espansiva
+::ricorsione espansiva::[html]<p>Calcolare, se esiste, il limite della successione definita per ricorrenza \\[ \\begin \{cases\} a_0 \= \\frac 1 2\\\\<br> a_\{n+1\} \= \\sqrt \{1-\\frac \{a_n^2\}2\} \\end \{cases\} \\] </p>{
+	~<p>non esiste</p>
+	=<p>\\(\\sqrt \{\\frac 2 3\}\\)</p>
+	~<p>\\(-\\sqrt \{\\frac 2 3\}\\)</p>
+	~<p>\\(0\\)</p>
+}
+
+
+// question: 27832  name: ricorsione periodica
+::ricorsione periodica::[html]<p>Calcolare, se esiste, il limite della successione definita per ricorrenza \\[ \\begin \{cases\} a_0 \= \\frac 1 2\\\\<br> a_\{n+1\} \= \\sqrt \{1-a_n^2\} \\end \{cases\} \\] </p>{
+	=<p>non esiste</p>
+	~<p>\\(\\frac \{\\sqrt 2\}\{2\}\\)</p>
+	~<p>\\(-\\frac \{\\sqrt 2\}\{2\}\\)</p>
+	~<p>\\(0\\)</p>
+}
+
+
+// question: 0  name: Switch category to $module$/top/riepilogo primo compitino
+$CATEGORY: $module$/top/riepilogo primo compitino
+
+
+// question: 363  name: 1.
+::1.::[html]<p>Determinare l&rsquo;insieme degli \\(x\\in \\mathbb R\\) per cui la seguente serie converge \\[ \\sum _k \\frac \{x^k\}\{k\\ln k\} \\] </p>{
+	~<p>\\((-1,1)\\)</p>
+	=<p>\\([-1,1)\\)</p>
+	~<p>\\(\\\{0\\\}\\)</p>
+	~<p>\\((-1,0]\\)</p>
+}
+
+
+// question: 364  name: 2.
+::2.::[html]<p>Per quali valori dei parametri reali \\(x\\), \\(y\\) la serie converge? \\[ \\sum _k \\sqrt [2k+1]\{x^k + y^k\} \\] </p>{
+	=<p>\\(x\=y\=0\\)</p>
+	~<p>\\((x,y)\\in [-1,1]\\times [-1,1]\\)</p>
+	~<p>\\(\\lvert x \\rvert + \\lvert y \\rvert &lt; 1\\)</p>
+	~<p>ogni \\(x,y\\)</p>
+}
+
+
+// question: 365  name: 3.
+::3.::[html]<p>Per quali valori del parametro \\(\\alpha \\in \\mathbb R\\) esiste il limite della seguente successione \\(a_n\\) definita per ricorrenza? \\[ \\begin \{cases\} a_0 \= \\alpha ,\\\\<br> a_\{n+1\} \= \\lvert 1-a_n\\rvert . \\end \{cases\} \\] </p>{
+	~<p>nessun \\(\\alpha \\)</p>
+	=<p>\\(\\alpha \=\\frac 1 2\\)</p>
+	~<p>\\(\\alpha &gt;1\\)</p>
+	~<p>\\(\\lvert \\alpha \\rvert &gt;1\\)</p>
+}
+
+
+// question: 366  name: 4.
+::4.::[html]<p>Calcolare, se esiste, il limite \\[ \\lim _\{n\\to +\\infty \} \\frac \{(n^2)!\}\{e^\{n!\}\}. \\] </p>{
+	~<p>non esiste</p>
+	=<p>\\(0\\)</p>
+	~<p>\\(1\\)</p>
+	~<p>\\(+\\infty \\)</p>
+}
+
+
+// question: 45625  name: criterio radice/rapporto
+::criterio radice/rapporto::[html]<p>Calcolare, se esiste, il seguente \\[ \\lim _\{n\\to +\\infty \} \\frac \{\\sqrt[n] 1 \\cdot \\sqrt[n] 3 \\cdot \\sqrt[n] 5 \\cdots \\sqrt [n]\{2n+1\}\}\{n\} \\] </p>{
+	=<p>\\(\\frac 2 e\\)</p>
+	~<p>\\(0\\)</p>
+	~<p>\\(+\\infty \\)</p>
+	~<p>non esiste</p>
+}
+
+
+// question: 45622  name: serie
+::serie::[html]<p>Determinare il carattere della serie \\[ \\sum _k \\left (\\sqrt [k]\{k+1\} - \\sqrt [k]\{k\}\\right )^k \\] </p>{
+	=<p>convergente</p>
+	~<p>divergente</p>
+	~<p>indeterminata</p>
+}
+
+
+// question: 45621  name: serie con parametro
+::serie con parametro::[html]<p>Per quali valori del parametro \\(x\\in \\mathbb R\\) la seguente serie converge? \\[ \\sum _k \\frac \{\\left ( x+ \\frac \{x+1\}\{k\}\\right )^k\}\{\\ln k\} \\] </p>{
+	=<p>\\(x\\in [-1,1)\\)</p>
+	~<p>\\(x\\in (-1,1)\\)</p>
+	~<p>\\(x\\in \\mathbb R\\)</p>
+	~<p>\\(x\=0\\)</p>
+}
+
+
+// question: 45624  name: serie/successione
+::serie/successione::[html]<p>Dopo aver osservato il legame tra la successione \\[ \\begin \{cases\} a_0 \= 0\\\\<br> a_\{n+1\} \= a_n + \\frac 1 \{n^2\} \\end \{cases\} \\] e la serie \\(\\sum _k \\frac \{1\}\{n^2\}\\) determinare il carattere della successione \\[ \\begin \{cases\} a_1 \= 1\\\\<br> a_\{n+1\} \= a_n + \\frac \{1\}\{a_n \\cdot n^2\} \\end \{cases\} \\] </p>{
+	=<p>la successione è crescente e convergente</p>
+	~<p>la successione è crescente e divergente</p>
+	~<p>la successione converge ma non è monotona</p>
+	~<p>la successione è indeterminata</p>
+}
+
+
+// question: 45623  name: successione lineare
+::successione lineare::[html]<p>Al variare del parametro \\(c\\in \\mathbb R\\) determinare, quando esiste, il limite della successione definita per ricorrenza \\[ \\begin \{cases\} a_0 \= 0\\\\<br> a_\{n+1\} \= 1 + c \\cdot a_n. \\end \{cases\} \\] Scegliere la risposta corretta. </p>{
+	=<p>la successione converge se e solo se \\(c\\in (-1,1)\\),</p>
+	~<p>la successione converge per ogni \\(c\\in \\mathbb R\\)</p>
+	~<p>la successione converge per \\(c\\ge 0\\) e non converge per \\(c&lt;0\\)</p>
+	~<p>la successione diverge per \\(c&gt;0\\) e converge per \\(c\\le 0\\)</p>
+}
+
+
+// question: 49453  name: successione per ricorrenza
+::successione per ricorrenza::[html]<p dir\="ltr" style\="text-align\: left;">Fissato \\(\\alpha\\in\\mathbb R\\) si consideri la successione definita per ricorrenza&nbsp; \\[ \\begin\{cases\}a_0\=\\alpha, \\\\a_\{n+1\} \= a_n\\cdot(\\lvert a_n\\rvert - 1). \\end\{cases\}\\]<br></p><p dir\="ltr" style\="text-align\: left;"><span style\="font-size\: 0.9375rem;">Per quali \\(\\alpha \\in \\mathbb R\\) la successione è convergente?</span><br></p><p dir\="ltr" style\="text-align\: left;"><span style\="font-size\: 0.9375rem;"><br></span></p>{
+	=<p dir\="ltr" style\="text-align\: left;">\\(-2\\le \\alpha\\le 2\\)</p>
+	~<p dir\="ltr" style\="text-align\: left;">nessun \\(\\alpha\\)</p>
+	~<p dir\="ltr" style\="text-align\: left;">per \\(\\alpha \\ge 0\\)</p>
+	~<p dir\="ltr" style\="text-align\: left;">per \\(\\alpha \\le -2\\)</p>
+}
+
+
+// question: 0  name: Switch category to $module$/top/pentagono regolare
+$CATEGORY: $module$/top/pentagono regolare
+
+
+// question: 45676  name: coseno 72
+::coseno 72::[html]<p>In base a quanto trovato negli esercizi precedenti possiamo affermare che il coseno di 72 gradi (un quinto di angolo giro) è\: </p>{
+	=<p>\\(\\frac \{\\sqrt 5-1\}\{4\}\\)</p>
+	~<p>\\(\\frac \{1+\\sqrt 5\}\{4\}\\)</p>
+	~<p>\\(\\frac \{\\sqrt 5\}\{5\}\\)</p>
+	~<p>\\(\\frac \{2\\sqrt 5\}\{5\}\\)</p>
+}
+
+
+// question: 45672  name: divisione tra polinomi
+::divisione tra polinomi::[html]<p>Svolgendo la divisione \\(\\frac \{z^5-1\}\{z-1\}\\) si ottiene\: </p>{
+	=<p>\\(z^4+z^3+z^2+z+1\\)</p>
+	~<p>\\(z^4-1\\)</p>
+	~<p>\\(z^4+1\\)</p>
+	~<p>\\(z^4\\)</p>
+}
+
+
+// question: 45673  name: inverso unitario
+::inverso unitario::[html]<p>Se \\(\\lvert z\\rvert \= 1\\) possiamo affermare che </p>{
+	=<p>\\(\\bar z \= \\frac 1 z\\)</p>
+	~<p>\\(z^2 \= 1\\)</p>
+	~<p>\\(z^2 \= z\\)</p>
+	~<p>\\(\\bar z \= z\\)</p>
+}
+
+
+// question: 45670  name: modulo complesso
+::modulo complesso::[html]<p>Se \\(z^5-1\=0\\) allora possiamo affermare che\: </p>{
+	=<p>\\(\\lvert z\\rvert \= 1\\)</p>
+	~<p>\\(\\lvert z\\rvert \= -1\\)</p>
+	~<p>\\(\\lvert z\\rvert \= i\\)</p>
+	~<p>\\(\\lvert z\\rvert \= \\sqrt [5]\{2\}\\)</p>
+}
+
+
+// question: 45674  name: parte reale numero unitario
+::parte reale numero unitario::[html]<p>Se \\(\\bar z \= 1/z\\) sviluppando \\((z+\\bar z)^2\\) scopriamo che \\(z^2+\\bar z^2\\) è uguale a\: </p>{
+	=<p>\\(4 \\mathrm \{Re\}^2\\, z - 2\\)</p>
+	~<p>\\(4 \\mathrm \{Re\}^2\\, z\\)</p>
+	~<p>\\(4 \\mathrm \{Re\}\\, z + 2\\)</p>
+	~<p>\\(\\mathrm \{Re\}\\, z + \\frac 1 \{\\mathrm \{Re\}\\, z\}\\)</p>
+}
+
+
+// question: 45675  name: quadrato reciproco
+::quadrato reciproco::[html]<p>Se \\(\\bar z\= 1/z \\) moltiplicando l’equazione \\(z^4+z^3+z^2+z+1\= 0\\) per \\(\\bar z^2\\) e ponendo \\(x \= \\mathrm \{Re\}\\, z\\) si ottiene </p>{
+	=<p>\\(4x^2+2x-1\=0\\)</p>
+	~<p>\\(2x^4+x^2+1\=0\\)</p>
+	~<p>\\(x^3-x+1\=0\\)</p>
+	~<p>\\(x^4+x^3+x^2+x+1\=0\\)</p>
+}
+
+
+// question: 45671  name: soluzione banale polinomio complesso
+::soluzione banale polinomio complesso::[html]<p>Si consideri l’equazione \\(z^5-1\=0\\) con \\(z\\in \\mathbb C\\). Certamente una soluzione è \: </p>{
+	=<p>\\(z\=1\\)</p>
+	~<p>\\(z\=2\\)</p>
+	~<p>\\(z\=5\\)</p>
+	~<p>\\(z\=i\\)</p>
+}
+
+
+// question: 0  name: Switch category to $module$/top/funzioni trigonometriche
+$CATEGORY: $module$/top/funzioni trigonometriche
+
+
+// question: 48678  name: 1. limite seno
+::1. limite seno::[html]<p>Calcolare, se esiste, il limite di funzione \\[ \\lim _\{x\\to 0\} \\sin \\ln (x^2). \\] </p>{
+	=<p>non esiste</p>
+	~<p>\\(+\\infty \\)</p>
+	~<p>\\(-\\infty \\)</p>
+	~<p>\\(1\\)</p>
+}
+
+
+// question: 48679  name: 2. limite seno
+::2. limite seno::[html]<p>Calcolare, se esiste, il limite di funzione \\[ \\lim _\{x\\to -\\infty \}\\frac \{\\sin x\}\{x\}. \\] </p>{
+	=<p>\\(0\\)</p>
+	~<p>non esiste</p>
+	~<p>\\(1\\)</p>
+	~<p>\\(-1\\)</p>
+}
+
+
+// question: 48680  name: 3. limite seno
+::3. limite seno::[html]<p>Calcolare, se esiste, il limite di successione \\[ \\lim _\{n\\to +\\infty \} \\sin \\frac \{\\pi n^2 + 1\}\{n\}. \\] </p>{
+	=<p>\\(0\\)</p>
+	~<p>non esiste</p>
+	~<p>\\(1\\)</p>
+	~<p>\\(-1\\)</p>
+}
+
+
+// question: 48681  name: 4. serie
+::4. serie::[html]<p>La serie \\[ \\sum _\{n\=1\}^\{+\\infty \} \\sin \\frac \{\\pi (n^2 + 1)\}\{n\}, \\] </p>{
+	=<p>converge ma non assolutamente</p>
+	~<p>converge assolutamente</p>
+	~<p>diverge</p>
+	~<p>è indeterminata</p>
+}
+
+
+// question: 0  name: Switch category to $module$/top/teorema fondamentale del calcolo
+$CATEGORY: $module$/top/teorema fondamentale del calcolo
+
+
+// question: 48743  name: 1.
+::1.::[html]<p>Calcolare \\[ \\lim _\{h\\to 0\} \\frac 1 h \\int _0^h \\cos (x^2)\\, dx. \\] </p>{
+	~<p>non esiste</p>
+	~<p>\\(0\\)</p>
+	=<p>\\(1\\)</p>
+	~<p>\\(+\\infty \\)</p>
+}
+
+
+// question: 48744  name: 2.
+::2.::[html]<p>Calcolare la derivata della funzione \\[ f(x) \= \\int _0^\{x^2\}e^\{-t^2\}\\, dt. \\] </p>{
+	=<p>\\(2xe^\{-x^4\}\\)</p>
+	~<p>\\(xe^\{-x^2\}\\)</p>
+	~<p>\\(2e^\{-x^2\}\\)</p>
+	~<p>\\(x^2e^\{-x^2\}\\)</p>
+}
+
+
+// question: 48745  name: 3.
+::3.::[html]<p>Calcolare il limite \\[ \\lim _\{x\\to e\} \\frac \{ e - x + \\int _e^x \\frac \{1\}\{\\ln t\}\\, dt\}\{(x-e)^2\} \\] </p>{
+	=<p>\\(-\\frac \{1\}\{2e\}\\)</p>
+	~<p>\\(0\\)</p>
+	~<p>\\(-\\infty \\)</p>
+	~<p>\\(1\\)</p>
+}
+
+
+// question: 0  name: Switch category to $module$/top/integrali 10
+$CATEGORY: $module$/top/integrali 10
+
+
+// question: 48746  name: 1
+::1::[html]<p>Calcolare \\[ \\int _0^1 x(x-1)(x-2)\\, dx \\] </p>{
+	=<p>\\(\\frac 1 4\\)</p>
+	~<p>\\(4\\)</p>
+	~<p>\\(\\frac 1 3\\)</p>
+	~<p>\\(3\\)</p>
+}
+
+
+// question: 48755  name: 10
+::10::[html]<p>Calcolare \\[ \\int _0^1 \\frac \{1\}\{4+x^4\}\\, dx \\] </p>{
+	=<p>\\(\\frac \{\\ln 5+2\\mathrm \{arctg\}\\, 2\}\{16\}\\)</p>
+	~<p>\\(\\frac \{2\\ln 2-\\pi \}\{16\}\\)</p>
+	~<p>\\(\\frac \{\\ln 3-\\sqrt \{\\pi \}\}\{16\}\\)</p>
+	~<p>\\(\\frac \{\\ln (2+\\pi ) - \\ln (2-\\pi )\}\{16\}\\)</p>
+}
+
+
+// question: 48747  name: 2
+::2::[html]<p>Calcolare \\[ \\int _0^1 \\frac \{1\}\{1+(1-x)^2\}\\, dx \\] </p>{
+	=<p>\\(\\frac \\pi 4\\)</p>
+	~<p>\\(-\\frac \\pi 4\\)</p>
+	~<p>\\(\\frac \\pi 2\\)</p>
+	~<p>\\(-\\frac \\pi 2\\)</p>
+}
+
+
+// question: 48748  name: 3
+::3::[html]<p>Calcolare \\[ \\int _0^1 \\sqrt [5]\{\\sqrt \{x\}\\cdot \\sqrt [3]\{x\}\}\\, dx \\] </p>{
+	=<p>\\(\\frac 6 7\\)</p>
+	~<p>\\(\\frac 5 6\\)</p>
+	~<p>\\(\\frac 7 6\\)</p>
+	~<p>\\(\\frac 6 5\\)</p>
+}
+
+
+// question: 48749  name: 4
+::4::[html]<p>Calcolare \\[ \\int _0^\{\\frac \\pi 3\} \\frac \{\\sin x \\cdot \\ln \\cos x\}\{\\cos x\}\\, dx \\] </p>{
+	=<p>\\(-\\frac \{\\ln ^2 2\}\{2\}\\)</p>
+	~<p>\\(0\\)</p>
+	~<p>\\(1\\)</p>
+	~<p>\\(-\\frac \\pi 4\\)</p>
+}
+
+
+// question: 48750  name: 5
+::5::[html]<p>Calcolare \\[ \\int _0^1 x \\cdot \\sqrt [3]\{1-x^2\}\\, dx \\] </p>{
+	=<p>\\(\\frac 3 8\\)</p>
+	~<p>\\(-\\frac 3 8\\)</p>
+	~<p>\\(\\frac 8 3\\)</p>
+	~<p>\\(-\\frac 8 3\\)</p>
+}
+
+
+// question: 48751  name: 6
+::6::[html]<p>Calcolare \\[ \\int _0^\{2\\pi \} \\sin ^3 x\\, dx \\] </p>{
+	=<p>\\(0\\)</p>
+	~<p>\\(\\frac 1 3\\)</p>
+	~<p>\\(\\frac \\pi 2\\)</p>
+	~<p>\\(\\pi \\)</p>
+}
+
+
+// question: 48752  name: 7
+::7::[html]<p>Calcolare \\[ \\int _0^\\pi \\sin ^4 x\\, dx \\] </p>{
+	=<p>\\(\\frac \{3\\pi \} 8\\)</p>
+	~<p>\\(\\frac \\pi 2\\)</p>
+	~<p>\\(\\frac 1 2\\)</p>
+	~<p>\\(\\frac \\pi 3\\)</p>
+}
+
+
+// question: 48753  name: 8
+::8::[html]<p>Calcolare \\[ \\int _\{\\frac 1 3\}^\{\\frac 1 2\} \\frac \{1\}\{x^3-x^4\}\\, dx \\] </p>{
+	=<p>\\(\\ln 2 + \\frac 7 2\\)</p>
+	~<p>\\(\\ln \{\\frac 3 2 \}-\\frac 1 5\\)</p>
+	~<p>\\(\\mathrm \{arctg\}\\, 2 - \\frac 2 3\\)</p>
+	~<p>\\(\\ln \{\\frac 2 3\} + \\frac 5 3\\)</p>
+}
+
+
+// question: 48754  name: 9
+::9::[html]<p>Calcolare \\[ \\int _\{0\}^\{1\} \\frac \{1\}\{(1+x^2)^2\}\\, dx \\] </p>{
+	=<p>\\(\\frac \{2+\\pi \}\{8\}\\)</p>
+	~<p>\\(\\frac \{\\pi \}\{2\}\\)</p>
+	~<p>\\(2\\sqrt 2-\\frac \\pi 2\\)</p>
+	~<p>\\(\\sqrt \{2\\pi - 2\}\\)</p>
+}
+
+
+// question: 0  name: Switch category to $module$/top/integrali 3
+$CATEGORY: $module$/top/integrali 3
+
+
+// question: 48768  name: 1
+::1::[html]<p>Calcolare \\[ \\int _0^\{+\\infty \} e^\{-tx\}\\sin t\\, dt. \\] </p>{
+	=<p>\\(\\frac \{1\}\{1+x^2\}\\)</p>
+	~<p>\\(\\frac \\pi 2\\)</p>
+	~<p>\\(+\\infty \\)</p>
+	~<p>\\(\\mathrm \{arctg\}\\, x\\)</p>
+}
+
+
+// question: 48769  name: 2
+::2::[html]<p>Calcolare \\[ \\lim _\{x\\to 0\} \\frac \{1\}\{x^5\}\\left [\\mathrm \{arctg\}\\, x - \\int _0^x e^\{-t^2\}\\, dt \\right ] \\] </p>{
+	=<p>\\(\\frac 1 \{10\}\\)</p>
+	~<p>\\(1\\)</p>
+	~<p>\\(e\\)</p>
+	~<p>\\(\\frac \\pi 2\\)</p>
+}
+
+
+// question: 48770  name: 3
+::3::[html]<p>Calcolare \\[ \\int _0^\\pi \\frac \{\\cos x\}\{\\pi x - x^2\}\\, dx \\] </p>{
+	=<p>è indeterminato</p>
+	~<p>\\(0\\)</p>
+	~<p>\\(+\\infty \\)</p>
+	~<p>\\(1\\)</p>
+}
+
+
+// question: 48771  name: 4
+::4::[html]<p>Calcolare \\[ \\lim _\{x\\to 0^+\} \\frac \{1\}\{\\sqrt x\}\\cdot \\int _x^\\pi \\frac \{\\cos t\}\{\\sqrt \{\\pi t-t^2\}\}\\, dt. \\] </p>{
+	=<p>\\(-\\frac 2 \{\\sqrt \\pi \}\\)</p>
+	~<p>\\(-\\sqrt \\pi \\)</p>
+	~<p>\\(-\\ln 2\\)</p>
+	~<p>\\(-\\sqrt 2\\)</p>
+}
+
+
+// question: 48772  name: 5
+::5::[html]<p>\\[ \\lim _\{x\\to 0\} \\frac 1 \{x^3\} \\int _\{1-x\}^\{1+x\} e^\{t^2\}\\, dt - \\frac \{2e\}\{x^2\} \\] </p>{
+	=<p>\\(2e\\)</p>
+	~<p>\\(0\\)</p>
+	~<p>\\(+\\infty \\)</p>
+	~<p>\\(e^2\\)</p>
+}
+
+
