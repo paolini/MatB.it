@@ -25,8 +25,9 @@ export default function NoteContent({ note, context }: {
   const [document, setDocument] = useState<Document|null>(null)
   if (!context) context = { 
     parents: [], 
+    questionIds: [],
     answers: {}, 
-    setAnswer: () => {} 
+    setAnswer: () => {}
   }
 
   useEffect(() => {

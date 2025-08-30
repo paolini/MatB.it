@@ -22,7 +22,8 @@ export type ContextAnswer = {
 
 export type Context = {
   parents: string[], // Array di ID dei genitori per evitare loop infiniti
-  answers: Record<string, ContextAnswer>,
+  questionIds: string[], // Array ordinato degli ID delle domande
+  answers: Record<string, ContextAnswer>, // Mappa delle risposte per ID
   setAnswer: (id: string, answer: number) => void
 }
 

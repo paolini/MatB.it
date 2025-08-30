@@ -13,6 +13,7 @@ const NOTE_QUERY = gql`
     note(_id: $_id) {
       _id
       title
+      hide_title
       delta
       variant
       author { name }
@@ -59,7 +60,16 @@ export function NoteEmbedInner({ context, note }: {
     setShowInfo(!showInfo);
   };
 
-  return <DocumentEmbed variant={note.variant || undefined} title={note.title}>
+  // Determina il titolo da mostrare
+  const questionIndex = context.questionIds.indexOf(note._id);
+  const isQuestion = questionIndex !== -1;
+  const questionNumber = questionIndex + 1;
+  
+  const displayTitle = note.hide_title && isQuestion
+    ? `Domanda ${questionNumber}`
+    : note.title;
+
+  return <DocumentEmbed variant={note.variant || undefined} title={displayTitle}>
     <div className="embedded-note-content">
       <NoteContent 
         note={note}
