@@ -1,12 +1,13 @@
 "use client"
-import React, { useContext, useState } from 'react'
+import React, { use, useContext, useState } from 'react'
 import { useQuery, gql } from '@apollo/client'
 import 'katex/dist/katex.min.css'
 import { ObjectId } from 'bson'
 
 import { Note } from '@/app/graphql/generated'
 import NoteContent from './NoteContent'
-import { DocumentContext, DocumentContextProvider, useDocumentContext } from './DocumentElement'
+import { DocumentContext, DocumentContextProvider, useDocumentContext, useOrdinalContext } from './DocumentElement'
+import { VARIANT_NAMES } from '@/lib/models'
 
 const NOTE_QUERY = gql`
   query Note($_id: ObjectId!) {
@@ -24,10 +25,11 @@ const NOTE_QUERY = gql`
   }
 `
 
-export function NoteEmbedAsync({context, note_id, title}: { 
+export function NoteEmbedAsync({context, note_id, title, ordinal}: { 
   note_id: ObjectId
   title?: string
   context: DocumentContext
+  ordinal?: string
 }) {
   const { data, loading, error } = useQuery(NOTE_QUERY, {
     variables: { _id: note_id }
@@ -42,21 +44,24 @@ export function NoteEmbedAsync({context, note_id, title}: {
       context={{...context, parents: [...context.parents, note_id.toString()]}}
       note={note}
       title={title}
+      ordinal={ordinal || ''}
     />
 }
 
-function NoteEmbed({ context, note, title }: {
+function NoteEmbed({ context, note, title, ordinal }: {
   context: DocumentContext
   note: Note
   title?: string
+  ordinal?: string
 }) {
   title = title || (!note.hide_title && note.title) || ''
 
   return <DocumentContextProvider value={context}>
-    <DocumentEmbed variant={note.variant || undefined} title={title}>
+    <DocumentEmbed variant={note.variant || undefined} title={title} ordinal={ordinal} note_id={note._id.toString()}>
       <NoteContent 
         note={note}
         context={context}
+        ordinal={ordinal || ''}
         />
       <EmbedInfo note={note} />
     </DocumentEmbed>
@@ -101,17 +106,24 @@ function EmbedInfo({note}: {
   </>
 }
 
-export function DocumentEmbed({variant, title, children, note_id}: {
+export function DocumentEmbed({variant, title, children, note_id, ordinal}: {
   variant?: string
   title?: string
   children: React.ReactNode
   note_id?: string
+  ordinal?: string
 }) {
   const context = useDocumentContext()
+  const ordinals = useOrdinalContext()
+  const counter = ordinal && variant && ordinals && ordinals.getCounter(variant, ordinal) || 0
   const inner_context = {
     ...context,
     parents: note_id ? [...context.parents, note_id] : context.parents
   }
+  title = compose_title()
+
+  if (ordinals?.addVariant && variant && ordinal) ordinals.addVariant(variant, ordinal)
+
   return <div 
       className={`ql-variant-container ql-var-${variant || 'default'}`}
       style={{ position: 'relative' }}
@@ -127,4 +139,11 @@ export function DocumentEmbed({variant, title, children, note_id}: {
         </DocumentContextProvider>
       </div>
   </div>
+
+  function compose_title(): string {
+    if (!variant) return title || ''
+    const variantLabel = VARIANT_NAMES[variant]
+    const label = variantLabel && counter ? `${variantLabel} ${counter}` : variantLabel
+    return label && title ? `${label} [${title}]` : (label || title || '')
+  }
 }

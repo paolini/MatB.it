@@ -18,6 +18,19 @@ export function extractNoteRef(insert: unknown): NoteRef | null {
     return isNoteRef(insert) ? insert["note-ref"] : null
 }
 
+export const VARIANT_NAMES: Record<string, string> = {
+    "": "",
+    "test": "Test",
+    "theorem": "Teorema",
+    "lemma": "Lemma",
+    "proof": "Dimostrazione",
+    "remark": "Osservazione",
+    "exercise": "Esercizio",
+    "definition": "Definizione",
+    "example": "Esempio",
+    "question": "Domanda"
+}
+
 export type MongoNote = {
     _id: ObjectId
     title: string               // Title dell'ultima versione (HEAD)

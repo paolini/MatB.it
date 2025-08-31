@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 
 import { Note } from '@/app/graphql/generated'
 import { QuillDelta } from '@/lib/myquill/document'
+import { VARIANT_NAMES } from '@/lib/models'
 
 const MyQuill = dynamic(() => import('@/lib/myquill/MyQuill'), { ssr: false });
 
@@ -78,13 +79,9 @@ export default function NoteForm({ note }: {
           value={variant}
           onChange={e => setVariant(e.target.value)}
         >
-          <option value="default">Nota</option>
-          <option value="theorem">Teorema</option>
-          <option value="lemma">Lemma</option>
-          <option value="proof">Dimostrazione</option>
-          <option value="remark">Osservazione</option>
-          <option value="exercise">Esercizio</option>
-          <option value="test">Test</option>
+          { Object.entries(VARIANT_NAMES).map(([key, label]) => (
+            <option key={key} value={key}>{label || "nota generica"}</option>
+          )) }
         </select>
       </div>
 

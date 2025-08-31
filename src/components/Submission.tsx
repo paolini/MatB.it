@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react'
 import { Profile, Submission } from '@/app/graphql/generated'
 import { Loading, Error, BUTTON_CLASS, EDIT_BUTTON_CLASS, DELETE_BUTTON_CLASS } from '@/components/utils'
 // ...existing code...
-import DocumentElement, { DocumentContext, ContextAnswer } from './DocumentElement'
+import DocumentElement, { DocumentContext, ContextAnswer, OrdinalContextProvider, DebugOrdinalContext } from './DocumentElement'
 import { myTimestamp } from '@/lib/utils'
 import { useRouter } from 'next/navigation'
 
@@ -113,10 +113,9 @@ function SubmissionElement({submission, profile}: {
                 setNeedSave(true)
             }
         },
-        counter: {counts:{}, prefix:''},
     }
 
-    return <>
+    return <OrdinalContextProvider>
         <h1>{submission.test.title || `submission ${submission._id}`}</h1>
         <Info submission={submission} profile={profile}/>
         <DocumentElement
@@ -150,7 +149,7 @@ function SubmissionElement({submission, profile}: {
         </>}
         <Error error={submitError} />
         <Error error={terminateError} />
-    </>
+    </OrdinalContextProvider>
 }
 
 const deleteMutation = gql`

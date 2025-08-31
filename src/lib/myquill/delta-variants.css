@@ -209,6 +209,21 @@
   content: "]";
 }
 
+.ql-variant-container.ql-var-question h1,
+.ql-variant-container.ql-var-question h4 {
+  color: #1cc76a;
+  font-weight: bold;
+}
+.ql-variant-container.ql-var-question h1::before,
+.ql-variant-container.ql-var-question h4::before
+{
+  content: "Domanda [";
+}
+.ql-variant-container.ql-var-question h1::after,
+.ql-variant-container.ql-var-question h4::after {
+  content: "]";
+}
+
 .ql-variant-container.ql-var-test h1,
 .ql-variant-container.ql-var-test .embedded-note-title,
 .ql-variant-container.ql-var-test h4,

@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react'
 import { gql, useMutation, useQuery } from '@apollo/client'
 import { Note } from '@/app/graphql/generated'
+import { VARIANT_NAMES } from '@/lib/models';
 
 // Type definition per Delta (per evitare import diretto)
 type DeltaType = unknown;
@@ -241,13 +242,9 @@ export default function NoteReferenceModal({ isOpen, onClose, onNoteSelected, in
                   value={variant}
                   onChange={e => setVariant(e.target.value)}
                 >
-                  <option value="default">Nota</option>
-                  <option value="theorem">Teorema</option>
-                  <option value="lemma">Lemma</option>
-                  <option value="proof">Dimostrazione</option>
-                  <option value="remark">Osservazione</option>
-                  <option value="exercise">Esercizio</option>
-                  <option value="test">Test</option>
+                  { Object.entries(VARIANT_NAMES).map(([key, label]) => (
+                    <option key={key} value={key}>{label || "nota generica"}</option>
+                  )) }
                 </select>
               </div>
 
