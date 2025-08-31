@@ -74,7 +74,7 @@ const submission = async function (_parent: unknown, {_id}: { _id: ObjectId }, c
         return {
             delta: note.delta,
             variant: note.variant || null,
-            title: note.title,
+            title: (!note.hide_title && note.title) || '',
             _id: new ObjectId(note_id)
         }
     }

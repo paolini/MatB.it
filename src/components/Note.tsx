@@ -62,7 +62,8 @@ function NoteView({note, profile}: {
 }) {
     return <div>
         <div className={`ql-variant-container ql-var-${note.variant || 'default'}`}>
-            {!note.hide_title &&
+            {   
+                !note.hide_title &&
                 <h1>{note.title}</h1>
             }
             <div className="delta">

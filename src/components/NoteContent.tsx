@@ -4,7 +4,7 @@ import 'katex/dist/katex.min.css'
 
 import { document_from_note, Document } from '@/lib/myquill/document'
 import { Note } from '@/app/graphql/generated'
-import DocumentElement, {Context} from './DocumentElement'
+import DocumentElement, {DocumentContext} from './DocumentElement'
 
 // Dichiarazione di tipo per KaTeX
 declare global {
@@ -20,15 +20,9 @@ import { Loading } from './utils'
 
 export default function NoteContent({ note, context }: {
   note: Note,
-  context?: Context
+  context?: DocumentContext
 }) {
   const [document, setDocument] = useState<Document|null>(null)
-  if (!context) context = { 
-    parents: [], 
-    questionIds: [],
-    answers: {}, 
-    setAnswer: () => {}
-  }
 
   useEffect(() => {
     let mounted = true

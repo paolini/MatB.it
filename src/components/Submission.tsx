@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react'
 import { Profile, Submission } from '@/app/graphql/generated'
 import { Loading, Error, BUTTON_CLASS, EDIT_BUTTON_CLASS, DELETE_BUTTON_CLASS } from '@/components/utils'
 // ...existing code...
-import DocumentElement, { Context, ContextAnswer } from './DocumentElement'
+import DocumentElement, { DocumentContext, ContextAnswer } from './DocumentElement'
 import { myTimestamp } from '@/lib/utils'
 import { useRouter } from 'next/navigation'
 
@@ -102,7 +102,7 @@ function SubmissionElement({submission, profile}: {
         ]
     })
 
-    const context: Context = {
+    const context: DocumentContext = {
         parents: [],
         questionIds,
         answers,
@@ -112,7 +112,8 @@ function SubmissionElement({submission, profile}: {
                 setAnswers({ ...answers, [id]: { ...answer_object, answer } })
                 setNeedSave(true)
             }
-        }
+        },
+        counter: {counts:{}, prefix:''},
     }
 
     return <>

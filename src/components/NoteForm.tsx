@@ -52,7 +52,8 @@ export default function NoteForm({ note }: {
         private: isPrivate, 
         variant 
       } 
-    })
+    });
+    router.push(`/note/${note._id}`);
   }
 
   const handleDelete = async () => {

@@ -1,9 +1,9 @@
 "use client"
-import React from 'react'
+import React, { createContext, useContext as useReactContext } from 'react'
 import 'katex/dist/katex.min.css'
 
-import NoteEmbed, { DocumentEmbed } from './NoteEmbed'
-import { Document, Paragraph, Node, Formula, List, Choice, NoteRef } from '@/lib/myquill/document'
+import { NoteEmbedAsync, DocumentEmbed } from './NoteEmbed'
+import { Document, Paragraph, Node, Formula, List, Choice, NoteRef, ParagraphMix } from '@/lib/myquill/document'
 import { ObjectId } from 'bson'
 
 // Dichiarazione di tipo per KaTeX
@@ -20,33 +20,67 @@ export type ContextAnswer = {
   correct_answer?: number | null,
 }
 
-export type Context = {
-  parents: string[], // Array di ID dei genitori per evitare loop infiniti
-  questionIds: string[], // Array ordinato degli ID delle domande
-  answers: Record<string, ContextAnswer>, // Mappa delle risposte per ID
+export type DocumentContext = {
+  parents: string[] // Array di ID dei genitori per evitare loop infiniti
+  questionIds: string[] // Array ordinato degli ID delle domande
+  answers: Record<string, ContextAnswer> // Mappa delle risposte per ID
   setAnswer: (id: string, answer: number) => void
+  counter: {
+    counts: Record<string,number>
+    prefix: string
+  }
 }
 
-export default function DocumentElement({context,document}:{context:Context, document: Document}) {
-  return document.paragraphs.map((paragraph,key) => <ParagraphElement key={key} context={context} paragraph={paragraph} />)
+// React Context per il tipo DocumentContext
+const DocumentContextReact = createContext<DocumentContext | undefined>(undefined);
+
+export function DocumentContextProvider({ value, children }: { value: DocumentContext, children: React.ReactNode }) {
+  return <DocumentContextReact.Provider value={value}>{children}</DocumentContextReact.Provider>;
 }
 
-function ParagraphElement({context,paragraph}:{context:Context, paragraph: Paragraph|NoteRef|Document}) {
+export function useDocumentContext(): DocumentContext {
+  const ctx = useReactContext(DocumentContextReact);
+  if (!ctx) throw new Error('useDocumentContext must be used within a DocumentContextProvider');
+  return ctx;
+}
+
+const DEFAULT_CONTEXT = {
+  parents: [],
+  questionIds: [],
+  answers: {},
+  setAnswer: () => {},
+  counter: {
+    counts: {},
+    prefix: ''
+  }
+}
+
+export default function DocumentElement({context,document}:{context?:DocumentContext, document: Document}) {
+  return <DocumentContextProvider value={context || {...DEFAULT_CONTEXT}}>
+      <DocumentParagraphs paragraphs={document.paragraphs} />
+  </DocumentContextProvider>
+}
+
+function DocumentParagraphs({paragraphs}:{paragraphs:ParagraphMix[]}) {
+  return paragraphs.map((paragraph,key) => <ParagraphElement key={key} paragraph={paragraph} />)
+}
+
+function ParagraphElement({paragraph}:{paragraph: Paragraph|NoteRef|Document}) {
+  const context = useDocumentContext()
   if (paragraph.type === 'document') {
-      const parents = paragraph.note_id ? [...context.parents,paragraph.note_id]: context.parents
-      return <DocumentEmbed variant={paragraph.variant} title={paragraph.title}>
-          <DocumentElement context={{...context,parents}} document={paragraph}/>
+      return <DocumentEmbed variant={paragraph.variant} title={paragraph.title} note_id={paragraph?.note_id}>
+          <DocumentParagraphs paragraphs={paragraph.paragraphs}/>
       </DocumentEmbed>
   }
   if (paragraph.type === 'note-ref') {
-    // asincrono
+    // caricamento asincrono
     if (context.parents.includes(paragraph.note_id)) {
       return <span className="ql-note-ref-simple">[Circular reference to note: {`${paragraph.note_id}`}]</span>
     }
-    return <NoteEmbed note_id={new ObjectId(paragraph.note_id)} title={paragraph.title} context={context} />
+    return <NoteEmbedAsync note_id={new ObjectId(paragraph.note_id)} title={paragraph.title} context={context} />
   }
-  if (paragraph.attribute === 'h1') return <h1 className="note"><LineElement context={context} nodes={paragraph.line.nodes} /></h1>
-  if (paragraph.attribute === 'h2') return <h2 className="note"><LineElement context={context} nodes={paragraph.line.nodes} /></h2>
+  if (paragraph.attribute === 'h1') return <h1 className="note"><LineElement nodes={paragraph.line.nodes} /></h1>
+  if (paragraph.attribute === 'h2') return <h2 className="note"><LineElement nodes={paragraph.line.nodes} /></h2>
   
   // Vorrei usare <p> per i paragrafi, ma gli elenchi non possono 
   // stare dentro <p>. 
@@ -70,22 +104,22 @@ function ParagraphElement({context,paragraph}:{context:Context, paragraph: Parag
 
   return ps.map((item, index) => {
     if (Array.isArray(item)) {
-      return <p key={index}><LineElement context={context} nodes={item} /></p>
+      return <p key={index}><LineElement nodes={item} /></p>
     } else {
-      return <ListElement key={index} context={context} list={item} />
+      return <ListElement key={index} list={item} />
     }
   })
 }
 
-function LineElement({context, nodes}:{context: Context, nodes: Node[]}) {
-  return nodes.map((node,key) => <NodeElement key={key} context={context} node={node} />)
+function LineElement({nodes}:{nodes: Node[]}) {
+  return nodes.map((node,key) => <NodeElement key={key} node={node} />)
 }
 
-function NodeElement({context,node}:{context: Context, node: Node}) {
+function NodeElement({node}:{node: Node}) {
   if (typeof node === 'string') return node
   if (node && typeof node === 'object') {
     if (node.type === 'span') {
-      const children = node.nodes.map((n,key) => <NodeElement key={key} context={context} node={n}/>)
+      const children = node.nodes.map((n,key) => <NodeElement key={key} node={n}/>)
       if (node.attribute === 'bold') return <b>{children}</b>
       if (node.attribute === 'italic') return <i>{children}</i>
       if (node.attribute === 'underline') return <u>{children}</u>
@@ -94,7 +128,7 @@ function NodeElement({context,node}:{context: Context, node: Node}) {
       return <span>{children}</span>
     }
     if (node.type === 'formula') return <FormulaElement formula={node} />
-    if (node.type === 'list') return <ListElement context={context} list={node} />
+    if (node.type === 'list') return <ListElement list={node} />
   }
   return <span className="error">invalid node</span>
 }
@@ -120,17 +154,18 @@ function FormulaElement({formula}:{formula:Formula}) {
   }
 }
 
-function ListElement({context, list}:{context: Context, list:List}) {
-  if (list.attribute === 'choice') return <ChoiceElement context={context} choice={list} />
+function ListElement({list}:{list:List}) {
+  if (list.attribute === 'choice') return <ChoiceElement choice={list} />
   
   const children = list.lines.map((line,key) => <li key={key}>
-        <LineElement context={context} nodes={line.nodes} />
+        <LineElement nodes={line.nodes} />
     </li>)
   if (list.attribute === 'ordered') return <ol>{children}</ol>
   return <ul>{children}</ul>
 }
 
-function ChoiceElement({context, choice}:{context: Context, choice:Choice}) {
+function ChoiceElement({choice}:{choice:Choice}) {
+  const context = useDocumentContext()
   const note_id = context?.parents.length>0 && context.parents[context.parents.length-1] || undefined
   const answer = note_id && context.answers ? context.answers[note_id] : undefined
   
@@ -150,7 +185,7 @@ function ChoiceElement({context, choice}:{context: Context, choice:Choice}) {
           }}
         />
         <div>
-          <LineElement context={context} nodes={line.nodes} />
+          <LineElement nodes={line.nodes} />
         </div>
       </li>
     )}

@@ -74,8 +74,10 @@ export interface NoteData {
   _id: ObjectId
 }
 
+type NoteLoader = (note_id: string) => Promise<NoteData|null>
+
 export type Options = {
-  note_loader?: (note_id: string) => Promise<NoteData|null>
+  note_loader?: NoteLoader
   variant?: string
   title?: string
   note_id?: string
@@ -87,9 +89,11 @@ export type NoteRef = {
   title?: string
 }
 
+export type ParagraphMix = Paragraph | NoteRef | Document
+
 export type Document = {
   type: "document"
-  paragraphs: (Paragraph|NoteRef|Document)[]
+  paragraphs: ParagraphMix[]
   variant?: string
   title?: string
   note_id?: string
@@ -97,7 +101,7 @@ export type Document = {
 
 export type Context = {
   parents: string[]
-  options: Options
+  note_loader?: NoteLoader
 }
 
 function last_paragraph(document: Document): Paragraph {
@@ -211,8 +215,9 @@ function push_error_paragraph(document: Document, error: string) {
 
 async function push_note_ref(context: Context, document: Document, note_ref: object, _attributes: AttributeMap | undefined) {
   if (note_ref && 'note_id' in note_ref && typeof note_ref.note_id === 'string') {
-    const note_loader = context.options.note_loader
+    const note_loader = context.note_loader
     const note_id = note_ref.note_id
+    const title = ('title' in note_ref) ? note_ref.title : undefined
     if (note_loader) {
       if (context.parents.includes(note_id)) {
           push_error_paragraph(document, `circular reference ${note_id}`)
@@ -220,9 +225,10 @@ async function push_note_ref(context: Context, document: Document, note_ref: obj
       }
       const data = await note_loader(note_id)
       if (data) {
-        const sub_document = await document_from_note_recurse({
+        const sub_document: Document = await document_from_note_recurse({
           ...context, 
-          parents: [...context.parents, note_id]
+          parents: [...context.parents, note_id],
+          ...(title !== null ? {title} : {}),
         }, data)
         document.paragraphs.push(sub_document)
       }
@@ -243,8 +249,8 @@ async function push_note_ref(context: Context, document: Document, note_ref: obj
 
 export async function document_from_note(note: NoteData, options?: Options): Promise<Document> {
   const context: Context = {
-    options: options || {},
-    parents: []
+    parents: [],
+    note_loader: options?.note_loader,
   }
   return await document_from_note_recurse(context, note)
 }
@@ -262,7 +268,6 @@ async function document_from_note_recurse(context: Context, note: NoteData): Pro
 
   for (const op of delta.ops) {
     const insert = op.insert
-//    console.log(JSON.stringify({insert}))
     if (typeof insert === 'string') {
       const chunks = insert.split('\n')
       for (let i=0; i<chunks.length; i++) {
@@ -279,7 +284,6 @@ async function document_from_note_recurse(context: Context, note: NoteData): Pro
         push_error(line, `invalid insert object ${JSON.stringify(insert)}`)
       }
     }
-//    console.log(JSON.stringify({document,line}))
   }
   if (line.nodes.length > 0) push_newline(document, line, {})
   return document
