@@ -1,18 +1,47 @@
 import React from "react";
 import { useSession, signIn, signOut } from "next-auth/react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { VERSION } from "../version";
 import type { Session } from "next-auth";
 
 export default function NavBar() {
   const { data: session } = useSession();
+  const pathname = usePathname();
+  
   return (
     <nav className="w-full flex items-center justify-between bg-white border-b border-gray-200 px-4 py-2 shadow-sm">
-      <div className="flex items-center gap-2">
-        <Link href="/" className="font-bold text-xl text-blue-600">
-          MatBit
-        </Link>
-        <span className="ml-2 text-xs text-gray-500 align-top">v{VERSION}</span>
+      <div className="flex items-center gap-6">
+        <div className="flex items-center gap-2">
+          <Link href="/" className="font-bold text-xl text-blue-600">
+            MatBit
+          </Link>
+          <span className="ml-2 text-xs text-gray-500 align-top">v{VERSION}</span>
+        </div>
+        
+        {/* Navigation Links */}
+        <div className="flex items-center gap-4">
+          <Link 
+            href="/notes" 
+            className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+              pathname === '/notes' || pathname === '/'
+                ? 'bg-blue-100 text-blue-700' 
+                : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+            }`}
+          >
+            Note
+          </Link>
+          <Link 
+            href="/tests" 
+            className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+              pathname === '/tests'
+                ? 'bg-blue-100 text-blue-700' 
+                : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+            }`}
+          >
+            Test
+          </Link>
+        </div>
       </div>
       <div>
         {session ? <ProfileMenuComponent session={session} /> : <LoginButton />}
