@@ -1,5 +1,5 @@
 "use client"
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import Badge from "@/components/Badge"
 import { gql, useQuery, NetworkStatus } from "@apollo/client"
 import Link from 'next/link'
@@ -8,10 +8,11 @@ import { Loading, Error } from "@/components/utils"
 import { Note, Profile } from "@/app/graphql/generated"
 import NewNoteButton from "./NewNoteButton"
 import { myTimestamp } from "@/lib/utils"
+import { VARIANT_NAMES } from "@/lib/models"
 
 const notesQuery = gql`
-    query Notes($mine: Boolean, $private: Boolean, $limit: Int, $skip: Int) {
-        notes(mine: $mine, private: $private, limit: $limit, skip: $skip) {
+    query Notes($mine: Boolean, $private: Boolean, $title: String, $variant: String, $limit: Int, $skip: Int) {
+        notes(mine: $mine, private: $private, title: $title, variant: $variant, limit: $limit, skip: $skip) {
             _id
             title
             private
@@ -29,13 +30,27 @@ const notesQuery = gql`
 `
 export default function Notes() {
     const [filter, setFilter] = useState<'tutte' | 'mie' | 'private'>('tutte')
+    const [titleFilter, setTitleFilter] = useState('')
+    const [variantFilter, setVariantFilter] = useState('')
+    const [debouncedTitleFilter, setDebouncedTitleFilter] = useState('')
     
     const NOTES_PER_PAGE = 20
     
-    const { loading, error, data, fetchMore, networkStatus } = useQuery(notesQuery, {
+    // Debounce per il filtro del titolo
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setDebouncedTitleFilter(titleFilter)
+        }, 500)
+        
+        return () => clearTimeout(timer)
+    }, [titleFilter])
+    
+    const { loading, error, data, fetchMore, networkStatus, refetch } = useQuery(notesQuery, {
         variables: { 
             mine: filter === 'mie', 
-            private: filter === 'private', 
+            private: filter === 'private',
+            title: debouncedTitleFilter || undefined,
+            variant: variantFilter || undefined,
             limit: NOTES_PER_PAGE,
             skip: 0
         },
@@ -44,6 +59,8 @@ export default function Notes() {
     
     const notes = data?.notes || []
     const profile = data?.profile
+    const isAuthenticated = !!profile?._id
+    
     const hasMore = notes.length % NOTES_PER_PAGE === 0 && notes.length > 0
     const loadingMore = networkStatus === NetworkStatus.fetchMore
 
@@ -54,6 +71,8 @@ export default function Notes() {
             variables: {
                 mine: filter === 'mie',
                 private: filter === 'private',
+                title: debouncedTitleFilter || undefined,
+                variant: variantFilter || undefined,
                 limit: NOTES_PER_PAGE,
                 skip: notes.length
             },
@@ -68,15 +87,50 @@ export default function Notes() {
     }
 
     return <>
-        <div className="flex flex-col items-center gap-2">
+        <div className="flex flex-col items-start gap-2 w-full">
             <div className="flex items-center gap-3 w-full justify-start">
                 <h2 className="text-2xl font-bold">Note</h2>
                 <NewNoteButton />
             </div>
-            <div className="flex gap-2">
-                <Badge active={filter === 'tutte'} onClick={() => setFilter('tutte')}>Tutte</Badge>
-                <Badge active={filter === 'mie'} onClick={() => setFilter('mie')}>Mie</Badge>
-                <Badge active={filter === 'private'} onClick={() => setFilter('private')}>Private</Badge>
+            <div className="flex items-center justify-between w-full gap-4">
+                <div className="flex gap-2">
+                    <Badge active={filter === 'tutte'} onClick={() => setFilter('tutte')}>Tutte</Badge>
+                    {isAuthenticated && (
+                        <>
+                            <Badge active={filter === 'mie'} onClick={() => setFilter('mie')}>Mie</Badge>
+                            <Badge active={filter === 'private'} onClick={() => setFilter('private')}>Private</Badge>
+                        </>
+                    )}
+                </div>
+                
+                <div className="flex items-center gap-3">
+                    {/* Filtro per variante */}
+                    <select
+                        value={variantFilter}
+                        onChange={(e) => setVariantFilter(e.target.value)}
+                        className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+                    >
+                        <option value="">Tutte le varianti</option>
+                        {Object.entries(VARIANT_NAMES).map(([key, label]) => 
+                            (
+                                <option key={key} value={key}>
+                                    {label || "nota generica"}
+                                </option>
+                            )
+                        )}
+                    </select>
+                    
+                    {/* Campo di filtro per titolo */}
+                    <div className="w-full max-w-sm">
+                        <input
+                            type="text"
+                            placeholder="Filtra per titolo..."
+                            value={titleFilter}
+                            onChange={(e) => setTitleFilter(e.target.value)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        />
+                    </div>
+                </div>
             </div>
         </div>
 

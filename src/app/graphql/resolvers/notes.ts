@@ -37,24 +37,66 @@ export const NOTES_PIPELINE = [
 
 export default async function notes (_parent: unknown, args: QueryNotesArgs, context: Context) {
     const userId = context.user?._id
-    return await getNotesCollection(context.db)
-    .aggregate<Note>([
-        { $match: {
+    
+    // Costruiamo la pipeline
+    const pipeline: any[] = []
+    
+    // Match per visibilità (pubbliche + mie se autenticato)
+    pipeline.push({
+        $match: {
             $or: [
-            { private: { $ne: true } },
-            ...(userId ? [{ author_id: userId }] : [])
+                { private: { $ne: true } },
+                ...(userId ? [{ author_id: userId }] : [])
             ]
-          }
-        },
-        { $match: {
-            ...(args.mine ? { author_id: userId } : {}),
-            ...(args.private ? { private: true } : {}),
-        }},
-        { $sort: { created_on: -1 } },
-        ...(args.skip ? [{ $skip: args.skip }] : []),
-        ...(args.limit ? [{ $limit: args.limit }] : []),
-        ...NOTES_PIPELINE
-    ])
-    .toArray()
+        }
+    })
+    
+    // Match per filtri specifici
+    const additionalMatch: any = {}
+    
+    // Se vengono richiesti filtri che richiedono autenticazione ma l'utente non è autenticato,
+    // ritorna array vuoto
+    if ((args.mine || args.private) && !userId) {
+        return []
+    }
+    
+    if (args.mine && userId) {
+        additionalMatch.author_id = userId
+    }
+    
+    if (args.private && userId) {
+        additionalMatch.private = true
+        additionalMatch.author_id = userId
+    }
+    
+    if (args.title && args.title.trim() !== '') {
+        additionalMatch.title = { $regex: args.title.trim(), $options: 'i' }
+    }
+    
+    if (args.variant && args.variant.trim() !== '') {
+        additionalMatch.variant = args.variant.trim()
+    }
+    
+    if (Object.keys(additionalMatch).length > 0) {
+        pipeline.push({ $match: additionalMatch })
+    }
+    
+    // Ordinamento
+    pipeline.push({ $sort: { created_on: -1 } })
+    
+    // Paginazione
+    if (args.skip) {
+        pipeline.push({ $skip: args.skip })
+    }
+    if (args.limit) {
+        pipeline.push({ $limit: args.limit })
+    }
+    
+    // Aggiungi le operazioni per i lookup
+    pipeline.push(...NOTES_PIPELINE)
+    
+    return await getNotesCollection(context.db)
+        .aggregate<Note>(pipeline)
+        .toArray()
 }
 
