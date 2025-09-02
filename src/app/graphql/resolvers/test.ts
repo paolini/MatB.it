@@ -3,21 +3,35 @@ import { UserInputError, ForbiddenError, AuthenticationError } from 'apollo-serv
 
 import { Context } from '../types'
 import { Test } from '../generated'
-import { getTestsCollection, TEST_PIPELINE } from '@/lib/models'
+import { getTestsCollection, TEST_PIPELINE, verifyAccessToken } from '@/lib/models'
 
 export default async function test (_parent: unknown, {_id}: { _id: ObjectId }, context: Context): Promise<Test | null> {
     const user = context.user
     const collection = getTestsCollection(context.db)
+    
+    // Costruisci le condizioni di autorizzazione
+    const authConditions: any[] = [
+        { private: { $ne: true } }, // test pubblici
+        ...(context.user ? [{ author_id: context.user._id }] : []) // test dell'autore
+    ]
+    
+    // Se c'è un token di accesso, verifica se è valido per questa risorsa
+    if (context.accessToken) {
+        const hasTokenAccess = await verifyAccessToken(
+            context.db, 
+            _id, 
+            context.accessToken, 
+            'read'
+        )
+        if (hasTokenAccess) {
+            // Se il token è valido, permetti l'accesso anche se privato
+            authConditions.push({ _id })
+        }
+    }
+    
     const tests = await collection.aggregate<Test>([
         { $match: { _id } },
-        // Mostra la nota se non è privata, oppure se l'utente autenticato è l'autore
-        { $match: {
-            $or: [
-            { private: { $ne: true } },
-            ...(context.user ? [{ author_id: context.user._id }] : [])
-            ]
-        }
-        },
+        { $match: { $or: authConditions } },
         ...TEST_PIPELINE,
         {
             // Aggiunge le sottomissioni

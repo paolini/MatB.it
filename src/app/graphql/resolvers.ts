@@ -19,6 +19,10 @@ import newSubmission from './resolvers/newSubmission'
 import updateSubmission from './resolvers/updateSubmission'
 import deleteSubmission from './resolvers/deleteSubmission'
 
+import accessTokens from './resolvers/accessTokens'
+import newAccessToken from './resolvers/newAccessToken'
+import deleteAccessToken from './resolvers/deleteAccessToken'
+
 export const resolvers = {
   ObjectId: ObjectIdType,
   JSON: JSONType,
@@ -35,6 +39,8 @@ export const resolvers = {
     tests,
 
     submission,
+
+    accessTokens,
   },
 
   Mutation: {
@@ -49,6 +55,9 @@ export const resolvers = {
     newSubmission,
     updateSubmission,
     deleteSubmission,
+
+    newAccessToken,
+    deleteAccessToken,
   }
 } satisfies Partial<Resolvers<Context>>
 

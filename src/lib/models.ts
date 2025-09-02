@@ -106,6 +106,14 @@ export type MongoAnswer = {
     answer: number | null // risposta depermutata 0-index
 }
 
+export type MongoAccessToken = {
+    _id: ObjectId
+    resource_id: ObjectId         // ID della nota o test
+    secret: string               // codice segreto (UUID)
+    permission: 'read' | 'write' // livello di accesso
+    created_on: Date             // quando è stato creato
+}
+
 export function getNotesCollection(db: Db) {
     return db.collection<OptionalId<MongoNote>>('notes')
 }
@@ -136,6 +144,42 @@ export function getSubmissionsCollection(db: Db) {
 
 export function getDeletedSubmissionsCollection(db: Db) {
     return db.collection<OptionalId<MongoSubmission>>('deleted_submissions')
+}
+
+export function getAccessTokensCollection(db: Db) {
+    return db.collection<OptionalId<MongoAccessToken>>('access_tokens')
+}
+
+// Funzioni di utilità per i token di accesso
+export async function verifyAccessToken(
+    db: Db, 
+    resourceId: ObjectId, 
+    secret: string, 
+    requiredPermission: 'read' | 'write'
+): Promise<boolean> {
+    const token = await getAccessTokensCollection(db).findOne({
+        resource_id: resourceId,
+        secret: secret
+    })
+    
+    if (!token) return false
+    
+    // Se richiesta lettura, sia 'read' che 'write' vanno bene
+    // Se richiesta scrittura, serve 'write'
+    if (requiredPermission === 'read') {
+        return token.permission === 'read' || token.permission === 'write'
+    } else {
+        return token.permission === 'write'
+    }
+}
+
+export function generateSecret(): string {
+    // Genera un UUID v4 semplice per ora
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        const r = Math.random() * 16 | 0
+        const v = c == 'x' ? r : (r & 0x3 | 0x8)
+        return v.toString(16)
+    })
 }
 
 export const TEST_PIPELINE = [

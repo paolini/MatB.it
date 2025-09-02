@@ -8,6 +8,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { myTimestamp } from '@/lib/utils'
 import Link from 'next/link'
+import ShareModal from '@/components/ShareModal'
 
 const TestQuery = gql`
     query Test($_id: ObjectId!) {
@@ -71,6 +72,7 @@ function ViewTest({test, profile}: {
     profile: Profile|null
 }) {
     const router = useRouter()
+    const [showShareModal, setShowShareModal] = useState(false)
 const [startSubmission, { loading: isStarting, error: startError }] = useMutation(NewSubmissionMutation, {
     refetchQueries: [
         { query: TestQuery, variables: { _id: test._id } }
@@ -100,6 +102,12 @@ const [startSubmission, { loading: isStarting, error: startError }] = useMutatio
                 <Link href={`?edit`} className={EDIT_BUTTON_CLASS}>
                     Modifica proprietà del test
                 </Link>
+                <button 
+                    onClick={() => setShowShareModal(true)}
+                    className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+                >
+                    Condividi
+                </button>
             </div>
         )}
         { !profile
@@ -129,6 +137,12 @@ const [startSubmission, { loading: isStarting, error: startError }] = useMutatio
         </div>
         { test.author._id === profile?._id && test.submissions && 
             <SubmissionTable submissions={test.submissions} /> }
+        
+        <ShareModal 
+            resource={test}
+            isOpen={showShareModal}
+            onClose={() => setShowShareModal(false)}
+        />
     </div>
 }
 

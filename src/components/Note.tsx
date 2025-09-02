@@ -1,5 +1,6 @@
 "use client"
 import { gql, useQuery, useMutation } from '@apollo/client'
+import { useState } from 'react'
 
 import { useSearchParams } from 'next/navigation';
 
@@ -8,6 +9,7 @@ import TestList from '@/components/TestList'
 import { Loading, Error, EDIT_BUTTON_CLASS } from '@/components/utils'
 import NoteContent from '@/components/NoteContent'
 import NoteForm from '@/components/NoteForm'
+import ShareModal from '@/components/ShareModal'
 
 const NoteQuery = gql`
     query Note($_id: ObjectId!) {
@@ -61,6 +63,8 @@ function NoteView({note, profile}: {
     note: Note,
     profile: Profile,
 }) {
+    const [showShareModal, setShowShareModal] = useState(false)
+    
     return <div>
         <div className={`ql-variant-container ql-var-${note.variant || 'default'}`}>
             {   
@@ -80,10 +84,24 @@ function NoteView({note, profile}: {
                 Edit
             </a>
         }
+        {note?.author?._id === profile?._id  && 
+            <button 
+                onClick={() => setShowShareModal(true)}
+                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+            >
+                Condividi
+            </button>
+        }
         {note?.variant === 'test' && (
             <CreateTestButton note={note} />
         )}
         </div>
+        
+        <ShareModal 
+            resource={note}
+            isOpen={showShareModal}
+            onClose={() => setShowShareModal(false)}
+        />
     </div>
 }
 

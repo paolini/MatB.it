@@ -20,6 +20,15 @@ export type Scalars = {
   Timestamp: { input: any; output: any; }
 };
 
+export type AccessToken = {
+  __typename?: 'AccessToken';
+  _id: Scalars['ObjectId']['output'];
+  created_on: Scalars['Timestamp']['output'];
+  permission: Scalars['String']['output'];
+  resource_id: Scalars['ObjectId']['output'];
+  secret: Scalars['String']['output'];
+};
+
 export type AnswerItem = {
   __typename?: 'AnswerItem';
   answer: Maybe<Scalars['Int']['output']>;
@@ -35,15 +44,22 @@ export type AnswerItemInput = {
 
 export type Mutation = {
   __typename?: 'Mutation';
+  deleteAccessToken: Maybe<Scalars['Boolean']['output']>;
   deleteNote: Maybe<Scalars['Boolean']['output']>;
   deleteSubmission: Maybe<Scalars['Boolean']['output']>;
   deleteTest: Maybe<Scalars['Boolean']['output']>;
+  newAccessToken: AccessToken;
   newNote: Scalars['ObjectId']['output'];
   newSubmission: Scalars['ObjectId']['output'];
   newTest: Maybe<Scalars['Boolean']['output']>;
   updateNote: Maybe<Note>;
   updateSubmission: Maybe<Scalars['Boolean']['output']>;
   updateTest: Maybe<Test>;
+};
+
+
+export type MutationDeleteAccessTokenArgs = {
+  _id: Scalars['ObjectId']['input'];
 };
 
 
@@ -59,6 +75,12 @@ export type MutationDeleteSubmissionArgs = {
 
 export type MutationDeleteTestArgs = {
   _id: Scalars['ObjectId']['input'];
+};
+
+
+export type MutationNewAccessTokenArgs = {
+  permission: Scalars['String']['input'];
+  resource_id: Scalars['ObjectId']['input'];
 };
 
 
@@ -133,6 +155,7 @@ export type Profile = {
 
 export type Query = {
   __typename?: 'Query';
+  accessTokens: Array<AccessToken>;
   hello: Scalars['String']['output'];
   note: Maybe<Note>;
   notes: Array<Note>;
@@ -140,6 +163,11 @@ export type Query = {
   submission: Maybe<Submission>;
   test: Maybe<Test>;
   tests: Array<Test>;
+};
+
+
+export type QueryAccessTokensArgs = {
+  resource_id: Scalars['ObjectId']['input'];
 };
 
 
@@ -283,6 +311,7 @@ export type DirectiveResolverFn<TResult = {}, TParent = {}, TContext = {}, TArgs
 
 /** Mapping between all available schema types and the resolvers types */
 export type ResolversTypes = ResolversObject<{
+  AccessToken: ResolverTypeWrapper<AccessToken>;
   AnswerItem: ResolverTypeWrapper<AnswerItem>;
   AnswerItemInput: AnswerItemInput;
   Boolean: ResolverTypeWrapper<Scalars['Boolean']['output']>;
@@ -303,6 +332,7 @@ export type ResolversTypes = ResolversObject<{
 
 /** Mapping between all available schema types and the resolvers parents */
 export type ResolversParentTypes = ResolversObject<{
+  AccessToken: AccessToken;
   AnswerItem: AnswerItem;
   AnswerItemInput: AnswerItemInput;
   Boolean: Scalars['Boolean']['output'];
@@ -321,6 +351,15 @@ export type ResolversParentTypes = ResolversObject<{
   User: User;
 }>;
 
+export type AccessTokenResolvers<ContextType = Context, ParentType extends ResolversParentTypes['AccessToken'] = ResolversParentTypes['AccessToken']> = ResolversObject<{
+  _id: Resolver<ResolversTypes['ObjectId'], ParentType, ContextType>;
+  created_on: Resolver<ResolversTypes['Timestamp'], ParentType, ContextType>;
+  permission: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  resource_id: Resolver<ResolversTypes['ObjectId'], ParentType, ContextType>;
+  secret: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+}>;
+
 export type AnswerItemResolvers<ContextType = Context, ParentType extends ResolversParentTypes['AnswerItem'] = ResolversParentTypes['AnswerItem']> = ResolversObject<{
   answer: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   correct_answer: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
@@ -334,9 +373,11 @@ export interface JsonScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes
 }
 
 export type MutationResolvers<ContextType = Context, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = ResolversObject<{
+  deleteAccessToken: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType, RequireFields<MutationDeleteAccessTokenArgs, '_id'>>;
   deleteNote: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType, RequireFields<MutationDeleteNoteArgs, '_id'>>;
   deleteSubmission: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType, RequireFields<MutationDeleteSubmissionArgs, '_id'>>;
   deleteTest: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType, RequireFields<MutationDeleteTestArgs, '_id'>>;
+  newAccessToken: Resolver<ResolversTypes['AccessToken'], ParentType, ContextType, RequireFields<MutationNewAccessTokenArgs, 'permission' | 'resource_id'>>;
   newNote: Resolver<ResolversTypes['ObjectId'], ParentType, ContextType, MutationNewNoteArgs>;
   newSubmission: Resolver<ResolversTypes['ObjectId'], ParentType, ContextType, RequireFields<MutationNewSubmissionArgs, 'test_id'>>;
   newTest: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType, RequireFields<MutationNewTestArgs, 'note_id'>>;
@@ -373,6 +414,7 @@ export type ProfileResolvers<ContextType = Context, ParentType extends Resolvers
 }>;
 
 export type QueryResolvers<ContextType = Context, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = ResolversObject<{
+  accessTokens: Resolver<Array<ResolversTypes['AccessToken']>, ParentType, ContextType, RequireFields<QueryAccessTokensArgs, 'resource_id'>>;
   hello: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   note: Resolver<Maybe<ResolversTypes['Note']>, ParentType, ContextType, RequireFields<QueryNoteArgs, '_id'>>;
   notes: Resolver<Array<ResolversTypes['Note']>, ParentType, ContextType, QueryNotesArgs>;
@@ -424,6 +466,7 @@ export type UserResolvers<ContextType = Context, ParentType extends ResolversPar
 }>;
 
 export type Resolvers<ContextType = Context> = ResolversObject<{
+  AccessToken: AccessTokenResolvers<ContextType>;
   AnswerItem: AnswerItemResolvers<ContextType>;
   JSON: GraphQLScalarType;
   Mutation: MutationResolvers<ContextType>;

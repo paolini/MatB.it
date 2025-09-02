@@ -18,7 +18,13 @@ const server = new ApolloServer<Context>({
 const handler = startServerAndCreateNextHandler<NextApiRequest,Context>(server, {
     context: async (req, res): Promise<Context> => { 
       const db = (await clientPromise).db()
-      const ctx: Context = { req, res, db, user: null }
+      
+      // Estrai il token dagli headers (gestisce sia Headers Web API che NextApiRequest)
+      const accessToken = (req.headers as any).get ? 
+                         (req.headers as any).get('x-access-token') : 
+                         req.headers['x-access-token'] as string || undefined
+      
+      const ctx: Context = { req, res, db, user: null, accessToken }
       try {
         const token = await getToken({ req })
         if (!token || !token.sub) {

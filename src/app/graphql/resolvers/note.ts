@@ -3,20 +3,34 @@ import { ObjectId } from 'mongodb'
 import { Context } from '../types'
 import { Note, Test } from '../generated'
 import { getNotesCollection, getTestsCollection, 
-  TEST_PIPELINE, NOTE_PIPELINE } from '@/lib/models'
+  TEST_PIPELINE, NOTE_PIPELINE, verifyAccessToken } from '@/lib/models'
 
 export default async function note (_parent: unknown, {_id}: { _id: ObjectId }, context: Context): Promise<Note | null> {
     const collection = getNotesCollection(context.db)
+    
+    // Costruisci le condizioni di autorizzazione
+    const authConditions: any[] = [
+        { private: { $ne: true } }, // note pubbliche
+        ...(context.user ? [{ author_id: context.user._id }] : []) // note dell'autore
+    ]
+    
+    // Se c'è un token di accesso, verifica se è valido per questa risorsa
+    if (context.accessToken) {
+        const hasTokenAccess = await verifyAccessToken(
+            context.db, 
+            _id, 
+            context.accessToken, 
+            'read'
+        )
+        if (hasTokenAccess) {
+            // Se il token è valido, permetti l'accesso anche se privata
+            authConditions.push({ _id })
+        }
+    }
+    
     const notes = await collection.aggregate<Note>([
         { $match: { _id } },
-        // Mostra la nota se non è privata, oppure se l'utente autenticato è l'autore
-        { $match: {
-            $or: [
-            { private: { $ne: true } },
-            ...(context.user ? [{ author_id: context.user._id }] : [])
-            ]
-        }
-        },
+        { $match: { $or: authConditions } },
         ...NOTE_PIPELINE
     ]).toArray()
 

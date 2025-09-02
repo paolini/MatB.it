@@ -8,7 +8,8 @@ export type Context = {
     res: NextApiResponse|undefined
     user: WithId<MongoUser> | null
     db: Db
-  }
+    accessToken?: string  // token di accesso condiviso
+}
   
 export const ObjectIdType = new GraphQLScalarType({
   name: "ObjectId",

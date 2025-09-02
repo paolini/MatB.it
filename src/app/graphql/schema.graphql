@@ -69,6 +69,14 @@ type Submission {
     score: Float
 }
 
+type AccessToken {
+    _id: ObjectId!
+    resource_id: ObjectId!
+    secret: String!
+    permission: String!
+    created_on: Timestamp!
+}
+
 type Query {
   hello: String!
   note(_id: ObjectId!): Note
@@ -77,6 +85,7 @@ type Query {
   test(_id: ObjectId!): Test
   tests(mine: Boolean, open: Boolean, limit: Int): [Test!]!
   submission(_id: ObjectId!): Submission
+  accessTokens(resource_id: ObjectId!): [AccessToken!]!
 }
 
 type Mutation {
@@ -91,4 +100,7 @@ type Mutation {
   newSubmission(test_id: ObjectId!): ObjectId!
   updateSubmission(_id: ObjectId!, answers: [AnswerItemInput!], completed: Boolean): Boolean
   deleteSubmission(_id: ObjectId!): Boolean
+
+  newAccessToken(resource_id: ObjectId!, permission: String!): AccessToken!
+  deleteAccessToken(_id: ObjectId!): Boolean
 }
