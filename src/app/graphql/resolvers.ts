@@ -13,6 +13,7 @@ import updateNote from './resolvers/updateNote'
 import deleteNote from './resolvers/deleteNote'
 
 import newTest from './resolvers/newTest'
+import updateTest from './resolvers/updateTest'
 import deleteTest from './resolvers/deleteTest'
 import newSubmission from './resolvers/newSubmission'
 import updateSubmission from './resolvers/updateSubmission'
@@ -42,6 +43,7 @@ export const resolvers = {
     deleteNote,    
     
     newTest,
+    updateTest,
     deleteTest,
 
     newSubmission,

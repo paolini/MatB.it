@@ -95,3 +95,7 @@ ul.delta-choice-list {
 .default-color {
   @apply bg-white hover:bg-gray-100;
 }
+
+.disabled-color {
+  @apply bg-gray-200 hover:bg-gray-300;
+}

@@ -42,7 +42,8 @@ MatBit is a **collaborative note-taking web application** built with Next.js and
 - **Edit** notes with real-time WYSIWYG editor and variant modification
 - **Delete** notes (author-only with confirmation)
 - **Privacy control** - notes can be public or private
-- **Variant selection** - categorize notes as theorems, lemmas, proofs, exercises, etc.
+- **Title visibility control** - option to hide title when displaying notes
+- **Variant selection** - categorize notes as theorems, lemmas, proofs, exercises, tests, definitions, examples, questions, remarks, etc.
 - **Author attribution** - notes display creator information
 
 ### 3. Rich Text Editing
@@ -142,7 +143,8 @@ function extractNoteRef(insert: unknown): NoteRef | null
 type MongoNote = {
     _id: ObjectId
     title: string               // Title dell'ultima versione (HEAD)
-    delta: object               // Contenuto dell'ultima versione (HEAD) in formato Quill Delta
+    hide_title: boolean         // Non mostrare il titolo quando si visualizza la nota
+    delta: QuillDelta           // Contenuto dell'ultima versione (HEAD) in formato Quill Delta
     variant?: string            // Tipo di contenuto dell'ultima versione (HEAD) - denormalizzato da NoteVersion
     author_id: ObjectId         // Chi controlla questo branch (può spostare il tip)
     note_version_id: ObjectId   // Punta alla versione corrente (HEAD)
@@ -152,7 +154,7 @@ type MongoNote = {
         first_contribution: Date
         last_contribution: Date
     }[]
-    private: boolean            // Controllo visibilità
+    private: boolean            // Solo l'autore può vederla
     created_on: Date
     description?: string        // Descrizione del branch
 }
@@ -163,8 +165,8 @@ type MongoNote = {
 type NoteVersion = {
     _id: ObjectId
     title: string
-    delta: object                // Contenuto in formato Quill Delta (JSON flessibile)
-    variant?: string            // Tipo di contenuto (theorem, lemma, proof, remark, exercise, test, default)
+    delta: QuillDelta           // Contenuto in formato Quill Delta
+    variant: string            // Tipo di contenuto (theorem, lemma, proof, remark, exercise, test, default, definition, example, question)
     author_id: ObjectId         // Chi ha creato questa versione
     parent_version_id?: ObjectId          // Primo parent (catena principale)
     second_parent_version_id?: ObjectId   // Secondo parent (per merge)
@@ -188,70 +190,47 @@ type MongoUser = {
     _id: ObjectId
     name: string
     email: string
-    image: string           // Profile picture URL
     emailVerified: boolean
-    pro: boolean           // Premium feature flag
     first_login: Date
     last_login: Date
+    image: string               // Profile picture URL
+    pro: boolean               // Premium feature flag
     createdAt: Date
+}
 
 ### Tests Collection
 ```typescript
-type Test = {
+type MongoTest = {
     _id: ObjectId
     note_id: ObjectId           // ID della nota con variant "test"
-    description?: string        // Descrizione opzionale
+    title: string               // Nome del test
     created_on: Date
-    author_id: ObjectId         // chi ha creato il test
-    open_on?: Date
-    close_on?: Date
+    author_id: ObjectId         // Chi ha creato il test
+    open_on: Date|null          // Quando è possibile aprirlo
+    close_on: Date|null         // Entro quando è possibile compilarlo
+    private: boolean            // Solo l'autore può vederlo
 }
 ```
 
 ### Submissions Collection
 ```typescript
-type Submission = {
+type MongoSubmission = {
     _id: ObjectId
     test_id: ObjectId           // ID del test
-    user_id: ObjectId           // Utente che ha effettuato la submission
-    created_on: Date
-    updated_on?: Date
-    status: 'draft' | 'submitted' | 'graded'
-    answers: {
-        question_id: ObjectId
-        answer: string
-        normalized_answer?: string
-        score?: number
-    }[]
-    total_score?: number
-    max_score?: number
-    graded_on?: Date
-    grader_id?: ObjectId
-    feedback?: string
+    author_id: ObjectId         // Utente che ha svolto il test (studente)
+    started_on: Date            // Quando è iniziato
+    completed_on: Date|null     // Quando (e se) è stato inviato
+    answers: MongoAnswer[]      // Array delle risposte
+}
+
+type MongoAnswer = {
+    note_id: ObjectId           // ID della nota (HEAD) a cui si riferisce la risposta
+    permutation: number[]|null  // Ordine delle opzioni per domande a scelta multipla
+    answer: number|null         // Risposta depermutata 0-index
 }
 ```
 
-### Results Collection
-```typescript
-type TestResult = {
-    _id: ObjectId
-    test_id: ObjectId           // ID del test     
-    note_version_id: ObjectId   // Versione della nota (HEAD) al momento della creazione
-    user_id: ObjectId           // Utente che ha eseguito il test
-    started_on: Date
-    completed_on?: Date // potrebbe essere in corso
-    questions: {
-        note_version_id: ObjectId // Provenienza della domanda (nota principale o innestata)
-        permutation?: number[]
-        answer: string
-        normalized_answer: string
-        score: number
-    }[]
-    randomized_options?: { [question_id: string]: number[] } // Ordine delle opzioni per ogni domanda
-    score?: number
-    max_score?: number
-}
-```
+## GraphQL API
     max_score?: number
 }
 ```
@@ -259,14 +238,23 @@ type TestResult = {
 ## GraphQL API
 
 ### Queries
-- `notes`: List all accessible notes (respects privacy)
+- `notes(mine, private, title, variant, limit, skip)`: List all accessible notes with filtering options
 - `note(_id)`: Get specific note by ID
 - `profile`: Get current user profile
+- `tests(mine, open, limit)`: List all accessible tests with filtering options
+- `test(_id)`: Get specific test by ID
+- `submission(_id)`: Get specific submission by ID
 
 ### Mutations
-- `newNote(title, delta, private, variant)`: Create new note with versioning and variant type
-- `updateNote(_id, title, delta, private, variant)`: Update existing note (creates new version) with variant modification
+- `newNote(title, delta, private, variant, hide_title)`: Create new note with versioning and variant type
+- `updateNote(_id, title, hide_title, delta, private, variant)`: Update existing note (creates new version) with variant modification
 - `deleteNote(_id)`: Move note to deleted_notes collection (preserves history)
+- `newTest(note_id, title, private)`: Create new test linked to a note
+- `updateTest(_id, title, open_on, close_on, private)`: Update test properties
+- `deleteTest(_id)`: Delete test
+- `newSubmission(test_id)`: Create new submission for a test
+- `updateSubmission(_id, answers, completed)`: Update submission with answers
+- `deleteSubmission(_id)`: Delete submission
 
 ## Key Components
 

@@ -43,6 +43,7 @@ export type Mutation = {
   newTest: Maybe<Scalars['Boolean']['output']>;
   updateNote: Maybe<Note>;
   updateSubmission: Maybe<Scalars['Boolean']['output']>;
+  updateTest: Maybe<Test>;
 };
 
 
@@ -96,6 +97,15 @@ export type MutationUpdateSubmissionArgs = {
   _id: Scalars['ObjectId']['input'];
   answers: InputMaybe<Array<AnswerItemInput>>;
   completed: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+
+export type MutationUpdateTestArgs = {
+  _id: Scalars['ObjectId']['input'];
+  close_on: InputMaybe<Scalars['Timestamp']['input']>;
+  open_on: InputMaybe<Scalars['Timestamp']['input']>;
+  private: InputMaybe<Scalars['Boolean']['input']>;
+  title: InputMaybe<Scalars['String']['input']>;
 };
 
 export type Note = {
@@ -196,6 +206,7 @@ export type Test = {
 export type User = {
   __typename?: 'User';
   _id: Scalars['ObjectId']['output'];
+  email: Maybe<Scalars['String']['output']>;
   image: Maybe<Scalars['String']['output']>;
   name: Maybe<Scalars['String']['output']>;
 };
@@ -331,6 +342,7 @@ export type MutationResolvers<ContextType = Context, ParentType extends Resolver
   newTest: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType, RequireFields<MutationNewTestArgs, 'note_id'>>;
   updateNote: Resolver<Maybe<ResolversTypes['Note']>, ParentType, ContextType, RequireFields<MutationUpdateNoteArgs, '_id'>>;
   updateSubmission: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType, RequireFields<MutationUpdateSubmissionArgs, '_id'>>;
+  updateTest: Resolver<Maybe<ResolversTypes['Test']>, ParentType, ContextType, RequireFields<MutationUpdateTestArgs, '_id'>>;
 }>;
 
 export type NoteResolvers<ContextType = Context, ParentType extends ResolversParentTypes['Note'] = ResolversParentTypes['Note']> = ResolversObject<{
@@ -405,6 +417,7 @@ export interface TimestampScalarConfig extends GraphQLScalarTypeConfig<Resolvers
 
 export type UserResolvers<ContextType = Context, ParentType extends ResolversParentTypes['User'] = ResolversParentTypes['User']> = ResolversObject<{
   _id: Resolver<ResolversTypes['ObjectId'], ParentType, ContextType>;
+  email: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   image: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   name: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;

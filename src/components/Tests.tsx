@@ -72,11 +72,24 @@ function TestItem({ test, profile }: {
 }) {
     const now = new Date()
     const isMine = test.author_id === profile?._id
+    const isPrivate = test.private
     const isOpen = (!test.open_on || new Date(test.open_on) <= now) 
         && (!test.close_on || new Date(test.close_on) >= now)
         
+    // Logica di colorazione:
+    // 1° priorità: test privati -> giallo
+    // 2° priorità: test chiusi -> grigio (disabled)
+    // 3° priorità: test aperti propri -> verde
+    // 4° priorità: test aperti altrui -> bianco
+    const getColorClass = () => {
+        if (isPrivate) return "alert-color"     // test privati (giallo)
+        if (!isOpen) return "disabled-color"    // test chiusi (grigio)
+        if (isMine) return "good-color"         // miei test aperti (verde)
+        return "default-color"                  // test aperti altrui (bianco)
+    }
+        
     return <Link href={`/test/${test._id}`}>
-        <div className={`border rounded p-2 ${isMine ? "alert-color" : isOpen ? "good-color" : "default-color"}`}>
+        <div className={`border rounded p-2 ${getColorClass()}`}>
             <span className="font-bold">Test del:</span> {myTimestamp(test.open_on || test.created_on)}<br/>
             { isOpen && test.close_on && <>
                 <span className="font-bold">Chiusura:</span> {myTimestamp(test.close_on)}<br/>

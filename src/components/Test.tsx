@@ -1,8 +1,9 @@
 "use client"
 import { gql, useMutation, useQuery } from '@apollo/client'
+import { useSearchParams } from 'next/navigation'
 
 import { Test, Profile, Submission, AnswerItem } from '@/app/graphql/generated'
-import { Loading, Error, EDIT_BUTTON_CLASS, CANCEL_BUTTON_CLASS, DELETE_BUTTON_CLASS, BUTTON_CLASS } from '@/components/utils'
+import { Loading, Error, EDIT_BUTTON_CLASS, CANCEL_BUTTON_CLASS, DELETE_BUTTON_CLASS, BUTTON_CLASS, SAVE_BUTTON_CLASS } from '@/components/utils'
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { myTimestamp } from '@/lib/utils'
@@ -35,6 +36,7 @@ const TestQuery = gql`
             }
             author {
                 _id
+                email
             }
         }
         profile {
@@ -44,7 +46,8 @@ const TestQuery = gql`
 `
 
 export default function TestWrapper({_id}: {_id: string}) {
-    const [editMode, setEditMode] = useState(false)
+    const searchParams = useSearchParams()
+    const editMode = searchParams.get('edit') !== null
     const { loading, error, data } = useQuery<{test: Test, profile: Profile|null}>(
         TestQuery, {variables: { _id }})
 
@@ -54,17 +57,8 @@ export default function TestWrapper({_id}: {_id: string}) {
     const test = data?.test 
     const profile = data?.profile
 
-    if (editMode) return <EditTest test={test} setEditMode={setEditMode} profile={profile}/>
-    return <>
-        <ViewTest test={test} profile={profile} />
-        {
-            profile 
-            && test.author_id === profile._id
-            && <button className={EDIT_BUTTON_CLASS} onClick={() => setEditMode(!editMode)}>
-                {"Edit"}
-            </button>
-        }
-    </>
+    if (editMode) return <EditTest test={test} profile={profile}/>
+    return <ViewTest test={test} profile={profile} />
 }
 
 const NewSubmissionMutation = gql`
@@ -95,11 +89,19 @@ const [startSubmission, { loading: isStarting, error: startError }] = useMutatio
         <h1>
             {test.title || `Test ${test._id}`}
         </h1>
-        { profile?._id === test.author._id && <>
-            <Link href={`/note/${test.note_id}?edit`} className={EDIT_BUTTON_CLASS}>
-                Modifica testo
-            </Link>
-        </>}
+        
+        <TestInfo test={test} now={now} isOwner={profile?._id === test.author._id} />
+
+        { profile?._id === test.author._id && (
+            <div className="flex gap-2 mb-4">
+                <Link href={`/note/${test.note_id}?edit`} className={EDIT_BUTTON_CLASS}>
+                    Modifica nota con il testo del test
+                </Link>
+                <Link href={`?edit`} className={EDIT_BUTTON_CLASS}>
+                    Modifica proprietà del test
+                </Link>
+            </div>
+        )}
         { !profile
             && <span>Fai il login per iniziare il test</span>
         }
@@ -116,7 +118,7 @@ const [startSubmission, { loading: isStarting, error: startError }] = useMutatio
                     router.push(`/submission/${submission_id}`)
                 }
             }}>
-                inizia
+                inizia test
             </button>
         }
         {startError && <Error error={startError} />}
@@ -128,6 +130,86 @@ const [startSubmission, { loading: isStarting, error: startError }] = useMutatio
         { test.author._id === profile?._id && test.submissions && 
             <SubmissionTable submissions={test.submissions} /> }
     </div>
+}
+
+function TestInfo({test, now, isOwner}: {
+    test: Test,
+    now: Date,
+    isOwner: boolean
+}) {
+    const isOpen = (!test.open_on || new Date(test.open_on) <= now) && (!test.close_on || new Date(test.close_on) >= now)
+    
+    if (!isOwner) {
+        // Visualizzazione semplificata per utenti non proprietari
+        return <div className="bg-gray-50 p-4 rounded-md mb-4">
+                <div className="space-y-2">
+                    <div>
+                        <span className="font-bold">Il test è</span> {
+                            isOpen
+                                ? <span className="text-green-600 font-semibold">aperto</span>
+                                : <span className="text-red-600 font-semibold">chiuso</span>
+                        }
+                    </div>
+                    {isOpen && test.close_on && (
+                        <div>
+                            <span className="font-bold">Si chiude il:</span> {myTimestamp(test.close_on)}
+                        </div>
+                    )}
+                    {!isOpen && test.close_on && new Date(test.close_on) < now && (
+                        <div>
+                            <span className="font-bold">Si è chiuso il:</span> {myTimestamp(test.close_on)}
+                        </div>
+                    )}
+                    {!isOpen && test.open_on && new Date(test.open_on) > now && (
+                        <div>
+                            <span className="font-bold">Si aprirà il:</span> {myTimestamp(test.open_on)}
+                        </div>
+                    )}
+                </div>
+        </div>
+    }
+
+    // Visualizzazione completa per il proprietario
+    return (
+        <div className="bg-gray-50 p-4 rounded-md mb-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <span className="font-bold">Autore:</span> {test.author?.email || 'Sconosciuto'}
+                </div>
+                <div>
+                    <span className="font-bold">Creato il:</span> {myTimestamp(test.created_on)}
+                </div>
+                <div>
+                    <span className="font-bold">Apertura:</span> {
+                        test.open_on 
+                            ? myTimestamp(test.open_on)
+                            : "Sempre aperto"
+                    }
+                </div>
+                <div>
+                    <span className="font-bold">Chiusura:</span> {
+                        test.close_on 
+                            ? myTimestamp(test.close_on)
+                            : "Sempre aperto"
+                    }
+                </div>
+                <div>
+                    <span className="font-bold">Stato:</span> {
+                        isOpen
+                            ? <span className="text-green-600 font-semibold">Aperto</span>
+                            : <span className="text-red-600 font-semibold">Chiuso</span>
+                    }
+                </div>
+                <div>
+                    <span className="font-bold">Privacy:</span> {
+                        test.private 
+                            ? <span className="text-yellow-600">Privato</span>
+                            : <span className="text-blue-600">Pubblico</span>
+                    }
+                </div>
+            </div>
+        </div>
+    )
 }
 
 function SubmissionElement({submission}:{
@@ -216,27 +298,146 @@ const DeleteTestMutation = gql`
     deleteTest(_id: $_id)
 }`
 
-function EditTest({test, profile, setEditMode}: {
+const UpdateTestMutation = gql`
+    mutation UpdateTest($_id: ObjectId!, $title: String, $open_on: Timestamp, $close_on: Timestamp, $private: Boolean) {
+        updateTest(_id: $_id, title: $title, open_on: $open_on, close_on: $close_on, private: $private) {
+            _id
+            title
+            open_on
+            close_on
+            private
+        }
+    }
+`
+
+function EditTest({test, profile}: {
     test: Test,
-    profile: Profile|null,
-    setEditMode: (editMode: boolean) => void
+    profile: Profile|null
 }) {
     const router = useRouter()
     const [deleteTest, { loading: isDeleting, error: deleteError }] = useMutation(DeleteTestMutation)
+    const [updateTest, { loading: isUpdating, error: updateError }] = useMutation(UpdateTestMutation, {
+        refetchQueries: [
+            { query: TestQuery, variables: { _id: test._id } }
+        ]
+    })
+
+    // Stati per il form
+    const [title, setTitle] = useState(test.title || '')
+    const [isPrivate, setIsPrivate] = useState(test.private || false)
+    const [openOn, setOpenOn] = useState(
+        test.open_on ? new Date(test.open_on).toISOString().slice(0, 16) : ''
+    )
+    const [closeOn, setCloseOn] = useState(
+        test.close_on ? new Date(test.close_on).toISOString().slice(0, 16) : ''
+    )
+
+    const handleSave = async () => {
+        await updateTest({ 
+            variables: { 
+                _id: test._id,
+                title: title || null,
+                open_on: openOn ? new Date(openOn) : null,
+                close_on: closeOn ? new Date(closeOn) : null,
+                private: isPrivate
+            } 
+        })
+        router.push(`/test/${test._id}`)
+    }
 
     return <>
-        <ViewTest test={test} profile={profile}/>
-        <button className={CANCEL_BUTTON_CLASS} onClick={() => setEditMode(false)}>
-            annulla
-        </button>
-        <button className={DELETE_BUTTON_CLASS} disabled={isDeleting} onClick={async () => {
-            if (confirm("Sei sicuro di voler eliminare questo test?")) {
-                await deleteTest({ variables: { _id: test._id } })
-                router.back()
-            }
-        }}>
-            elimina
-        </button>
-        {deleteError && <Error error={deleteError} />}
+        <div className="space-y-4 mb-6">
+            <h2 className="text-xl font-bold">Modifica Test</h2>
+            
+            {/* Titolo */}
+            <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Titolo del test
+                </label>
+                <input
+                    type="text"
+                    className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    value={title}
+                    onChange={e => setTitle(e.target.value)}
+                    placeholder="Titolo del test"
+                />
+            </div>
+
+            {/* Date di apertura e chiusura */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Data/ora di apertura
+                    </label>
+                    <input
+                        type="datetime-local"
+                        className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        value={openOn}
+                        onChange={e => setOpenOn(e.target.value)}
+                    />
+                    <p className="text-xs text-gray-500 mt-1">
+                        Lascia vuoto per apertura immediata
+                    </p>
+                </div>
+                
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Data/ora di chiusura
+                    </label>
+                    <input
+                        type="datetime-local"
+                        className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        value={closeOn}
+                        onChange={e => setCloseOn(e.target.value)}
+                    />
+                    <p className="text-xs text-gray-500 mt-1">
+                        Lascia vuoto per test sempre aperto
+                    </p>
+                </div>
+            </div>
+
+            {/* Privacy */}
+            <div>
+                <label className="flex items-center gap-2">
+                    <input
+                        type="checkbox"
+                        checked={isPrivate}
+                        onChange={e => setIsPrivate(e.target.checked)}
+                        className="rounded"
+                    />
+                    <span className="text-sm font-medium text-gray-700">Test privato</span>
+                </label>
+                <p className="text-xs text-gray-500 mt-1">
+                    Solo tu puoi vedere e gestire questo test
+                </p>
+            </div>
+
+            {/* Errori */}
+            {updateError && <Error error={updateError} />}
+            {deleteError && <Error error={deleteError} />}
+        </div>
+        
+        <div className="flex gap-2 mt-4">
+            <button 
+                className={SAVE_BUTTON_CLASS}
+                onClick={handleSave}
+                disabled={isUpdating}
+            >
+                {isUpdating ? 'Salvando...' : 'Salva modifiche'}
+            </button>
+            
+            <button className={CANCEL_BUTTON_CLASS} onClick={() => router.push(`/test/${test._id}`)}>
+                Annulla
+            </button>
+            
+            <button className={DELETE_BUTTON_CLASS} disabled={isDeleting} onClick={async () => {
+                if (confirm("Sei sicuro di voler eliminare questo test?")) {
+                    await deleteTest({ variables: { _id: test._id } })
+                    router.back()
+                }
+            }}>
+                {isDeleting ? 'Eliminando...' : 'Elimina'}
+            </button>
+        </div>
     </>
 }
