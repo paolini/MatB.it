@@ -17,6 +17,7 @@ const TestQuery = gql`
             created_on
             open_on 
             close_on
+            private
             submissions {
                 _id
                 started_on

@@ -14,6 +14,13 @@ const newSubmission = async function (
     const testsCollection = getTestsCollection(context.db)
     const tests = await testsCollection.aggregate([
         { $match: { _id: args.test_id } },
+        // Verifica che il test sia accessibile all'utente (non privato o utente è l'autore)
+        { $match: {
+            $or: [
+            { private: { $ne: true } },
+            { author_id: context.user._id }
+            ]
+        }},
     ]).toArray()
     if (tests.length === 0) throw new Error('Test not found')
     const test = tests[0]

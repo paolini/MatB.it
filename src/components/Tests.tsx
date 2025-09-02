@@ -17,6 +17,7 @@ const testsQuery = gql`
             open_on
             close_on
             author_id
+            private
             author {
                 name
             }

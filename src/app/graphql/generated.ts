@@ -77,6 +77,7 @@ export type MutationNewSubmissionArgs = {
 
 export type MutationNewTestArgs = {
   note_id: Scalars['ObjectId']['input'];
+  private: InputMaybe<Scalars['Boolean']['input']>;
   title: InputMaybe<Scalars['String']['input']>;
 };
 
@@ -187,6 +188,7 @@ export type Test = {
   note: Note;
   note_id: Scalars['ObjectId']['output'];
   open_on: Maybe<Scalars['Timestamp']['output']>;
+  private: Scalars['Boolean']['output'];
   submissions: Maybe<Array<Submission>>;
   title: Maybe<Scalars['String']['output']>;
 };
@@ -391,6 +393,7 @@ export type TestResolvers<ContextType = Context, ParentType extends ResolversPar
   note: Resolver<ResolversTypes['Note'], ParentType, ContextType>;
   note_id: Resolver<ResolversTypes['ObjectId'], ParentType, ContextType>;
   open_on: Resolver<Maybe<ResolversTypes['Timestamp']>, ParentType, ContextType>;
+  private: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   submissions: Resolver<Maybe<Array<ResolversTypes['Submission']>>, ParentType, ContextType>;
   title: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;

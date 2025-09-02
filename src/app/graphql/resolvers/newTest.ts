@@ -23,7 +23,8 @@ export default async function resolver (
     created_on: now,
     title: args.title || '',
     open_on: null,
-    close_on: null
+    close_on: null,
+    private: args.private || false
     }
     await testsCollection.insertOne(testDoc)
     return true

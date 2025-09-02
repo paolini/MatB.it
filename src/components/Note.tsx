@@ -32,6 +32,7 @@ const NoteQuery = gql`
                 author_id
                 open_on
                 close_on
+                private
             }
         }
         profile {
@@ -106,14 +107,15 @@ function NoteFooter({note}: {
 }
 
 const NewTestMutation = gql`
-    mutation NewTest($note_id: ObjectId!, $title: String) {
-        newTest(note_id: $note_id, title: $title)
+    mutation NewTest($note_id: ObjectId!, $title: String, $private: Boolean) {
+        newTest(note_id: $note_id, title: $title, private: $private)
     }
 `
 
 function CreateTestButton({note}: {note: Note}) {
     const note_id = note._id
     const title = note.title || ""
+    const private_test = note.private
     const [createTest, { loading, error }] = useMutation(NewTestMutation, {
         refetchQueries: ["Note"],
     })
@@ -121,7 +123,7 @@ function CreateTestButton({note}: {note: Note}) {
     return <>
         <button
             className="px-4 py-2 bg-green-500 text-white rounded mt-2 hover:bg-green-600 transition-colors"
-            onClick={() => createTest({ variables: { note_id, title } })}
+            onClick={() => createTest({ variables: { note_id, title, private: private_test } })}
             disabled={loading}
             >
                 {loading ? 'Creazione...' : 'Crea test'}

@@ -90,7 +90,7 @@ export default function Notes() {
         <div className="flex flex-col items-start gap-2 w-full">
             <div className="flex items-center gap-3 w-full justify-start">
                 <h2 className="text-2xl font-bold">Note</h2>
-                <NewNoteButton />
+                {isAuthenticated && <NewNoteButton />}
             </div>
             <div className="flex items-center justify-between w-full gap-4">
                 <div className="flex gap-2">

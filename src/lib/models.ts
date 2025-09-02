@@ -87,6 +87,7 @@ export type MongoTest = {
     author_id: ObjectId // chi l'ha creato
     open_on: Date|null // quando è possibile aprirlo
     close_on: Date|null // entro quando è possibile compilarlo
+    private: boolean // solo l'autore può vederlo
 }
 
 // risposte date da un utente al test

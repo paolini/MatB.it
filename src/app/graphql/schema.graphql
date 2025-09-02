@@ -39,6 +39,7 @@ type Test {
     author: User!
     open_on: Timestamp
     close_on: Timestamp
+    private: Boolean!
     submissions: [Submission!]
 }
 
@@ -82,7 +83,7 @@ type Mutation {
   updateNote(_id: ObjectId!, title: String, hide_title: Boolean, delta: JSON, private: Boolean, variant: String): Note
   deleteNote(_id: ObjectId!): Boolean
 
-  newTest(note_id: ObjectId!, title: String): Boolean
+  newTest(note_id: ObjectId!, title: String, private: Boolean): Boolean
   deleteTest(_id: ObjectId!): Boolean
 
   newSubmission(test_id: ObjectId!): ObjectId!
