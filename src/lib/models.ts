@@ -1,3 +1,13 @@
+// Log collection: traccia azioni utenti (login, logout, query, ecc.)
+export type MongoLog = {
+    _id: ObjectId;
+    user_id: ObjectId | null; // Utente che ha eseguito l’azione (null per guest)
+    action: string;           // login, logout, query, ecc.
+    timestamp: Date;
+    ip?: string;              // IP dell’utente
+    userAgent?: string;       // User agent/browser
+    metadata?: Record<string, any>; // Info aggiuntive (query, errori, ecc.)
+};
 import { Db, ObjectId, OptionalId } from 'mongodb'
 import { QuillDelta } from './myquill/document'
 
@@ -150,6 +160,11 @@ export function getAccessTokensCollection(db: Db) {
     return db.collection<OptionalId<MongoAccessToken>>('access_tokens')
 }
 
+// Collezione dei log
+export function getLogsCollection(db: Db) {
+    return db.collection<OptionalId<MongoLog>>('logs')
+}
+
 // Funzioni di utilità per i token di accesso
 export async function verifyAccessToken(
     db: Db, 
@@ -268,4 +283,28 @@ export const SUBMISSION_PIPELINE = [
     $unwind: { path: '$test', preserveNullAndEmptyArrays: true }
   },
 ]
+
+// Funzione per inserire un log di azione utente
+/**
+ * Inserisce un log di azione utente nella collezione logs.
+ * @param db - Connessione MongoDB
+ * @param params - Parametri del log
+ */
+export async function logAction(db: Db, params: {
+    user_id: ObjectId | null,
+    action: string,
+    ip?: string,
+    userAgent?: string,
+    metadata?: Record<string, any>
+}) {
+    const { user_id, action, ip, userAgent, metadata } = params;
+    await getLogsCollection(db).insertOne({
+        user_id,
+        action,
+        timestamp: new Date(),
+        ip,
+        userAgent,
+        metadata
+    });
+}
 

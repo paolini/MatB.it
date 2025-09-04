@@ -4,6 +4,8 @@ import GoogleProvider from "next-auth/providers/google";
 import EmailProvider from "next-auth/providers/email";
 import clientPromise from "@/lib/mongodb";
 import { MongoDBAdapter } from "@auth/mongodb-adapter";
+import { logAction } from "@/lib/models";
+import { ObjectId } from "mongodb";
 
 const providers = [];
 
@@ -230,6 +232,23 @@ const handler = NextAuth({
         }
       }
       
+      // Logging login
+      try {
+        const client = await clientPromise;
+        const db = client.db();
+        await logAction(db, {
+          user_id: user.id ? new ObjectId(user.id) : null,
+          action: "login",
+          // ip e userAgent non sono disponibili direttamente qui, vanno aggiunti lato API route se servono
+          metadata: {
+            provider: account?.provider,
+            email: user.email,
+          },
+        });
+      } catch (e) {
+        console.error("Errore logging login:", e);
+      }
+      
       return true;
     },
     async jwt({ token, user }) {
@@ -257,6 +276,23 @@ const handler = NextAuth({
     },
   },
   events: {
+    async signOut({ token }) {
+      // Logging logout
+      try {
+        const client = await clientPromise;
+        const db = client.db();
+        await logAction(db, {
+          user_id: (typeof token?.id === "string" && token.id.match(/^[a-f\d]{24}$/i)) ? new ObjectId(token.id) : null,
+          action: "logout",
+          // ip e userAgent non sono disponibili direttamente qui
+          metadata: {
+            email: token?.email,
+          },
+        });
+      } catch (e) {
+        console.error("Errore logging logout:", e);
+      }
+    },
     async linkAccount({ user, account, profile }) {
       console.log(`✅ Account ${account.provider} collegato automaticamente all'utente ${user.email}`);
     },
