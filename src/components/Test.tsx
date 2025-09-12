@@ -339,12 +339,20 @@ function EditTest({test, profile}: {
     // Stati per il form
     const [title, setTitle] = useState(test.title || '')
     const [isPrivate, setIsPrivate] = useState(test.private || false)
+    // Helpers per conversione locale <-> UTC compatibili con input datetime-local
+    function toLocalDatetimeInputValue(date: Date|string|undefined|null) {
+        if (!date) return '';
+        const d = new Date(date);
+        d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+        return d.toISOString().slice(0, 16);
+    }
+
     const [openOn, setOpenOn] = useState(
-        test.open_on ? new Date(test.open_on).toISOString().slice(0, 16) : ''
-    )
+        toLocalDatetimeInputValue(test.open_on)
+    );
     const [closeOn, setCloseOn] = useState(
-        test.close_on ? new Date(test.close_on).toISOString().slice(0, 16) : ''
-    )
+        toLocalDatetimeInputValue(test.close_on)
+    );
 
     const handleSave = async () => {
         await updateTest({ 
