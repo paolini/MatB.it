@@ -4,7 +4,7 @@ import { useSearchParams } from 'next/navigation'
 
 import { Test, Profile, Submission, AnswerItem } from '@/app/graphql/generated'
 import { Loading, Error, EDIT_BUTTON_CLASS, CANCEL_BUTTON_CLASS, DELETE_BUTTON_CLASS, BUTTON_CLASS, SAVE_BUTTON_CLASS } from '@/components/utils'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { myTimestamp } from '@/lib/utils'
 import Link from 'next/link'
@@ -73,7 +73,7 @@ function ViewTest({test, profile}: {
 }) {
     const router = useRouter()
     const [showShareModal, setShowShareModal] = useState(false)
-const [startSubmission, { loading: isStarting, error: startError }] = useMutation(NewSubmissionMutation, {
+    const [startSubmission, { loading: isStarting, error: startError }] = useMutation(NewSubmissionMutation, {
     refetchQueries: [
         { query: TestQuery, variables: { _id: test._id } }
     ]
@@ -87,12 +87,18 @@ const [startSubmission, { loading: isStarting, error: startError }] = useMutatio
         }, 1000);
         return () => clearInterval(interval);
     }, [])
+
+    const isOpen = useMemo(() => 
+        (!test.open_on || new Date(test.open_on) <= now) && (!test.close_on || new Date(test.close_on) >= now),
+        [test.open_on, test.close_on, now]
+    )
+    
     return <div className="matbit-test">
         <h1>
             {test.title || `Test ${test._id}`}
         </h1>
         
-        <TestInfo test={test} now={now} isOwner={profile?._id === test.author._id} />
+        <TestInfo test={test} now={now} isOpen={isOpen} isOwner={profile?._id === test.author._id} />
 
         { profile?._id === test.author._id && (
             <div className="flex gap-2 mb-4">
@@ -117,8 +123,7 @@ const [startSubmission, { loading: isStarting, error: startError }] = useMutatio
             profile 
             && test.submissions
             && test.submissions.length === 0 
-            && (!test.open_on || new Date(test.open_on) <= now)
-            && (!test.close_on || new Date(test.close_on) >= now) 
+            && isOpen
             && <button className={BUTTON_CLASS} disabled={isStarting} onClick={async () => {
                 const result = await startSubmission({ variables: { test_id: test._id } })
                 const submission_id = result.data?.newSubmission
@@ -146,12 +151,12 @@ const [startSubmission, { loading: isStarting, error: startError }] = useMutatio
     </div>
 }
 
-function TestInfo({test, now, isOwner}: {
+function TestInfo({test, now, isOpen, isOwner}: {
     test: Test,
     now: Date,
+    isOpen: boolean,
     isOwner: boolean
 }) {
-    const isOpen = (!test.open_on || new Date(test.open_on) <= now) && (!test.close_on || new Date(test.close_on) >= now)
     
     if (!isOwner) {
         // Visualizzazione semplificata per utenti non proprietari
@@ -301,7 +306,7 @@ function SubmissionRow({submission, headers}:{
                 : ' bg-red-100'
 
             return <td className={`${COMMON_CLASSNAME}${color}`}>
-                {n == null ? '---' :n === 0 ? <b>A</b> : String.fromCharCode(65 + n)}
+                {n == null ? '-' :n === 0 ? <b>A</b> : String.fromCharCode(65 + n)}
             </td>
         }
     }

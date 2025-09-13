@@ -183,7 +183,7 @@ function Info({submission, profile}: {
         </>}
         { submission.test.open_on && <><strong>Apertura test:</strong> {myTimestamp(submission.test.open_on)}<br /></> }
         { submission.test.close_on && <><strong>Chiusura test:</strong> {myTimestamp(submission.test.close_on)}<br /></> }
-        { submission.test.close_on && <>Perché il test venga valutato devi terminarlo entro la data di chiusura.<br /></>}
+        { (submission.test.close_on && !submission.completed_on) && <>Perché il test venga valutato devi terminarlo entro la data di chiusura.<br /></>}
         <strong>Iniziato:</strong> {myTimestamp(submission.started_on)}<br />
         { submission.completed_on && <>
             <strong>Finito:</strong> {myTimestamp(submission.completed_on)}, 
