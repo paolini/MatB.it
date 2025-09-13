@@ -117,8 +117,8 @@ const [startSubmission, { loading: isStarting, error: startError }] = useMutatio
             profile 
             && test.submissions
             && test.submissions.length === 0 
-            && (!test.open_on || (test.open_on < now))
-            && (!test.close_on || (test.close_on > now)) 
+            && (!test.open_on || new Date(test.open_on) <= now)
+            && (!test.close_on || new Date(test.close_on) >= now) 
             && <button className={BUTTON_CLASS} disabled={isStarting} onClick={async () => {
                 const result = await startSubmission({ variables: { test_id: test._id } })
                 const submission_id = result.data?.newSubmission
