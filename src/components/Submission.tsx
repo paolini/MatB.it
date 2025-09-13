@@ -135,7 +135,7 @@ function SubmissionElement({submission, profile}: {
                     })
                     setNeedSave(false)
                 }}>
-                {isSubmitting ? 'Invio...' : 'invia risposte'}
+                {isSubmitting ? 'Invio...' : 'salva risposte'}
             </button>
             <button 
                 className={EDIT_BUTTON_CLASS} 
@@ -190,8 +190,9 @@ function Info({submission, profile}: {
             {} tempo impiegato: {format_seconds((new Date(submission.completed_on).getTime() - new Date(submission.started_on).getTime())/1000)}<br />
         </>}
         { submission.score != null && <><strong>Punteggio:</strong> {submission.score} <br /></> }
-        Ogni risposta corretta vale <i>1</i> punto, ogni risposta lasciata in bianco vale <i>2/(n+1)</i> punti dove <i>n</i> è il numero di opzioni, 
-        le risposte sbagliate danno <i>0</i> punti.
+        Ogni risposta corretta vale <i>1</i> punto, 
+        ogni risposta sbagliata vale <i>0</i> punti,
+        le risposte lasciate in bianco danno <i>2/(n+1)</i> punti, dove <i>n</i> è il numero di opzioni, 
         <br />
         { submission.test.author._id === profile?._id && 
             <div style={{ textAlign: 'right', marginTop: '1em' }}>
