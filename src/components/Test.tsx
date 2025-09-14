@@ -352,10 +352,7 @@ function SubmissionTable({submissions}: {submissions: Submission[]}) {
     return <table className="mt-4 w-full border-2 border-black" style={{borderCollapse: 'collapse'}}>
         <thead className="bg-gray-100">
             <tr>
-                <th className="px-2 py-1 text-left border border-black"></th>
-                <th className="px-2 py-1 text-left border border-black">
-                    #
-                </th>
+                <th className="px-2 py-1 text-left border border-black">#</th>
                 <th 
                     className="px-2 py-1 text-left border border-black cursor-pointer hover:bg-gray-200"
                     onClick={() => handleSort('rank')}
@@ -434,8 +431,11 @@ function SubmissionRow({submission, headers, index, rankMap}:{
     
     return (
         <tr className="hover:bg-gray-50">
-            <td className={`${COMMON_CLASSNAME} text-center`}><Link href={`/submission/${submission._id}`} className="block w-full h-full">👁</Link></td>
-            <td className={`${COMMON_CLASSNAME} text-center`}>{index}</td>
+            <td className={`${COMMON_CLASSNAME} text-center`}>
+                <Link href={`/submission/${submission._id}`} className="block w-full h-full">
+                    {index} 👁
+                </Link>
+            </td>
             <td className={`${COMMON_CLASSNAME} text-center`}>{getRank()}</td>
             <td className={COMMON_CLASSNAME}>{myTimestamp(submission.started_on)}</td>
             <td className={COMMON_CLASSNAME}>{myTimestamp(submission.completed_on)}</td>

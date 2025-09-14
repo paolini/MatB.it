@@ -16,7 +16,7 @@ export function myTimestamp(date: Date | undefined | null): string {
 }
 
 export function formatDuration(durationMs: number): string {
-    if (durationMs < 0) return '0 secondi'
+    if (durationMs < 0) return '0:00:00'
     
     const seconds = Math.floor(durationMs / 1000)
     const minutes = Math.floor(seconds / 60)
@@ -25,19 +25,5 @@ export function formatDuration(durationMs: number): string {
     const remainingSeconds = seconds % 60
     const remainingMinutes = minutes % 60
     
-    const parts: string[] = []
-    
-    if (hours > 0) {
-        parts.push(`${hours} ${hours === 1 ? 'ora' : 'ore'}`)
-    }
-    
-    if (remainingMinutes > 0) {
-        parts.push(`${remainingMinutes} ${remainingMinutes === 1 ? 'minuto' : 'minuti'}`)
-    }
-    
-    if (remainingSeconds > 0 || parts.length === 0) {
-        parts.push(`${remainingSeconds} ${remainingSeconds === 1 ? 'secondo' : 'secondi'}`)
-    }
-    
-    return parts.join(', ')
+    return `${hours}:${remainingMinutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`
 }
