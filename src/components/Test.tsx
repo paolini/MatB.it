@@ -6,7 +6,7 @@ import { Test, Profile, Submission, AnswerItem } from '@/app/graphql/generated'
 import { Loading, Error, EDIT_BUTTON_CLASS, CANCEL_BUTTON_CLASS, DELETE_BUTTON_CLASS, BUTTON_CLASS, SAVE_BUTTON_CLASS } from '@/components/utils'
 import { useEffect, useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
-import { myTimestamp } from '@/lib/utils'
+import { myTimestamp, formatDuration } from '@/lib/utils'
 import Link from 'next/link'
 import ShareModal from '@/components/ShareModal'
 
@@ -243,6 +243,9 @@ function SubmissionElement({submission}:{
 }
 
 function SubmissionTable({submissions}: {submissions: Submission[]}) {
+    const [sortColumn, setSortColumn] = useState<string>('started_on')
+    const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc')
+    
     const headers: string[] = []
     submissions.forEach(submission => {
         submission.answers.forEach(answer => {
@@ -253,41 +256,192 @@ function SubmissionTable({submissions}: {submissions: Submission[]}) {
         })
     })
 
+    const handleSort = (column: string) => {
+        if (sortColumn === column) {
+            setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc')
+        } else {
+            setSortColumn(column)
+            setSortDirection('asc')
+        }
+    }
+
+    const sortedSubmissions = [...submissions].sort((a, b) => {
+        let valueA: any = ''
+        let valueB: any = ''
+
+        switch (sortColumn) {
+            case 'rank':
+                // Per il rank, ordiniamo prima per punteggio (desc) poi per durata (asc)
+                const getRankValue = (submission: Submission) => {
+                    const score = submission.score || 0
+                    const duration = submission.started_on && submission.completed_on 
+                        ? new Date(submission.completed_on).getTime() - new Date(submission.started_on).getTime()
+                        : Number.MAX_SAFE_INTEGER
+                    // Creiamo un valore composito: punteggio negativo (per desc) + durata normalizzata
+                    return -score * 1000000 + duration / 1000
+                }
+                valueA = getRankValue(a)
+                valueB = getRankValue(b)
+                break
+            case 'started_on':
+                valueA = new Date(a.started_on || 0).getTime()
+                valueB = new Date(b.started_on || 0).getTime()
+                break
+            case 'completed_on':
+                valueA = new Date(a.completed_on || 0).getTime()
+                valueB = new Date(b.completed_on || 0).getTime()
+                break
+            case 'duration':
+                const getDurationMs = (submission: Submission) => {
+                    if (!submission.started_on || !submission.completed_on) return 0
+                    return new Date(submission.completed_on).getTime() - new Date(submission.started_on).getTime()
+                }
+                valueA = getDurationMs(a)
+                valueB = getDurationMs(b)
+                break
+            case 'author':
+                valueA = a.author?.name || ''
+                valueB = b.author?.name || ''
+                break
+            case 'score':
+                valueA = a.score || 0
+                valueB = b.score || 0
+                break
+        }
+
+        if (valueA < valueB) return sortDirection === 'asc' ? -1 : 1
+        if (valueA > valueB) return sortDirection === 'asc' ? 1 : -1
+        return 0
+    })
+
+    const getSortIcon = (column: string) => {
+        if (sortColumn !== column) return ' ↕'
+        return sortDirection === 'asc' ? ' ↑' : ' ↓'
+    }
+
+    // Calcola i rank delle submission
+    const submissionsWithRank = [...submissions]
+        .filter(s => s.completed_on) // Solo submission completate per il ranking
+        .sort((a, b) => {
+            // Ordina per punteggio decrescente, poi per tempo crescente
+            if ((a.score || 0) !== (b.score || 0)) {
+                return (b.score || 0) - (a.score || 0)
+            }
+            const durationA = a.started_on && a.completed_on 
+                ? new Date(a.completed_on).getTime() - new Date(a.started_on).getTime()
+                : Number.MAX_SAFE_INTEGER
+            const durationB = b.started_on && b.completed_on 
+                ? new Date(b.completed_on).getTime() - new Date(b.started_on).getTime()
+                : Number.MAX_SAFE_INTEGER
+            return durationA - durationB
+        })
+
+    const rankMap = new Map<string, { rank: number, percentile: number }>()
+    const totalCompleted = submissionsWithRank.length
+    
+    submissionsWithRank.forEach((submission, index) => {
+        const rank = index + 1
+        // Calcola il percentile: (n - rank + 1) / n * 100
+        // dove n è il numero totale di submission completate
+        const percentile = totalCompleted > 1 
+            ? Math.round((totalCompleted - rank + 1) / totalCompleted * 100)
+            : 100
+        rankMap.set(submission._id, { rank, percentile })
+    })
+
     return <table className="mt-4 w-full border-2 border-black" style={{borderCollapse: 'collapse'}}>
         <thead className="bg-gray-100">
             <tr>
                 <th className="px-2 py-1 text-left border border-black"></th>
-                <th className="px-2 py-1 text-left border border-black">Inizio</th>
-                <th className="px-2 py-1 text-left border border-black">Fine</th>
-                <th className="px-2 py-1 text-left border border-black">Autore</th>
-                <th className="px-2 py-1 text-left border border-black">Punti</th>
+                <th className="px-2 py-1 text-left border border-black">
+                    #
+                </th>
+                <th 
+                    className="px-2 py-1 text-left border border-black cursor-pointer hover:bg-gray-200"
+                    onClick={() => handleSort('rank')}
+                >
+                    Rank{getSortIcon('rank')}
+                </th>
+                <th 
+                    className="px-2 py-1 text-left border border-black cursor-pointer hover:bg-gray-200"
+                    onClick={() => handleSort('started_on')}
+                >
+                    Inizio{getSortIcon('started_on')}
+                </th>
+                <th 
+                    className="px-2 py-1 text-left border border-black cursor-pointer hover:bg-gray-200"
+                    onClick={() => handleSort('completed_on')}
+                >
+                    Fine{getSortIcon('completed_on')}
+                </th>
+                <th 
+                    className="px-2 py-1 text-left border border-black cursor-pointer hover:bg-gray-200"
+                    onClick={() => handleSort('duration')}
+                >
+                    Tempo{getSortIcon('duration')}
+                </th>
+                <th 
+                    className="px-2 py-1 text-left border border-black cursor-pointer hover:bg-gray-200"
+                    onClick={() => handleSort('author')}
+                >
+                    Autore{getSortIcon('author')}
+                </th>
+                <th 
+                    className="px-2 py-1 text-left border border-black cursor-pointer hover:bg-gray-200"
+                    onClick={() => handleSort('score')}
+                >
+                    Punti{getSortIcon('score')}
+                </th>
                 {headers.map((header,i) => (
-                    <th key={header.toString()} className="px-2 py-1 text-left border border-black">
+                    <th 
+                        key={header.toString()} 
+                        className="px-2 py-1 text-left border border-black"
+                    >
                         {i+1}
                     </th>
                 ))}
             </tr>
         </thead>
         <tbody>
-            {submissions.map(submission => <SubmissionRow key={submission._id} submission={submission} headers={headers}/>)}
+            {sortedSubmissions.map((submission, index) => <SubmissionRow key={submission._id} submission={submission} headers={headers} index={index + 1} rankMap={rankMap}/>)}
         </tbody>
     </table>
 }
 
 const COMMON_CLASSNAME = "px-2 py-1 border border-black"
 
-function SubmissionRow({submission, headers}:{
+function SubmissionRow({submission, headers, index, rankMap}:{
     submission: Submission
     headers: string[]
+    index: number
+    rankMap: Map<string, { rank: number, percentile: number }>
 }) {
     const map = Object.fromEntries(submission.answers.map(item => [item.note_id.toString(), item]))
+    
+    // Calcola il tempo impiegato
+    const getDuration = () => {
+        if (!submission.started_on || !submission.completed_on) return '-'
+        const start = new Date(submission.started_on)
+        const end = new Date(submission.completed_on)
+        const diffMs = end.getTime() - start.getTime()
+        return formatDuration(diffMs)
+    }
+
+    const getRank = () => {
+        const rankData = rankMap.get(submission._id)
+        return rankData ? `${rankData.rank} (${rankData.percentile}%)` : '-'
+    }
+    
     return (
         <tr className="hover:bg-gray-50">
             <td className={`${COMMON_CLASSNAME} text-center`}><Link href={`/submission/${submission._id}`} className="block w-full h-full">👁</Link></td>
+            <td className={`${COMMON_CLASSNAME} text-center`}>{index}</td>
+            <td className={`${COMMON_CLASSNAME} text-center`}>{getRank()}</td>
             <td className={COMMON_CLASSNAME}>{myTimestamp(submission.started_on)}</td>
             <td className={COMMON_CLASSNAME}>{myTimestamp(submission.completed_on)}</td>
+            <td className={COMMON_CLASSNAME}>{getDuration()}</td>
             <td className={COMMON_CLASSNAME}>{submission.author.name}</td>
-            <td className={COMMON_CLASSNAME}>{submission.score || ''}</td>
+            <td className={COMMON_CLASSNAME}>{submission.score ? submission.score.toFixed(1) : ''}</td>
             { headers.map(id => <AnswerItem key={id} item={map[id]} />)}
         </tr>
     )
