@@ -2,8 +2,7 @@ import { Context } from '../types'
 import { getNotesCollection } from '@/lib/models'
 import { Note, QueryNotesArgs } from '../generated'
 
-export const NOTES_PIPELINE = [
-  { $sort: { created_on: -1 } }, // Ordina per data di creazione della Note
+export const NOTES_LOOKUP_PIPELINE = [
   {
     $lookup: {
       from: 'users',
@@ -81,8 +80,11 @@ export default async function notes (_parent: unknown, args: QueryNotesArgs, con
         pipeline.push({ $match: additionalMatch })
     }
     
-    // Ordinamento
-    pipeline.push({ $sort: { created_on: -1 } })
+    // Aggiungi le operazioni per i lookup PRIMA dell'ordinamento e paginazione
+    pipeline.push(...NOTES_LOOKUP_PIPELINE)
+    
+    // Ordinamento finale (dopo aver calcolato updated_on)
+    pipeline.push({ $sort: { updated_on: -1 } })
     
     // Paginazione
     if (args.skip) {
@@ -91,9 +93,6 @@ export default async function notes (_parent: unknown, args: QueryNotesArgs, con
     if (args.limit) {
         pipeline.push({ $limit: args.limit })
     }
-    
-    // Aggiungi le operazioni per i lookup
-    pipeline.push(...NOTES_PIPELINE)
     
     return await getNotesCollection(context.db)
         .aggregate<Note>(pipeline)
