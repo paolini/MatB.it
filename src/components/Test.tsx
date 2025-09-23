@@ -49,6 +49,7 @@ const TestQuery = gql`
 export default function TestWrapper({_id}: {_id: string}) {
     const searchParams = useSearchParams()
     const editMode = searchParams.get('edit') !== null
+    const hasAccessToken = searchParams.get('token') !== null
     const { loading, error, data } = useQuery<{test: Test, profile: Profile|null}>(
         TestQuery, {variables: { _id }})
 
@@ -59,7 +60,7 @@ export default function TestWrapper({_id}: {_id: string}) {
     const profile = data?.profile
 
     if (editMode) return <EditTest test={test} profile={profile}/>
-    return <ViewTest test={test} profile={profile} />
+    return <ViewTest test={test} profile={profile} hasAccessToken={hasAccessToken} />
 }
 
 const NewSubmissionMutation = gql`
@@ -67,9 +68,10 @@ const NewSubmissionMutation = gql`
         newSubmission(test_id: $test_id)
 }`
 
-function ViewTest({test, profile}: {
+function ViewTest({test, profile, hasAccessToken}: {
     test: Test,
-    profile: Profile|null
+    profile: Profile|null,
+    hasAccessToken?: boolean
 }) {
     const router = useRouter()
     const [showShareModal, setShowShareModal] = useState(false)
@@ -116,7 +118,7 @@ function ViewTest({test, profile}: {
                 </button>
             </div>
         )}
-        { !profile
+        { !profile && isOpen
             && <span>Fai il login per iniziare il test</span>
         }
         {
@@ -140,7 +142,7 @@ function ViewTest({test, profile}: {
                 .filter(submission => submission.author?._id === profile?._id)
                 .map(submission => <SubmissionElement key={submission._id} submission={submission} />)}
         </div>
-        { test.author._id === profile?._id && test.submissions && 
+        { (test.author._id === profile?._id || hasAccessToken) && test.submissions && 
             <SubmissionTable submissions={test.submissions} /> }
         
         <ShareModal 

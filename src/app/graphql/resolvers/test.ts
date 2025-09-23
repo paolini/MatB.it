@@ -16,14 +16,15 @@ export default async function test (_parent: unknown, {_id}: { _id: ObjectId }, 
     ]
     
     // Se c'è un token di accesso, verifica se è valido per questa risorsa
+    let hasValidToken = false
     if (context.accessToken) {
-        const hasTokenAccess = await verifyAccessToken(
+        hasValidToken = await verifyAccessToken(
             context.db, 
             _id, 
             context.accessToken, 
             'read'
         )
-        if (hasTokenAccess) {
+        if (hasValidToken) {
             // Se il token è valido, permetti l'accesso anche se privato
             authConditions.push({ _id })
         }
@@ -40,14 +41,16 @@ export default async function test (_parent: unknown, {_id}: { _id: ObjectId }, 
                 let: { 
                     test_id: '$_id', 
                     user_id: user?._id,
-                    test_author_id: '$author_id'
+                    test_author_id: '$author_id',
+                    has_valid_token: hasValidToken
                 },
                 pipeline: [
                     { $match: { $expr: { $and: [ 
                         { $eq: ['$test_id', '$$test_id'] },
                         { $or: [
                                 { $eq: ['$author_id', '$$user_id'] },
-                                { $eq: ['$$test_author_id', '$$user_id'] }
+                                { $eq: ['$$test_author_id', '$$user_id'] },
+                                { $eq: ['$$has_valid_token', true] }
                                 ] }, 
                         ]}}}, 
                     { $sort: { started_on: -1 } },
