@@ -3,7 +3,7 @@ import { UserInputError, ForbiddenError, AuthenticationError } from 'apollo-serv
 
 import { Context } from '../types'
 import { Submission } from '../generated'
-import { getNotesCollection, getSubmissionsCollection, SUBMISSION_PIPELINE } from '@/lib/models'
+import { getNotesCollection, getSubmissionsCollection, SUBMISSION_PIPELINE, verifyAccessToken } from '@/lib/models'
 import { document_from_note, Document, Paragraph, NoteRef, Node, NoteData, QuillDelta } from '@/lib/myquill/document'
 import { MongoSubmission, MongoAnswer } from '@/lib/models'
 
@@ -21,10 +21,30 @@ const submission = async function (_parent: unknown, {_id}: { _id: ObjectId }, c
     const submission = items[0]
     const test = submission.test
 
-    if (!user) throw new AuthenticationError('Not authenticated')
-    if (!(test.author_id.equals(user._id)) 
-        && !(submission.author_id.equals(user._id))) {
-        throw new ForbiddenError('Not authorized to view this submission')
+    // Verifica autorizzazione: token valido O (utente autenticato E (autore del test O autore della submission))
+    let hasAccess = false
+    
+    // Prima verifica se c'è un token di accesso valido
+    if (context.accessToken) {
+        hasAccess = await verifyAccessToken(
+            context.db,
+            test._id,
+            context.accessToken,
+            'read'
+        )
+    }
+    
+    // Se non ha accesso tramite token, verifica se è utente autorizzato
+    if (!hasAccess) {
+        if (!user) {
+            throw new AuthenticationError('Not authenticated')
+        }
+        
+        if (test.author_id.equals(user._id) || submission.author_id.equals(user._id)) {
+            hasAccess = true
+        } else {
+            throw new ForbiddenError('Not authorized to view this submission')
+        }
     }
 
     const note = await note_loader(test.note_id)

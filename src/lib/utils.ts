@@ -14,3 +14,16 @@ export function myTimestamp(date: Date | undefined | null): string {
     const minute = date.getMinutes()
     return `${day}.${month}.${year}, ${hour}:${minute < 10 ? '0' : ''}${minute}`
 }
+
+export function formatDuration(durationMs: number): string {
+    if (durationMs < 0) return '0:00:00'
+    
+    const seconds = Math.floor(durationMs / 1000)
+    const minutes = Math.floor(seconds / 60)
+    const hours = Math.floor(minutes / 60)
+    
+    const remainingSeconds = seconds % 60
+    const remainingMinutes = minutes % 60
+    
+    return `${hours}:${remainingMinutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`
+}

@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react'
 import Badge from "@/components/Badge"
 import { gql, useQuery, NetworkStatus } from "@apollo/client"
 import Link from 'next/link'
+import { useRouter, useSearchParams } from 'next/navigation'
 
 import { Loading, Error } from "@/components/utils"
 import { Note, Profile } from "@/app/graphql/generated"
@@ -29,12 +30,37 @@ const notesQuery = gql`
     }
 `
 export default function Notes() {
-    const [filter, setFilter] = useState<'tutte' | 'mie' | 'private'>('tutte')
-    const [titleFilter, setTitleFilter] = useState('')
-    const [variantFilter, setVariantFilter] = useState('')
-    const [debouncedTitleFilter, setDebouncedTitleFilter] = useState('')
+    const router = useRouter()
+    const searchParams = useSearchParams()
+    
+    // Mapping per i testi di visualizzazione
+    const filterLabels = {
+        'all': 'Tutte',
+        'mine': 'Mie',
+        'private': 'Private'
+    } as const
+    
+    // Inizializza i filtri dai parametri URL
+    const [filter, setFilter] = useState<'all' | 'mine' | 'private'>(() => {
+        const urlFilter = searchParams.get('filter') as 'all' | 'mine' | 'private'
+        return (urlFilter === 'mine' || urlFilter === 'private') ? urlFilter : 'all'
+    })
+    const [titleFilter, setTitleFilter] = useState(() => searchParams.get('title') || '')
+    const [variantFilter, setVariantFilter] = useState(() => searchParams.get('variant') || '')
+    const [debouncedTitleFilter, setDebouncedTitleFilter] = useState(() => searchParams.get('title') || '')
     
     const NOTES_PER_PAGE = 20
+    
+    // Funzione per aggiornare l'URL con i parametri di filtro
+    const updateUrl = (newFilter: 'all' | 'mine' | 'private', newTitle: string, newVariant: string) => {
+        const params = new URLSearchParams()
+        if (newFilter !== 'all') params.set('filter', newFilter)
+        if (newTitle.trim()) params.set('title', newTitle.trim())
+        if (newVariant) params.set('variant', newVariant)
+        
+        const newUrl = params.toString() ? `?${params.toString()}` : ''
+        router.replace(newUrl, { scroll: false })
+    }
     
     // Debounce per il filtro del titolo
     useEffect(() => {
@@ -45,9 +71,27 @@ export default function Notes() {
         return () => clearTimeout(timer)
     }, [titleFilter])
     
+    // Aggiorna l'URL quando cambiano i filtri
+    useEffect(() => {
+        updateUrl(filter, debouncedTitleFilter, variantFilter)
+    }, [filter, debouncedTitleFilter, variantFilter, router])
+    
+    // Funzioni helper per cambiare i filtri
+    const handleFilterChange = (newFilter: 'all' | 'mine' | 'private') => {
+        setFilter(newFilter)
+    }
+    
+    const handleTitleFilterChange = (newTitle: string) => {
+        setTitleFilter(newTitle)
+    }
+    
+    const handleVariantFilterChange = (newVariant: string) => {
+        setVariantFilter(newVariant)
+    }
+    
     const { loading, error, data, fetchMore, networkStatus, refetch } = useQuery(notesQuery, {
         variables: { 
-            mine: filter === 'mie', 
+            mine: filter === 'mine', 
             private: filter === 'private',
             title: debouncedTitleFilter || undefined,
             variant: variantFilter || undefined,
@@ -69,7 +113,7 @@ export default function Notes() {
         
         await fetchMore({
             variables: {
-                mine: filter === 'mie',
+                mine: filter === 'mine',
                 private: filter === 'private',
                 title: debouncedTitleFilter || undefined,
                 variant: variantFilter || undefined,
@@ -94,11 +138,11 @@ export default function Notes() {
             </div>
             <div className="flex items-center justify-between w-full gap-4">
                 <div className="flex gap-2">
-                    <Badge active={filter === 'tutte'} onClick={() => setFilter('tutte')}>Tutte</Badge>
+                    <Badge active={filter === 'all'} onClick={() => handleFilterChange('all')}>{filterLabels.all}</Badge>
                     {isAuthenticated && (
                         <>
-                            <Badge active={filter === 'mie'} onClick={() => setFilter('mie')}>Mie</Badge>
-                            <Badge active={filter === 'private'} onClick={() => setFilter('private')}>Private</Badge>
+                            <Badge active={filter === 'mine'} onClick={() => handleFilterChange('mine')}>{filterLabels.mine}</Badge>
+                            <Badge active={filter === 'private'} onClick={() => handleFilterChange('private')}>{filterLabels.private}</Badge>
                         </>
                     )}
                 </div>
@@ -107,7 +151,7 @@ export default function Notes() {
                     {/* Filtro per variante */}
                     <select
                         value={variantFilter}
-                        onChange={(e) => setVariantFilter(e.target.value)}
+                        onChange={(e) => handleVariantFilterChange(e.target.value)}
                         className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
                     >
                         <option value="">Tutte le varianti</option>
@@ -126,7 +170,7 @@ export default function Notes() {
                             type="text"
                             placeholder="Filtra per titolo..."
                             value={titleFilter}
-                            onChange={(e) => setTitleFilter(e.target.value)}
+                            onChange={(e) => handleTitleFilterChange(e.target.value)}
                             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         />
                     </div>
