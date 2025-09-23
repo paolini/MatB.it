@@ -42,6 +42,15 @@ export type AnswerItemInput = {
   note_id: Scalars['ObjectId']['input'];
 };
 
+export type ExerciseStats = {
+  __typename?: 'ExerciseStats';
+  average_score: Maybe<Scalars['Float']['output']>;
+  correct_answers: Scalars['Int']['output'];
+  correlation_to_total: Maybe<Scalars['Float']['output']>;
+  empty_answers: Scalars['Int']['output'];
+  total_answers: Scalars['Int']['output'];
+};
+
 export type Mutation = {
   __typename?: 'Mutation';
   deleteAccessToken: Maybe<Scalars['Boolean']['output']>;
@@ -227,8 +236,16 @@ export type Test = {
   note_id: Scalars['ObjectId']['output'];
   open_on: Maybe<Scalars['Timestamp']['output']>;
   private: Scalars['Boolean']['output'];
+  stats: TestStats;
   submissions: Maybe<Array<Submission>>;
   title: Maybe<Scalars['String']['output']>;
+};
+
+export type TestStats = {
+  __typename?: 'TestStats';
+  completed_submissions: Scalars['Int']['output'];
+  exercises: Array<ExerciseStats>;
+  min_submissions_for_stats: Scalars['Int']['output'];
 };
 
 export type User = {
@@ -315,6 +332,7 @@ export type ResolversTypes = ResolversObject<{
   AnswerItem: ResolverTypeWrapper<AnswerItem>;
   AnswerItemInput: AnswerItemInput;
   Boolean: ResolverTypeWrapper<Scalars['Boolean']['output']>;
+  ExerciseStats: ResolverTypeWrapper<ExerciseStats>;
   Float: ResolverTypeWrapper<Scalars['Float']['output']>;
   Int: ResolverTypeWrapper<Scalars['Int']['output']>;
   JSON: ResolverTypeWrapper<Scalars['JSON']['output']>;
@@ -326,6 +344,7 @@ export type ResolversTypes = ResolversObject<{
   String: ResolverTypeWrapper<Scalars['String']['output']>;
   Submission: ResolverTypeWrapper<Submission>;
   Test: ResolverTypeWrapper<Test>;
+  TestStats: ResolverTypeWrapper<TestStats>;
   Timestamp: ResolverTypeWrapper<Scalars['Timestamp']['output']>;
   User: ResolverTypeWrapper<User>;
 }>;
@@ -336,6 +355,7 @@ export type ResolversParentTypes = ResolversObject<{
   AnswerItem: AnswerItem;
   AnswerItemInput: AnswerItemInput;
   Boolean: Scalars['Boolean']['output'];
+  ExerciseStats: ExerciseStats;
   Float: Scalars['Float']['output'];
   Int: Scalars['Int']['output'];
   JSON: Scalars['JSON']['output'];
@@ -347,6 +367,7 @@ export type ResolversParentTypes = ResolversObject<{
   String: Scalars['String']['output'];
   Submission: Submission;
   Test: Test;
+  TestStats: TestStats;
   Timestamp: Scalars['Timestamp']['output'];
   User: User;
 }>;
@@ -365,6 +386,15 @@ export type AnswerItemResolvers<ContextType = Context, ParentType extends Resolv
   correct_answer: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   note_id: Resolver<ResolversTypes['ObjectId'], ParentType, ContextType>;
   permutation: Resolver<Maybe<Array<ResolversTypes['Int']>>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+}>;
+
+export type ExerciseStatsResolvers<ContextType = Context, ParentType extends ResolversParentTypes['ExerciseStats'] = ResolversParentTypes['ExerciseStats']> = ResolversObject<{
+  average_score: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
+  correct_answers: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  correlation_to_total: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
+  empty_answers: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  total_answers: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
@@ -448,8 +478,16 @@ export type TestResolvers<ContextType = Context, ParentType extends ResolversPar
   note_id: Resolver<ResolversTypes['ObjectId'], ParentType, ContextType>;
   open_on: Resolver<Maybe<ResolversTypes['Timestamp']>, ParentType, ContextType>;
   private: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  stats: Resolver<ResolversTypes['TestStats'], ParentType, ContextType>;
   submissions: Resolver<Maybe<Array<ResolversTypes['Submission']>>, ParentType, ContextType>;
   title: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+}>;
+
+export type TestStatsResolvers<ContextType = Context, ParentType extends ResolversParentTypes['TestStats'] = ResolversParentTypes['TestStats']> = ResolversObject<{
+  completed_submissions: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  exercises: Resolver<Array<ResolversTypes['ExerciseStats']>, ParentType, ContextType>;
+  min_submissions_for_stats: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
@@ -468,6 +506,7 @@ export type UserResolvers<ContextType = Context, ParentType extends ResolversPar
 export type Resolvers<ContextType = Context> = ResolversObject<{
   AccessToken: AccessTokenResolvers<ContextType>;
   AnswerItem: AnswerItemResolvers<ContextType>;
+  ExerciseStats: ExerciseStatsResolvers<ContextType>;
   JSON: GraphQLScalarType;
   Mutation: MutationResolvers<ContextType>;
   Note: NoteResolvers<ContextType>;
@@ -476,6 +515,7 @@ export type Resolvers<ContextType = Context> = ResolversObject<{
   Query: QueryResolvers<ContextType>;
   Submission: SubmissionResolvers<ContextType>;
   Test: TestResolvers<ContextType>;
+  TestStats: TestStatsResolvers<ContextType>;
   Timestamp: GraphQLScalarType;
   User: UserResolvers<ContextType>;
 }>;

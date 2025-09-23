@@ -42,6 +42,7 @@ type Test {
     close_on: Timestamp
     private: Boolean!
     submissions: [Submission!]
+    stats: TestStats!
 }
 
 type AnswerItem {
@@ -67,6 +68,20 @@ type Submission {
     started_on: Timestamp!
     completed_on: Timestamp
     score: Float
+}
+
+type TestStats {
+    completed_submissions: Int!
+    exercises: [ExerciseStats!]!
+    min_submissions_for_stats: Int!
+}
+
+type ExerciseStats {
+    correct_answers: Int!
+    total_answers: Int!
+    empty_answers: Int!
+    average_score: Float
+    correlation_to_total: Float
 }
 
 type AccessToken {

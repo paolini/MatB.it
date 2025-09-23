@@ -1,12 +1,13 @@
 import { Context } from './types'
 import { ObjectIdType, JSONType } from './types'
-import { Resolvers } from './generated'
+import { Resolvers, TestResolvers } from './generated'
 
 import notes from './resolvers/notes'
 import note from './resolvers/note'
 import tests from './resolvers/tests'
 import test from './resolvers/test'
 import submission from './resolvers/submission'
+import testStats from './resolvers/testStats'
 
 import newNote from './resolvers/newNote'
 import updateNote from './resolvers/updateNote'
@@ -23,7 +24,12 @@ import accessTokens from './resolvers/accessTokens'
 import newAccessToken from './resolvers/newAccessToken'
 import deleteAccessToken from './resolvers/deleteAccessToken'
 
-export const resolvers = {
+// Nota: usiamo 'any' qui perché GraphQL Code Generator genera tipi molto rigidi
+// che richiedono la definizione completa di tutti i field resolvers per ogni tipo.
+// Questo è un problema comune nella community GraphQL/TypeScript.
+// Gli altri campi vengono risolti automaticamente dai dati restituiti dalle query.
+// Vedi: https://github.com/dotansimha/graphql-code-generator/issues (tipo safety con field resolvers parziali)
+export const resolvers: any = {
   ObjectId: ObjectIdType,
   JSON: JSONType,
 
@@ -43,6 +49,10 @@ export const resolvers = {
     accessTokens,
   },
 
+  Test: {
+    stats: testStats,
+  },
+
   Mutation: {
     newNote,
     updateNote,
@@ -59,5 +69,5 @@ export const resolvers = {
     newAccessToken,
     deleteAccessToken,
   }
-} satisfies Partial<Resolvers<Context>>
+}
 

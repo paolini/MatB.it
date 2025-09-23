@@ -2,7 +2,7 @@
 import { gql, useMutation, useQuery } from '@apollo/client'
 import { useSearchParams } from 'next/navigation'
 
-import { Test, Profile, Submission, AnswerItem } from '@/app/graphql/generated'
+import { Test, Profile, Submission, AnswerItem, TestStats } from '@/app/graphql/generated'
 import { Loading, Error, EDIT_BUTTON_CLASS, CANCEL_BUTTON_CLASS, DELETE_BUTTON_CLASS, BUTTON_CLASS, SAVE_BUTTON_CLASS } from '@/components/utils'
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
@@ -33,6 +33,17 @@ const TestQuery = gql`
                     note_id
                     answer
                     permutation
+                }
+            }
+            stats {
+                completed_submissions
+                min_submissions_for_stats
+                exercises {
+                    correct_answers
+                    total_answers
+                    empty_answers
+                    average_score
+                    correlation_to_total
                 }
             }
             author {
@@ -137,6 +148,9 @@ const [startSubmission, { loading: isStarting, error: startError }] = useMutatio
         </div>
         { test.author._id === profile?._id && test.submissions && 
             <SubmissionTable submissions={test.submissions} /> }
+        
+        { test.author._id === profile?._id && test.stats && 
+            <TestStatistics stats={test.stats} /> }
         
         <ShareModal 
             resource={test}
@@ -305,6 +319,108 @@ function SubmissionRow({submission, headers}:{
             </td>
         }
     }
+}
+
+function TestStatistics({stats}: {stats: TestStats}) {
+    const hasDetailedStats = stats.exercises.length > 0
+    
+    return (
+        <div className="mt-6">
+            <h2 className="text-xl font-bold mb-4">Statistiche del test</h2>
+            
+            <div className="bg-gray-50 p-4 rounded-md mb-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <span className="font-bold">Test completati:</span> {stats.completed_submissions}
+                    </div>
+                    <div>
+                        <span className="font-bold">Soglia privacy:</span> {stats.min_submissions_for_stats} test
+                    </div>
+                </div>
+            </div>
+
+            {!hasDetailedStats ? (
+                <div className="bg-yellow-50 border border-yellow-200 p-4 rounded-md">
+                    <p className="text-yellow-800">
+                        📊 Le statistiche dettagliate degli esercizi saranno disponibili quando ci saranno almeno {stats.min_submissions_for_stats} test completati.
+                    </p>
+                    <p className="text-sm text-yellow-600 mt-2">
+                        Attualmente: {stats.completed_submissions} / {stats.min_submissions_for_stats}
+                    </p>
+                </div>
+            ) : (
+                <div>
+                    <h3 className="text-lg font-semibold mb-3">Statistiche per esercizio</h3>
+                    <div className="overflow-x-auto">
+                        <table className="w-full border border-gray-300 rounded-lg" style={{borderCollapse: 'collapse'}}>
+                            <thead className="bg-gray-100">
+                                <tr>
+                                    <th className="px-3 py-2 text-left border border-gray-300">Esercizio</th>
+                                    <th className="px-3 py-2 text-center border border-gray-300">Risposte totali</th>
+                                    <th className="px-3 py-2 text-center border border-gray-300">Risposte corrette</th>
+                                    <th className="px-3 py-2 text-center border border-gray-300">Non risposte</th>
+                                    <th className="px-3 py-2 text-center border border-gray-300">% Successo</th>
+                                    <th className="px-3 py-2 text-center border border-gray-300">Punteggio medio</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {stats.exercises.map((exercise, index) => (
+                                    <tr key={index} className="hover:bg-gray-50">
+                                        <td className="px-3 py-2 border border-gray-300 font-medium">
+                                            Esercizio {index + 1}
+                                        </td>
+                                        <td className="px-3 py-2 text-center border border-gray-300">
+                                            {exercise.total_answers}
+                                        </td>
+                                        <td className="px-3 py-2 text-center border border-gray-300">
+                                            <span className="text-green-600 font-semibold">
+                                                {exercise.correct_answers}
+                                            </span>
+                                        </td>
+                                        <td className="px-3 py-2 text-center border border-gray-300">
+                                            <span className="text-gray-500">
+                                                {exercise.empty_answers}
+                                            </span>
+                                        </td>
+                                        <td className="px-3 py-2 text-center border border-gray-300">
+                                            <span className={`font-semibold ${
+                                                exercise.total_answers > 0 
+                                                    ? (exercise.correct_answers / exercise.total_answers >= 0.7 ? 'text-green-600' : 
+                                                       exercise.correct_answers / exercise.total_answers >= 0.5 ? 'text-yellow-600' : 'text-red-600')
+                                                    : 'text-gray-500'
+                                            }`}>
+                                                {exercise.total_answers > 0 
+                                                    ? `${Math.round((exercise.correct_answers / exercise.total_answers) * 100)}%`
+                                                    : 'N/A'
+                                                }
+                                            </span>
+                                        </td>
+                                        <td className="px-3 py-2 text-center border border-gray-300">
+                                            {exercise.average_score !== null 
+                                                ? exercise.average_score.toFixed(2)
+                                                : 'N/A'
+                                            }
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    {stats.exercises.length > 0 && (
+                        <div className="mt-4 text-sm text-gray-600">
+                            <p>💡 <strong>Legenda:</strong></p>
+                            <ul className="list-disc list-inside mt-1 space-y-1">
+                                <li><strong>Risposte corrette:</strong> risposte con punteggio massimo (1.0)</li>
+                                <li><strong>% Successo:</strong> percentuale di risposte completamente corrette</li>
+                                <li><strong>Punteggio medio:</strong> media dei punteggi ottenuti (0.0 - 1.0)</li>
+                            </ul>
+                        </div>
+                    )}
+                </div>
+            )}
+        </div>
+    )
 }
 
 const DeleteTestMutation = gql`
