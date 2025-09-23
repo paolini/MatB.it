@@ -49,7 +49,7 @@ const TestQuery = gql`
 export default function TestWrapper({_id}: {_id: string}) {
     const searchParams = useSearchParams()
     const editMode = searchParams.get('edit') !== null
-    const hasAccessToken = searchParams.get('token') !== null
+    const accessToken = searchParams.get('token')
     const { loading, error, data } = useQuery<{test: Test, profile: Profile|null}>(
         TestQuery, {variables: { _id }})
 
@@ -60,7 +60,7 @@ export default function TestWrapper({_id}: {_id: string}) {
     const profile = data?.profile
 
     if (editMode) return <EditTest test={test} profile={profile}/>
-    return <ViewTest test={test} profile={profile} hasAccessToken={hasAccessToken} />
+    return <ViewTest test={test} profile={profile} accessToken={accessToken} />
 }
 
 const NewSubmissionMutation = gql`
@@ -68,10 +68,10 @@ const NewSubmissionMutation = gql`
         newSubmission(test_id: $test_id)
 }`
 
-function ViewTest({test, profile, hasAccessToken}: {
+function ViewTest({test, profile, accessToken}: {
     test: Test,
     profile: Profile|null,
-    hasAccessToken?: boolean
+    accessToken?: string | null
 }) {
     const router = useRouter()
     const [showShareModal, setShowShareModal] = useState(false)
@@ -140,10 +140,10 @@ function ViewTest({test, profile, hasAccessToken}: {
         <div className="flex flex-col gap-2">
             {test.submissions && test.submissions
                 .filter(submission => submission.author?._id === profile?._id)
-                .map(submission => <SubmissionElement key={submission._id} submission={submission} />)}
+                .map(submission => <SubmissionElement key={submission._id} submission={submission} accessToken={accessToken} />)}
         </div>
-        { (test.author._id === profile?._id || hasAccessToken) && test.submissions && 
-            <SubmissionTable submissions={test.submissions} /> }
+        { (test.author._id === profile?._id || accessToken) && test.submissions && 
+            <SubmissionTable submissions={test.submissions} accessToken={accessToken} /> }
         
         <ShareModal 
             resource={test}
@@ -233,10 +233,19 @@ function TestInfo({test, now, isOpen, isOwner}: {
     )
 }
 
-function SubmissionElement({submission}:{
+function SubmissionElement({submission, accessToken}:{
     submission: Submission
+    accessToken?: string | null
 }) {
-    return <a key={submission._id} className={BUTTON_CLASS} href={`/submission/${submission._id}`}>
+    // Costruisci il link con il token se presente
+    const getSubmissionLink = () => {
+        if (accessToken) {
+            return `/submission/${submission._id}?token=${accessToken}`
+        }
+        return `/submission/${submission._id}`
+    }
+
+    return <a key={submission._id} className={BUTTON_CLASS} href={getSubmissionLink()}>
         { submission.completed_on 
             ? `visualizza test completato il ${myTimestamp(submission.completed_on)}`
             : `riprendi test del ${myTimestamp(submission.started_on)}`
@@ -244,7 +253,7 @@ function SubmissionElement({submission}:{
     </a>
 }
 
-function SubmissionTable({submissions}: {submissions: Submission[]}) {
+function SubmissionTable({submissions, accessToken}: {submissions: Submission[], accessToken?: string | null}) {
     const [sortColumn, setSortColumn] = useState<string>('started_on')
     const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc')
     
@@ -402,20 +411,29 @@ function SubmissionTable({submissions}: {submissions: Submission[]}) {
             </tr>
         </thead>
         <tbody>
-            {sortedSubmissions.map((submission, index) => <SubmissionRow key={submission._id} submission={submission} headers={headers} index={index + 1} rankMap={rankMap}/>)}
+            {sortedSubmissions.map((submission, index) => <SubmissionRow key={submission._id} submission={submission} headers={headers} index={index + 1} rankMap={rankMap} accessToken={accessToken}/>)}
         </tbody>
     </table>
 }
 
 const COMMON_CLASSNAME = "px-2 py-1 border border-black"
 
-function SubmissionRow({submission, headers, index, rankMap}:{
+function SubmissionRow({submission, headers, index, rankMap, accessToken}:{
     submission: Submission
     headers: string[]
     index: number
     rankMap: Map<string, { rank: number, percentile: number }>
+    accessToken?: string | null
 }) {
     const map = Object.fromEntries(submission.answers.map(item => [item.note_id.toString(), item]))
+    
+    // Costruisci il link con il token se presente
+    const getSubmissionLink = () => {
+        if (accessToken) {
+            return `/submission/${submission._id}?token=${accessToken}`
+        }
+        return `/submission/${submission._id}`
+    }
     
     // Calcola il tempo impiegato
     const getDuration = () => {
@@ -434,7 +452,7 @@ function SubmissionRow({submission, headers, index, rankMap}:{
     return (
         <tr className="hover:bg-gray-50">
             <td className={`${COMMON_CLASSNAME} text-center`}>
-                <Link href={`/submission/${submission._id}`} className="block w-full h-full">
+                <Link href={getSubmissionLink()} className="block w-full h-full">
                     {index} 👁
                 </Link>
             </td>
