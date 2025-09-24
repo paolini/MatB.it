@@ -153,12 +153,13 @@ function ViewTest({test, profile, accessToken}: {
                 .filter(submission => submission.author?._id === profile?._id)
                 .map(submission => <SubmissionElement key={submission._id} submission={submission} accessToken={accessToken} />)}
         </div>
+        { (test.author._id === profile?._id || accessToken) && test.stats && 
+            <TestStatistics stats={test.stats} /> }
+
         { (test.author._id === profile?._id || accessToken) && test.submissions && 
             <SubmissionTable submissions={test.submissions} accessToken={accessToken} /> }
         
-        { test.author._id === profile?._id && test.stats && 
-            <TestStatistics stats={test.stats} /> }
-        
+         
         <ShareModal 
             resource={test}
             isOpen={showShareModal}
