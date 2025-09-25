@@ -85,7 +85,7 @@ function SubmissionElement({submission, profile}: {
     // Reset answers state when submission changes
     useEffect(() => {
         setAnswers(answers_map)
-    }, [answers_map])
+    }, [submission._id, submission.answers])
 
     const [submitAnswers, { loading: isSubmitting, error: submitError }] = useMutation(SUBMIT_MUTATION, {
         refetchQueries: [
@@ -101,12 +101,14 @@ function SubmissionElement({submission, profile}: {
 
     // Debounced autosave functionality
     const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+    const [isAutoSaving, setIsAutoSaving] = useState<boolean>(false)
     
     const autoSave = useCallback((answersToSave: Record<string, ContextAnswer>) => {
         if (saveTimeoutRef.current) {
             clearTimeout(saveTimeoutRef.current)
         }
         
+        setIsAutoSaving(true)
         saveTimeoutRef.current = setTimeout(async () => {
             try {
                 await submitAnswers({
@@ -117,6 +119,8 @@ function SubmissionElement({submission, profile}: {
                 })
             } catch (error) {
                 console.error('Autosave failed:', error)
+            } finally {
+                setIsAutoSaving(false)
             }
         }, 1000) // Wait 1 second after the last change before saving
     }, [submitAnswers, submission._id])
@@ -126,6 +130,7 @@ function SubmissionElement({submission, profile}: {
         return () => {
             if (saveTimeoutRef.current) {
                 clearTimeout(saveTimeoutRef.current)
+                setIsAutoSaving(false)
             }
         }
     }, [])
@@ -155,11 +160,11 @@ function SubmissionElement({submission, profile}: {
         { submission.completed_on === null && <>
             <button 
                 className={EDIT_BUTTON_CLASS} 
-                disabled={isSubmitting || isTerminating}
+                disabled={isSubmitting || isTerminating || isAutoSaving}
                 onClick={async () => {
                     await terminateSubmission()
                 }}>
-                termina test
+                {isAutoSaving ? 'salvataggio in corso...' : 'termina test'}
             </button>
         </>}
         <Error error={submitError} />
