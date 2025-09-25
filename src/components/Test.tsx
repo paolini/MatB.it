@@ -1,10 +1,11 @@
 "use client"
 import { gql, useMutation, useQuery } from '@apollo/client'
 import { useSearchParams } from 'next/navigation'
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LabelList } from 'recharts'
 
-import { Test, Profile, Submission, AnswerItem, TestStats } from '@/app/graphql/generated'
+import { Test, Profile, Submission, AnswerItem, TestStats, ScoreDistributionEntry } from '@/app/graphql/generated'
 import { Loading, Error, EDIT_BUTTON_CLASS, CANCEL_BUTTON_CLASS, DELETE_BUTTON_CLASS, BUTTON_CLASS, SAVE_BUTTON_CLASS } from '@/components/utils'
-import { useEffect, useState, useMemo } from 'react'
+import { useEffect, useState, useMemo, memo } from 'react'
 import { useRouter } from 'next/navigation'
 import { myTimestamp, formatDuration } from '@/lib/utils'
 import Link from 'next/link'
@@ -44,6 +45,10 @@ const TestQuery = gql`
                     empty_answers
                     average_score
                     correlation_to_total
+                }
+                score_distribution {
+                    score_range
+                    count
                 }
             }
             author {
@@ -587,6 +592,26 @@ function TestStatistics({stats}: {stats: TestStats}) {
                         </table>
                     </div>
                     
+                    {/* Grafico statistiche per esercizio */}
+                    {stats.exercises.length > 0 && (
+                        <div className="mt-6">
+                            <h4 className="text-md font-semibold mb-3">Grafico prestazioni per esercizio</h4>
+                            <div className="bg-white p-4 border border-gray-200 rounded-lg">
+                                <ExerciseStatisticsChart exercises={stats.exercises} />
+                            </div>
+                        </div>
+                    )}
+                    
+                    {/* Grafico distribuzione punteggi */}
+                    {stats.score_distribution.length > 0 && (
+                        <div className="mt-6">
+                            <h4 className="text-md font-semibold mb-3">Distribuzione dei punteggi</h4>
+                            <div className="bg-white p-4 border border-gray-200 rounded-lg">
+                                <ScoreDistributionChart distribution={stats.score_distribution} />
+                            </div>
+                        </div>
+                    )}
+                    
                     {stats.exercises.length > 0 && (
                         <div className="mt-4 text-sm text-gray-600">
                             <p>💡 <strong>Legenda:</strong></p>
@@ -602,6 +627,205 @@ function TestStatistics({stats}: {stats: TestStats}) {
         </div>
     )
 }
+
+const ExerciseStatisticsChart = memo(function ExerciseStatisticsChart({ exercises }: { exercises: any[] }) {
+    // Se non ci sono dati, non mostrare nulla
+    if (exercises.length === 0) {
+        return null
+    }
+
+    // Prepara i dati per il grafico
+    const chartData = exercises.map((exercise, index) => ({
+        exercise: `Es. ${index + 1}`,
+        successRate: exercise.total_answers > 0 
+            ? Math.round((exercise.correct_answers / exercise.total_answers) * 100)
+            : 0,
+        averageScore: exercise.average_score !== null 
+            ? Math.round(exercise.average_score * 100)
+            : 0,
+        totalAnswers: exercise.total_answers,
+        correctAnswers: exercise.correct_answers,
+        emptyAnswers: exercise.empty_answers
+    }))
+
+    return (
+        <div>
+            <div className="text-sm text-gray-600 mb-4">
+                Percentuale di successo e punteggio medio per ciascun esercizio
+            </div>
+            <div className="w-full h-80">
+                <ResponsiveContainer width="100%" height="100%">
+                    <BarChart
+                        data={chartData}
+                        margin={{
+                            top: 20,
+                            right: 30,
+                            left: 20,
+                            bottom: 5,
+                        }}
+                    >
+                        <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                        <XAxis 
+                            dataKey="exercise" 
+                            stroke="#666"
+                            fontSize={12}
+                        />
+                        <YAxis 
+                            stroke="#666"
+                            fontSize={12}
+                            domain={[0, 100]}
+                            tickFormatter={(value: any) => `${value}%`}
+                        />
+                        <Tooltip
+                            contentStyle={{
+                                backgroundColor: '#f8f9fa',
+                                border: '1px solid #dee2e6',
+                                borderRadius: '6px',
+                                fontSize: '14px'
+                            }}
+                            formatter={(value: any, name: any) => {
+                                const label = name === 'successRate' 
+                                    ? 'Percentuale successo'
+                                    : 'Punteggio medio'
+                                return [`${value}%`, label]
+                            }}
+                            labelFormatter={(label: any, payload: any) => {
+                                if (payload && payload.length > 0) {
+                                    const data = payload[0].payload
+                                    return `${label} - Totali: ${data.totalAnswers} | Corrette: ${data.correctAnswers} | Vuote: ${data.emptyAnswers}`
+                                }
+                                return label
+                            }}
+                        />
+                        <Bar 
+                            dataKey="successRate" 
+                            fill="#10b981"
+                            name="successRate"
+                            radius={[2, 2, 0, 0]}
+                            stroke="#059669"
+                            strokeWidth={1}
+                        >
+                            <LabelList 
+                                dataKey="successRate" 
+                                position="top" 
+                                formatter={(value: any) => `${value}%`}
+                                fontSize={10}
+                                fill="#059669"
+                            />
+                        </Bar>
+                        <Bar 
+                            dataKey="averageScore" 
+                            fill="#3b82f6"
+                            name="averageScore"
+                            radius={[2, 2, 0, 0]}
+                            stroke="#2563eb"
+                            strokeWidth={1}
+                        >
+                            <LabelList 
+                                dataKey="averageScore" 
+                                position="top" 
+                                formatter={(value: any) => `${value}%`}
+                                fontSize={10}
+                                fill="#2563eb"
+                            />
+                        </Bar>
+                    </BarChart>
+                </ResponsiveContainer>
+            </div>
+            <div className="mt-2 flex justify-center space-x-6 text-sm">
+                <div className="flex items-center space-x-2">
+                    <div className="w-3 h-3 bg-green-500 rounded"></div>
+                    <span>Percentuale successo</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                    <div className="w-3 h-3 bg-blue-500 rounded"></div>
+                    <span>Punteggio medio</span>
+                </div>
+            </div>
+        </div>
+    )
+})
+
+const ScoreDistributionChart = memo(function ScoreDistributionChart({ distribution }: { distribution: ScoreDistributionEntry[] }) {
+    // Se non ci sono dati, mostra un messaggio
+    if (distribution.length === 0) {
+        return (
+            <div className="text-center text-gray-500 py-4">
+                Nessun dato disponibile
+            </div>
+        )
+    }
+
+    // Prepara i dati per Recharts
+    const chartData = distribution.map(entry => ({
+        scoreRange: `${entry.score_range}-${entry.score_range + 1}`,
+        count: entry.count,
+        label: `${entry.score_range} - ${entry.score_range + 1} punti`
+    }))
+
+    return (
+        <div>
+            <div className="text-sm text-gray-600 mb-4">
+                Numero di studenti per fascia di punteggio
+            </div>
+            <div className="w-full h-80">
+                <ResponsiveContainer width="100%" height="100%">
+                    <BarChart
+                        data={chartData}
+                        margin={{
+                            top: 20,
+                            right: 30,
+                            left: 20,
+                            bottom: 60,
+                        }}
+                    >
+                        <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                        <XAxis 
+                            dataKey="scoreRange" 
+                            stroke="#666"
+                            fontSize={12}
+                            angle={-45}
+                            textAnchor="end"
+                            height={60}
+                        />
+                        <YAxis 
+                            stroke="#666"
+                            fontSize={12}
+                            tickFormatter={(value) => Math.round(value).toString()}
+                        />
+                        <Tooltip
+                            contentStyle={{
+                                backgroundColor: '#f8f9fa',
+                                border: '1px solid #dee2e6',
+                                borderRadius: '6px',
+                                fontSize: '14px'
+                            }}
+                            formatter={(value, name) => [
+                                `${value} ${value === 1 ? 'studente' : 'studenti'}`, 
+                                'Numero di studenti'
+                            ]}
+                            labelFormatter={(label) => `Fascia: ${label} punti`}
+                        />
+                        <Bar 
+                            dataKey="count" 
+                            fill="#3b82f6"
+                            radius={[4, 4, 0, 0]}
+                            stroke="#2563eb"
+                            strokeWidth={1}
+                        >
+                            <LabelList 
+                                dataKey="count" 
+                                position="top" 
+                                fontSize={10}
+                                fill="#2563eb"
+                            />
+                        </Bar>
+                    </BarChart>
+                </ResponsiveContainer>
+            </div>
+        </div>
+    )
+})
 
 const DeleteTestMutation = gql`
     mutation DeleteTest($_id: ObjectId!) {

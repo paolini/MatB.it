@@ -1,6 +1,6 @@
 import { ObjectId } from 'mongodb'
 import { Context } from '../types'
-import { TestStats, ExerciseStats, Test } from '../generated'
+import { TestStats, ExerciseStats, Test, ScoreDistributionEntry } from '../generated'
 import { getSubmissionsCollection } from '@/lib/models'
 import { compute_answer_score } from '@/lib/answer'
 
@@ -22,17 +22,23 @@ export default async function testStats(parent: Test, _args: unknown, context: C
             __typename: 'TestStats',
             completed_submissions,
             exercises: [], // Array vuoto se non ci sono abbastanza submissions
-            min_submissions_for_stats: MIN_SUBMISSIONS_FOR_STATS
+            min_submissions_for_stats: MIN_SUBMISSIONS_FOR_STATS,
+            score_distribution: [] // Array vuoto se non ci sono abbastanza submissions
         }
     }
     
     // Estrai tutti gli esercizi (note_id) dalle submissions esistenti
     const exerciseIds = new Set<string>()
+    const submissionScores: number[] = [] // Array dei punteggi già calcolati
     
     submissions.forEach(submission => {
         submission.answers?.forEach(answer => {
             exerciseIds.add(answer.note_id.toString())
         })
+        
+        // Usa il punteggio già memorizzato nel database (calcolato quando la submission è stata completata)
+        const score = submission.score ?? 0
+        submissionScores.push(score)
     })
     
     // Calcola le statistiche per ogni esercizio
@@ -85,10 +91,28 @@ export default async function testStats(parent: Test, _args: unknown, context: C
         })
     }
     
+    // Calcola la distribuzione dei punteggi usando i punteggi già memorizzati
+    const scoreDistribution = new Map<number, number>()
+    
+    for (const totalScore of submissionScores) {
+        const scoreRange = Math.floor(totalScore)
+        scoreDistribution.set(scoreRange, (scoreDistribution.get(scoreRange) || 0) + 1)
+    }
+    
+    // Converti la mappa in array di ScoreDistributionEntry, ordinato per score_range
+    const score_distribution = Array.from(scoreDistribution.entries())
+        .map(([score_range, count]) => ({
+            __typename: 'ScoreDistributionEntry' as const,
+            score_range,
+            count
+        }))
+        .sort((a, b) => a.score_range - b.score_range)
+
     return {
         __typename: 'TestStats',
         completed_submissions,
         exercises,
-        min_submissions_for_stats: MIN_SUBMISSIONS_FOR_STATS
+        min_submissions_for_stats: MIN_SUBMISSIONS_FOR_STATS,
+        score_distribution
     }
 }

@@ -74,6 +74,12 @@ type TestStats {
     completed_submissions: Int!
     exercises: [ExerciseStats!]!
     min_submissions_for_stats: Int!
+    score_distribution: [ScoreDistributionEntry!]!
+}
+
+type ScoreDistributionEntry {
+    score_range: Int!
+    count: Int!
 }
 
 type ExerciseStats {
