@@ -1,11 +1,11 @@
 "use client"
 import { gql, useQuery, useMutation } from '@apollo/client'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 
 import { Profile, Submission } from '@/app/graphql/generated'
-import { Loading, Error, BUTTON_CLASS, EDIT_BUTTON_CLASS, DELETE_BUTTON_CLASS } from '@/components/utils'
+import { Loading, Error, EDIT_BUTTON_CLASS, DELETE_BUTTON_CLASS } from '@/components/utils'
 // ...existing code...
-import DocumentElement, { DocumentContext, ContextAnswer, OrdinalContextProvider, DebugOrdinalContext } from './DocumentElement'
+import DocumentElement, { DocumentContext, ContextAnswer, OrdinalContextProvider } from './DocumentElement'
 import { myTimestamp } from '@/lib/utils'
 import { useRouter } from 'next/navigation'
 
@@ -85,10 +85,8 @@ function SubmissionElement({submission, profile}: {
     // Reset answers state when submission changes
     useEffect(() => {
         setAnswers(answers_map)
-        setNeedSave(false)
-    }, [submission])
+    }, [answers_map])
 
-    const [needSave, setNeedSave] = useState<boolean>(false)
     const [submitAnswers, { loading: isSubmitting, error: submitError }] = useMutation(SUBMIT_MUTATION, {
         refetchQueries: [
             { query: SubmissionQuery, variables: { _id: submission._id } }
@@ -96,11 +94,41 @@ function SubmissionElement({submission, profile}: {
     })
     const [terminateSubmission, { loading: isTerminating, error: terminateError }] = useMutation(TERMINATE_MUTATION, {
         variables: { _id: submission._id, completed: true },
-        onCompleted: () => setNeedSave(false),
         refetchQueries: [
             { query: SubmissionQuery, variables: { _id: submission._id } }
         ]
     })
+
+    // Debounced autosave functionality
+    const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+    
+    const autoSave = useCallback((answersToSave: Record<string, ContextAnswer>) => {
+        if (saveTimeoutRef.current) {
+            clearTimeout(saveTimeoutRef.current)
+        }
+        
+        saveTimeoutRef.current = setTimeout(async () => {
+            try {
+                await submitAnswers({
+                    variables: {
+                        _id: submission._id,
+                        answers: Object.entries(answersToSave).map(([note_id, item]) => ({ note_id, answer: item.answer })),
+                    }
+                })
+            } catch (error) {
+                console.error('Autosave failed:', error)
+            }
+        }, 1000) // Wait 1 second after the last change before saving
+    }, [submitAnswers, submission._id])
+
+    // Cleanup timeout on unmount
+    useEffect(() => {
+        return () => {
+            if (saveTimeoutRef.current) {
+                clearTimeout(saveTimeoutRef.current)
+            }
+        }
+    }, [])
 
     const context: DocumentContext = {
         parents: [],
@@ -109,8 +137,10 @@ function SubmissionElement({submission, profile}: {
         setAnswer: (id: string, answer: number) => {
             const answer_object = answers[id]
             if (answer_object.answer !== answer) {
-                setAnswers({ ...answers, [id]: { ...answer_object, answer } })
-                setNeedSave(true)
+                const newAnswers = { ...answers, [id]: { ...answer_object, answer } }
+                setAnswers(newAnswers)
+                // Trigger autosave with the new answers
+                autoSave(newAnswers)
             }
         },
     }
@@ -123,26 +153,11 @@ function SubmissionElement({submission, profile}: {
             document={submission.document}
         />
         { submission.completed_on === null && <>
-            <button
-                className={BUTTON_CLASS}
-                disabled={!needSave || isSubmitting || isTerminating}
-                onClick={async () => {
-                    await submitAnswers({
-                        variables: {
-                            _id: submission._id,
-                            answers: Object.entries(answers).map(([note_id, item]) => ({ note_id, answer: item.answer })),
-                        }
-                    })
-                    setNeedSave(false)
-                }}>
-                {isSubmitting ? 'Invio...' : 'salva risposte'}
-            </button>
             <button 
                 className={EDIT_BUTTON_CLASS} 
-                disabled={needSave || isSubmitting || isTerminating}
+                disabled={isSubmitting || isTerminating}
                 onClick={async () => {
                     await terminateSubmission()
-
                 }}>
                 termina test
             </button>
