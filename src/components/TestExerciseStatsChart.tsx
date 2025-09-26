@@ -1,7 +1,22 @@
 import { memo } from 'react'
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LabelList } from 'recharts'
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LabelList, Legend } from 'recharts'
+
+export default function ExerciseStatsChart({exercises}: {exercises: any[]}) {
+    return (
+        <div>
+            <h4 className="text-md font-semibold mb-3">Grafico prestazioni per esercizio</h4>
+            <ExerciseStatisticsChart exercises={exercises} />
+        </div>
+    )
+}
 
 const ExerciseStatisticsChart = memo(function ExerciseStatisticsChart({ exercises }: { exercises: any[] }) {
+    const LABELS_MAP: Record<string, string> = {
+        successRate: 'Percentuale successo',
+        averageScore: 'Punteggio medio',
+        correlation: 'Correlazione'
+    }
+    
     if (exercises.length === 0) {
         return null
     }
@@ -12,6 +27,9 @@ const ExerciseStatisticsChart = memo(function ExerciseStatisticsChart({ exercise
             : 0,
         averageScore: exercise.average_score !== null 
             ? Math.round(exercise.average_score * 100)
+            : 0,
+        correlation: typeof exercise.correlation_to_total === 'number' && exercise.correlation_to_total !== null
+            ? Math.round(exercise.correlation_to_total * 100)
             : 0,
         totalAnswers: exercise.total_answers,
         correctAnswers: exercise.correct_answers,
@@ -53,9 +71,7 @@ const ExerciseStatisticsChart = memo(function ExerciseStatisticsChart({ exercise
                                 fontSize: '14px'
                             }}
                             formatter={(value: any, name: any) => {
-                                const label = name === 'successRate' 
-                                    ? 'Percentuale successo'
-                                    : 'Punteggio medio'
+                                const label = LABELS_MAP[name] || name
                                 return [`${value}%`, label]
                             }}
                             labelFormatter={(label: any, payload: any) => {
@@ -66,10 +82,11 @@ const ExerciseStatisticsChart = memo(function ExerciseStatisticsChart({ exercise
                                 return label
                             }}
                         />
+                        <Legend />
                         <Bar 
                             dataKey="successRate" 
                             fill="#10b981"
-                            name="successRate"
+                            name="Percentuale successo"
                             radius={[2, 2, 0, 0]}
                             stroke="#059669"
                             strokeWidth={1}
@@ -85,7 +102,7 @@ const ExerciseStatisticsChart = memo(function ExerciseStatisticsChart({ exercise
                         <Bar 
                             dataKey="averageScore" 
                             fill="#3b82f6"
-                            name="averageScore"
+                            name="Punteggio medio"
                             radius={[2, 2, 0, 0]}
                             stroke="#2563eb"
                             strokeWidth={1}
@@ -98,28 +115,25 @@ const ExerciseStatisticsChart = memo(function ExerciseStatisticsChart({ exercise
                                 fill="#2563eb"
                             />
                         </Bar>
+                        <Bar 
+                            dataKey="correlation" 
+                            fill="#f59e42"
+                            name="Correlazione"
+                            radius={[2, 2, 0, 0]}
+                            stroke="#ea580c"
+                            strokeWidth={1}
+                        >
+                            <LabelList 
+                                dataKey="correlation" 
+                                position="top" 
+                                formatter={(value: any) => `${value}%`}
+                                fontSize={10}
+                                fill="#ea580c"
+                            />
+                        </Bar>
                     </BarChart>
                 </ResponsiveContainer>
-            </div>
-            <div className="mt-2 flex justify-center space-x-6 text-sm">
-                <div className="flex items-center space-x-2">
-                    <div className="w-3 h-3 bg-green-500 rounded"></div>
-                    <span>Percentuale successo</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                    <div className="w-3 h-3 bg-blue-500 rounded"></div>
-                    <span>Punteggio medio</span>
-                </div>
             </div>
         </div>
     )
 })
-
-export default function ExerciseStatsChart({exercises}: {exercises: any[]}) {
-    return (
-        <div>
-            <h4 className="text-md font-semibold mb-3">Grafico prestazioni per esercizio</h4>
-            <ExerciseStatisticsChart exercises={exercises} />
-        </div>
-    )
-}

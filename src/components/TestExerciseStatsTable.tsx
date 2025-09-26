@@ -10,6 +10,7 @@ export default function ExerciseStatsTable({exercises}: {exercises: any[]}) {
                         <th className="border border-gray-300 px-4 py-2 text-center">Risposte vuote</th>
                         <th className="border border-gray-300 px-4 py-2 text-center">% Successo</th>
                         <th className="border border-gray-300 px-4 py-2 text-center">Punteggio medio</th>
+                        <th className="border border-gray-300 px-4 py-2 text-center">Correlazione</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -24,6 +25,11 @@ export default function ExerciseStatsTable({exercises}: {exercises: any[]}) {
                             </td>
                             <td className="border border-gray-300 px-4 py-2 text-center">
                                 {exercise.average_score !== null ? (exercise.average_score * 100).toFixed(1) + '%' : 'N/A'}
+                            </td>
+                            <td className="border border-gray-300 px-4 py-2 text-center">
+                                {typeof exercise.correlation_to_total === 'number' && exercise.correlation_to_total !== null
+                                    ? (exercise.correlation_to_total * 100).toFixed(1) + '%'
+                                    : 'N/A'}
                             </td>
                         </tr>
                     ))}

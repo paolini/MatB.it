@@ -1,6 +1,6 @@
 import { TestStats } from '@/app/graphql/generated'
-import ExerciseStatsTable from './ExerciseStatsTable'
-import ExerciseStatsChart from './ExerciseStatsChart'
+import ExerciseStatsTable from './TestExerciseStatsTable'
+import ExerciseStatsChart from './TestExerciseStatsChart'
 
 export default function TestExercisesTab({stats}: {stats: TestStats}) {
     const hasDetailedStats = stats.exercises.length > 0
@@ -29,6 +29,7 @@ export default function TestExercisesTab({stats}: {stats: TestStats}) {
                     <li><strong>% Successo:</strong> percentuale di risposte corrette sul totale</li>
                     <li><strong>Punteggio medio:</strong> media dei punteggi ottenuti per questo esercizio</li>
                     <li><strong>Risposte vuote:</strong> numero di esercizi lasciati senza risposta</li>
+                    <li><strong>Correlazione:</strong> quanto il punteggio nell'esercizio è legato al punteggio totale del test (valori vicini a 100% indicano forte correlazione, vicini a 0% nessuna correlazione)</li>
                 </ul>
             </div>
         </div>
