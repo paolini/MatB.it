@@ -87,7 +87,7 @@ export default function TestWrapper({_id}: {_id: string}) {
     const editMode = searchParams.get('edit') !== null
     const accessToken = searchParams.get('token')
     const { loading, error, data } = useQuery<{test: Test, profile: Profile|null}>(
-        TestQuery, {variables: { _id }})
+        TestQuery, {variables: { _id }, pollInterval: 10000})
 
     if (error) return <Error error={error} />    
     if (loading || !data) return <Loading />
