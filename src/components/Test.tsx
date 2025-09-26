@@ -1,15 +1,30 @@
 "use client"
 import { gql, useMutation, useQuery } from '@apollo/client'
-import { useSearchParams } from 'next/navigation'
+import { useSearchParams, useRouter, usePathname } from 'next/navigation'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LabelList } from 'recharts'
 
 import { Test, Profile, Submission, AnswerItem, TestStats, ScoreDistributionEntry } from '@/app/graphql/generated'
 import { Loading, Error, EDIT_BUTTON_CLASS, CANCEL_BUTTON_CLASS, DELETE_BUTTON_CLASS, BUTTON_CLASS, SAVE_BUTTON_CLASS } from '@/components/utils'
 import { useEffect, useState, useMemo, memo } from 'react'
-import { useRouter } from 'next/navigation'
 import { myTimestamp, formatDuration } from '@/lib/utils'
 import Link from 'next/link'
-import ShareModal from '@/components/ShareModal'
+import ShareModal from './ShareModal'
+
+// Definizione dei tab disponibili
+type TabKey = 'info' | 'scores' | 'exercises' | 'submissions'
+
+interface TabInfo {
+    key: TabKey
+    label: string
+    icon: string
+}
+
+const TABS: TabInfo[] = [
+    { key: 'info', label: 'Informazioni', icon: '📋' },
+    { key: 'scores', label: 'Punteggi', icon: '📊' },
+    { key: 'exercises', label: 'Esercizi', icon: '🧮' },
+    { key: 'submissions', label: 'Consegne', icon: '📝' }
+]
 
 const TestQuery = gql`
     query Test($_id: ObjectId!) {
@@ -90,6 +105,8 @@ function ViewTest({test, profile, accessToken}: {
     accessToken?: string | null
 }) {
     const router = useRouter()
+    const pathname = usePathname()
+    const searchParams = useSearchParams()
     const [showShareModal, setShowShareModal] = useState(false)
     const [startSubmission, { loading: isStarting, error: startError }] = useMutation(NewSubmissionMutation, {
     refetchQueries: [
@@ -97,6 +114,25 @@ function ViewTest({test, profile, accessToken}: {
     ]
 })
     const [now, setNow] = useState(new Date())
+    
+    // Determina se l'utente può vedere i dettagli (è l'autore o ha un token)
+    const canViewDetails = test.author._id === profile?._id || accessToken
+    
+    // Gestione del tab attivo
+    const activeTab = (searchParams.get('tab') as TabKey) || 'info'
+    
+    const switchTab = (tab: TabKey) => {
+        const params = new URLSearchParams(searchParams)
+        if (tab === 'info') {
+            params.delete('tab') // Default tab, non serve specificarlo
+        } else {
+            params.set('tab', tab)
+        }
+        
+        // Mantieni altri parametri come token
+        const newUrl = params.toString() ? `${pathname}?${params.toString()}` : pathname
+        router.push(newUrl)
+    }
     
     // Aggiorna il timestamp ogni secondo
     useEffect(() => {
@@ -116,55 +152,91 @@ function ViewTest({test, profile, accessToken}: {
             {test.title || `Test ${test._id}`}
         </h1>
         
-        <TestInfo test={test} now={now} isOpen={isOpen} isOwner={profile?._id === test.author._id} />
-
-        { profile?._id === test.author._id && (
-            <div className="flex gap-2 mb-4">
-                <Link href={`/note/${test.note_id}?edit`} className={EDIT_BUTTON_CLASS}>
-                    Modifica nota con il testo del test
-                </Link>
-                <Link href={`?edit`} className={EDIT_BUTTON_CLASS}>
-                    Modifica proprietà del test
-                </Link>
-                <button 
-                    onClick={() => setShowShareModal(true)}
-                    className={EDIT_BUTTON_CLASS}
-                >
-                    Condividi
+        {/* Sempre visibile: informazioni di base e controlli per tutti */}
+        <div className="mb-6">
+            <TestBasicInfo test={test} now={now} isOpen={isOpen} profile={profile} />
+            
+            {/* Controlli per l'autore */}
+            { profile?._id === test.author._id && (
+                <div className="flex gap-2 mb-4">
+                    <Link href={`/note/${test.note_id}?edit`} className={EDIT_BUTTON_CLASS}>
+                        Modifica nota con il testo del test
+                    </Link>
+                    <Link href={`?edit`} className={EDIT_BUTTON_CLASS}>
+                        Modifica proprietà del test
+                    </Link>
+                    <button 
+                        onClick={() => setShowShareModal(true)}
+                        className={EDIT_BUTTON_CLASS}
+                    >
+                        Condividi
+                    </button>
+                </div>
+            )}
+            
+            {/* Controlli per gli utenti non autenticati */}
+            { !profile && isOpen && (
+                <div className="bg-yellow-50 border border-yellow-200 rounded-md p-4 mb-4">
+                    <span>Fai il login per iniziare il test</span>
+                </div>
+            )}
+            
+            {/* Pulsante per iniziare il test */}
+            {profile && test.submissions && test.submissions.length === 0 && isOpen && (
+                <button className={BUTTON_CLASS} disabled={isStarting} onClick={async () => {
+                    const result = await startSubmission({ variables: { test_id: test._id } })
+                    const submission_id = result.data?.newSubmission
+                    if (submission_id) {
+                        router.push(`/submission/${submission_id}`)
+                    }
+                }}>
+                    inizia test
                 </button>
-            </div>
-        )}
-        { !profile && isOpen
-            && <span>Fai il login per iniziare il test</span>
-        }
-        {
-            profile 
-            && test.submissions
-            && test.submissions.length === 0 
-            && isOpen
-            && <button className={BUTTON_CLASS} disabled={isStarting} onClick={async () => {
-                const result = await startSubmission({ variables: { test_id: test._id } })
-                const submission_id = result.data?.newSubmission
-                if (submission_id) {
-                    router.push(`/submission/${submission_id}`)
-                }
-            }}>
-                inizia test
-            </button>
-        }
-        {startError && <Error error={startError} />}
-        <div className="flex flex-col gap-2">
-            {test.submissions && test.submissions
-                .filter(submission => submission.author?._id === profile?._id)
-                .map(submission => <SubmissionElement key={submission._id} submission={submission} accessToken={accessToken} />)}
+            )}
+            
+            {startError && <Error error={startError} />}
+            
+            {/* Submission dell'utente corrente */}
+            {profile && test.submissions && (
+                <div className="flex flex-col gap-2 mb-4">
+                    {test.submissions
+                        .filter(submission => submission.author?._id === profile._id)
+                        .map(submission => <SubmissionElement key={submission._id} submission={submission} accessToken={accessToken} />)}
+                </div>
+            )}
         </div>
-        { (test.author._id === profile?._id || accessToken) && test.stats && 
-            <TestStatistics stats={test.stats} /> }
 
-        { (test.author._id === profile?._id || accessToken) && test.submissions && 
-            <SubmissionTable submissions={test.submissions} accessToken={accessToken} /> }
+        {/* Tab navigation - solo se l'utente può vedere i dettagli */}
+        {canViewDetails && (
+            <>
+                <div className="border-b border-gray-200 mb-6">
+                    <nav className="flex space-x-8">
+                        {TABS.map((tab) => (
+                            <button
+                                key={tab.key}
+                                onClick={() => switchTab(tab.key)}
+                                className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                                    activeTab === tab.key
+                                        ? 'border-blue-500 text-blue-600'
+                                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                }`}
+                            >
+                                {tab.icon} {tab.label}
+                            </button>
+                        ))}
+                    </nav>
+                </div>
+
+                {/* Tab content */}
+                <div className="tab-content">
+                    {activeTab === 'info' && <TestInfoTab test={test} now={now} isOpen={isOpen} />}
+                    {activeTab === 'scores' && test.stats && <TestScoresTab stats={test.stats} />}
+                    {activeTab === 'exercises' && test.stats && <TestExercisesTab stats={test.stats} />}
+                    {activeTab === 'submissions' && test.submissions && <TestSubmissionsTab submissions={test.submissions} accessToken={accessToken} />}
+                </div>
+            </>
+        )}
         
-         
         <ShareModal 
             resource={test}
             isOpen={showShareModal}
@@ -173,12 +245,13 @@ function ViewTest({test, profile, accessToken}: {
     </div>
 }
 
-function TestInfo({test, now, isOpen, isOwner}: {
+function TestBasicInfo({test, now, isOpen, profile}: {
     test: Test,
     now: Date,
     isOpen: boolean,
-    isOwner: boolean
+    profile: Profile|null
 }) {
+    const isOwner = profile?._id === test.author._id
     
     if (!isOwner) {
         // Visualizzazione semplificata per utenti non proprietari
@@ -504,6 +577,192 @@ function SubmissionRow({submission, headers, index, rankMap, accessToken}:{
             </td>
         }
     }
+}
+
+// Componenti per i vari tab
+function TestInfoTab({test, now, isOpen}: {
+    test: Test,
+    now: Date,
+    isOpen: boolean
+}) {
+    return (
+        <div className="space-y-6">
+            <div className="bg-white p-6 rounded-lg border border-gray-200">
+                <h3 className="text-lg font-semibold mb-4">Informazioni dettagliate</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <strong>Autore:</strong> {test.author.name || test.author.email}
+                    </div>
+                    <div>
+                        <strong>Creato il:</strong> {myTimestamp(test.created_on)}
+                    </div>
+                    <div>
+                        <strong>Apertura:</strong> {
+                            test.open_on 
+                                ? myTimestamp(test.open_on)
+                                : "Sempre aperto"
+                        }
+                    </div>
+                    <div>
+                        <strong>Chiusura:</strong> {
+                            test.close_on 
+                                ? myTimestamp(test.close_on)
+                                : "Sempre aperto"
+                        }
+                    </div>
+                    <div>
+                        <strong>Stato attuale:</strong> {
+                            isOpen
+                                ? <span className="text-green-600 font-semibold">Aperto</span>
+                                : <span className="text-red-600 font-semibold">Chiuso</span>
+                        }
+                    </div>
+                    <div>
+                        <strong>Visibilità:</strong> {
+                            test.private 
+                                ? <span className="text-yellow-600">Privato</span>
+                                : <span className="text-blue-600">Pubblico</span>
+                        }
+                    </div>
+                </div>
+            </div>
+            
+            <div className="bg-white p-6 rounded-lg border border-gray-200">
+                <h3 className="text-lg font-semibold mb-4">Contenuto del test</h3>
+                <div className="text-gray-600">
+                    <Link href={`/note/${test.note_id}`} className="text-blue-600 hover:text-blue-800 underline">
+                        Visualizza il contenuto del test →
+                    </Link>
+                </div>
+            </div>
+        </div>
+    )
+}
+
+function TestScoresTab({stats}: {stats: TestStats}) {
+    return (
+        <div className="space-y-6">
+            <div className="bg-white p-6 rounded-lg border border-gray-200">
+                <h3 className="text-lg font-semibold mb-4">Riepilogo punteggi</h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                    <div className="text-center">
+                        <div className="text-2xl font-bold text-blue-600">{stats.completed_submissions}</div>
+                        <div className="text-sm text-gray-600">Consegne totali</div>
+                    </div>
+                    <div className="text-center">
+                        <div className="text-2xl font-bold text-green-600">{stats.min_submissions_for_stats}</div>
+                        <div className="text-sm text-gray-600">Minimo per statistiche</div>
+                    </div>
+                    <div className="text-center">
+                        <div className="text-2xl font-bold text-purple-600">{stats.score_distribution.length}</div>
+                        <div className="text-sm text-gray-600">Fasce di punteggio</div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Grafico distribuzione punteggi */}
+            {stats.score_distribution.length > 0 && (
+                <div className="bg-white p-6 rounded-lg border border-gray-200">
+                    <h3 className="text-lg font-semibold mb-4">Distribuzione dei punteggi</h3>
+                    <ScoreDistributionChart distribution={stats.score_distribution} />
+                </div>
+            )}
+
+            {stats.completed_submissions < stats.min_submissions_for_stats && (
+                <div className="bg-yellow-50 border border-yellow-200 rounded-md p-4">
+                    <p className="text-yellow-800">
+                        📊 Sono necessarie almeno {stats.min_submissions_for_stats} consegne per visualizzare le statistiche dettagliate.
+                        Attualmente ci sono {stats.completed_submissions} consegne.
+                    </p>
+                </div>
+            )}
+        </div>
+    )
+}
+
+function TestExercisesTab({stats}: {stats: TestStats}) {
+    const hasDetailedStats = stats.exercises.length > 0
+    
+    return (
+        <div className="space-y-6">
+            <div className="bg-white p-6 rounded-lg border border-gray-200">
+                <h3 className="text-lg font-semibold mb-4">Statistiche per esercizio</h3>
+                
+                {!hasDetailedStats ? (
+                    <div className="bg-yellow-50 border border-yellow-200 rounded-md p-4">
+                        <p className="text-yellow-800">
+                            📊 Sono necessarie almeno {stats.min_submissions_for_stats} consegne per visualizzare le statistiche per esercizio.
+                            Attualmente ci sono {stats.completed_submissions} consegne.
+                        </p>
+                    </div>
+                ) : (
+                    <>
+                        {/* Tabella statistiche */}
+                        <div className="overflow-x-auto mb-6">
+                            <table className="w-full border-collapse border border-gray-300">
+                                <thead>
+                                    <tr className="bg-gray-50">
+                                        <th className="border border-gray-300 px-4 py-2 text-left">Esercizio</th>
+                                        <th className="border border-gray-300 px-4 py-2 text-center">Risposte totali</th>
+                                        <th className="border border-gray-300 px-4 py-2 text-center">Risposte corrette</th>
+                                        <th className="border border-gray-300 px-4 py-2 text-center">Risposte vuote</th>
+                                        <th className="border border-gray-300 px-4 py-2 text-center">% Successo</th>
+                                        <th className="border border-gray-300 px-4 py-2 text-center">Punteggio medio</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {stats.exercises.map((exercise, index) => (
+                                        <tr key={index} className="hover:bg-gray-50">
+                                            <td className="border border-gray-300 px-4 py-2 font-medium">Esercizio {index + 1}</td>
+                                            <td className="border border-gray-300 px-4 py-2 text-center">{exercise.total_answers}</td>
+                                            <td className="border border-gray-300 px-4 py-2 text-center text-green-600 font-semibold">{exercise.correct_answers}</td>
+                                            <td className="border border-gray-300 px-4 py-2 text-center text-red-600">{exercise.empty_answers}</td>
+                                            <td className="border border-gray-300 px-4 py-2 text-center">
+                                                {exercise.total_answers > 0 ? Math.round((exercise.correct_answers / exercise.total_answers) * 100) : 0}%
+                                            </td>
+                                            <td className="border border-gray-300 px-4 py-2 text-center">
+                                                {exercise.average_score !== null ? (exercise.average_score * 100).toFixed(1) + '%' : 'N/A'}
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        {/* Grafico statistiche per esercizio */}
+                        <div>
+                            <h4 className="text-md font-semibold mb-3">Grafico prestazioni per esercizio</h4>
+                            <ExerciseStatisticsChart exercises={stats.exercises} />
+                        </div>
+
+                        <div className="mt-4 text-sm text-gray-600">
+                            <p>💡 <strong>Legenda:</strong></p>
+                            <ul className="list-disc list-inside mt-2 space-y-1">
+                                <li><strong>Risposte corrette:</strong> numero di risposte che hanno ottenuto il punteggio massimo</li>
+                                <li><strong>% Successo:</strong> percentuale di risposte corrette sul totale</li>
+                                <li><strong>Punteggio medio:</strong> media dei punteggi ottenuti per questo esercizio</li>
+                                <li><strong>Risposte vuote:</strong> numero di esercizi lasciati senza risposta</li>
+                            </ul>
+                        </div>
+                    </>
+                )}
+            </div>
+        </div>
+    )
+}
+
+function TestSubmissionsTab({submissions, accessToken}: {
+    submissions: Submission[], 
+    accessToken?: string | null
+}) {
+    return (
+        <div className="space-y-6">
+            <div className="bg-white p-6 rounded-lg border border-gray-200">
+                <h3 className="text-lg font-semibold mb-4">Elenco consegne</h3>
+                <SubmissionTable submissions={submissions} accessToken={accessToken} />
+            </div>
+        </div>
+    )
 }
 
 function TestStatistics({stats}: {stats: TestStats}) {
