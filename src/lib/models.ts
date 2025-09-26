@@ -111,6 +111,7 @@ export type MongoSubmission = {
     started_on: Date // quando è iniziato
     completed_on: Date|null // quando (e se) è stato inviato
     answers: MongoAnswer[]
+    score?: number // calcolato quando la submission è completata
 }
 
 export type MongoAnswer = {

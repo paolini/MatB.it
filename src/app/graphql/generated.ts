@@ -296,6 +296,13 @@ export type QueryTestsArgs = {
   open: InputMaybe<Scalars['Boolean']['input']>;
 };
 
+export type ScoreDistributionEntry = {
+  __typename?: 'ScoreDistributionEntry';
+  count: Scalars['Int']['output'];
+  score_max: Scalars['Float']['output'];
+  score_min: Scalars['Float']['output'];
+};
+
 export type Submission = {
   __typename?: 'Submission';
   _id: Scalars['ObjectId']['output'];
@@ -332,7 +339,9 @@ export type TestStats = {
   __typename?: 'TestStats';
   completed_submissions: Scalars['Int']['output'];
   exercises: Array<ExerciseStats>;
+  incompleted_submissions: Scalars['Int']['output'];
   min_submissions_for_stats: Scalars['Int']['output'];
+  score_distribution: Array<ScoreDistributionEntry>;
 };
 
 export type User = {
@@ -429,6 +438,7 @@ export type ResolversTypes = ResolversObject<{
   ObjectId: ResolverTypeWrapper<Scalars['ObjectId']['output']>;
   Profile: ResolverTypeWrapper<Profile>;
   Query: ResolverTypeWrapper<{}>;
+  ScoreDistributionEntry: ResolverTypeWrapper<ScoreDistributionEntry>;
   String: ResolverTypeWrapper<Scalars['String']['output']>;
   Submission: ResolverTypeWrapper<Submission>;
   Test: ResolverTypeWrapper<Test>;
@@ -453,6 +463,7 @@ export type ResolversParentTypes = ResolversObject<{
   ObjectId: Scalars['ObjectId']['output'];
   Profile: Profile;
   Query: {};
+  ScoreDistributionEntry: ScoreDistributionEntry;
   String: Scalars['String']['output'];
   Submission: Submission;
   Test: Test;
@@ -571,6 +582,13 @@ export type QueryResolvers<ContextType = Context, ParentType extends ResolversPa
   tests: Resolver<Array<ResolversTypes['Test']>, ParentType, ContextType, QueryTestsArgs>;
 }>;
 
+export type ScoreDistributionEntryResolvers<ContextType = Context, ParentType extends ResolversParentTypes['ScoreDistributionEntry'] = ResolversParentTypes['ScoreDistributionEntry']> = ResolversObject<{
+  count: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  score_max: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
+  score_min: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+}>;
+
 export type SubmissionResolvers<ContextType = Context, ParentType extends ResolversParentTypes['Submission'] = ResolversParentTypes['Submission']> = ResolversObject<{
   _id: Resolver<ResolversTypes['ObjectId'], ParentType, ContextType>;
   answers: Resolver<Array<ResolversTypes['AnswerItem']>, ParentType, ContextType>;
@@ -606,7 +624,9 @@ export type TestResolvers<ContextType = Context, ParentType extends ResolversPar
 export type TestStatsResolvers<ContextType = Context, ParentType extends ResolversParentTypes['TestStats'] = ResolversParentTypes['TestStats']> = ResolversObject<{
   completed_submissions: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   exercises: Resolver<Array<ResolversTypes['ExerciseStats']>, ParentType, ContextType>;
+  incompleted_submissions: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   min_submissions_for_stats: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  score_distribution: Resolver<Array<ResolversTypes['ScoreDistributionEntry']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
@@ -633,6 +653,7 @@ export type Resolvers<ContextType = Context> = ResolversObject<{
   ObjectId: GraphQLScalarType;
   Profile: ProfileResolvers<ContextType>;
   Query: QueryResolvers<ContextType>;
+  ScoreDistributionEntry: ScoreDistributionEntryResolvers<ContextType>;
   Submission: SubmissionResolvers<ContextType>;
   Test: TestResolvers<ContextType>;
   TestStats: TestStatsResolvers<ContextType>;

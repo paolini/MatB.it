@@ -22,9 +22,10 @@ const deleteSubmission = async function (
     if (!context.user) throw new AuthenticationError('Not authenticated')
     if (!item.test.author_id.equals(context.user._id)) throw new ForbiddenError('Not authorized')
     
-    // Sposta la nota nella collection deletedNotes
+    // Sposta la submission nella collection deletedSubmissions
     const deletedItem = {
         ...item,
+        score: item.score ?? undefined, // Converti null in undefined per compatibilità con MongoSubmission
         deleted_on: new Date(),
         deleted_by: context.user._id
     }

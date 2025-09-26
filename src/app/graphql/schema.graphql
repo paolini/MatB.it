@@ -92,8 +92,16 @@ type Submission {
 
 type TestStats {
     completed_submissions: Int!
+    incompleted_submissions: Int!
     exercises: [ExerciseStats!]!
     min_submissions_for_stats: Int!
+    score_distribution: [ScoreDistributionEntry!]!
+}
+
+type ScoreDistributionEntry {
+    score_min: Float!
+    score_max: Float!
+    count: Int!
 }
 
 type ExerciseStats {
