@@ -21,7 +21,7 @@ export default function SubmissionElement({submission, accessToken}: {
         const diffMs = end.getTime() - start.getTime()
         return formatDuration(diffMs)
     }
-    return <a key={submission._id} className={BUTTON_CLASS} href={getSubmissionLink()}>
+    return <a key={submission._id.toString()} className={BUTTON_CLASS} href={getSubmissionLink()}>
         { submission.completed_on 
             ? `visualizza test completato il ${myTimestamp(submission.completed_on)}`
             : `riprendi test del ${myTimestamp(submission.started_on)}`

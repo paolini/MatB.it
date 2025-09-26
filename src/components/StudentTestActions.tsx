@@ -25,6 +25,18 @@ export default function StudentTestActions({ test, profile, accessToken, isOpen 
     })
     return (
         <div className="mb-6">
+            {/* Messaggio test chiuso o non ancora aperto */}
+            { !isOpen && (
+                <div className="bg-red-50 border border-red-200 rounded-md p-4 mb-4">
+                    {test.open_on && new Date(test.open_on) > new Date() ? (
+                        <span>Il test non è ancora aperto. Apertura prevista: {new Date(test.open_on).toLocaleString()}</span>
+                    ) : test.close_on && new Date(test.close_on) < new Date() ? (
+                        <span>Il test è chiuso e non è possibile partecipare.</span>
+                    ) : (
+                        <span>Il test non è disponibile.</span>
+                    )}
+                </div>
+            )}
             {/* Messaggio login per utenti non autenticati */}
             { !profile && isOpen && (
                 <div className="bg-yellow-50 border border-yellow-200 rounded-md p-4 mb-4">
@@ -49,7 +61,7 @@ export default function StudentTestActions({ test, profile, accessToken, isOpen 
                 <div className="flex flex-col gap-2 mb-4">
                     {test.submissions
                         .filter(submission => submission.author?._id === profile._id)
-                        .map(submission => <SubmissionElement key={submission._id} submission={submission} accessToken={accessToken} />)}
+                        .map(submission => <SubmissionElement key={submission._id.toString()} submission={submission} accessToken={accessToken} />)}
                 </div>
             )}
         </div>

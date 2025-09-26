@@ -47,7 +47,7 @@ const submission = async function (_parent: unknown, {_id}: { _id: ObjectId }, c
         }
     }
 
-    const note = await note_loader(test.note_id)
+    const note = await note_loader(test.note_id.toString())
     if (!note) throw new UserInputError('Note not found')
 
     const options = {

@@ -6,7 +6,7 @@ export default function TestList({ tests }: { tests: Test[] | null }) {
         <div className="mt-4">
             <h2 className="text-lg font-semibold mb-2">Test associati</h2>
             <ul className="space-y-2">
-                {tests.map(test => <TestListItem key={test._id} test={test} />)}
+                {tests.map(test => <TestListItem key={test._id.toString()} test={test} />)}
             </ul>
         </div>
     )

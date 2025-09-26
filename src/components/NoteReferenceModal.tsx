@@ -196,9 +196,9 @@ export default function NoteReferenceModal({ isOpen, onClose, onNoteSelected, in
                   ) : (
                     filteredNotes.map(note => (
                       <div
-                        key={note._id}
+                        key={note._id.toString()}
                         className="p-3 border rounded hover:bg-gray-50 cursor-pointer transition-colors"
-                        onClick={() => handleSelectExistingNote(note._id)}
+                        onClick={() => handleSelectExistingNote(note._id.toString())}
                       >
                         <div className="flex items-center justify-between">
                           <div>

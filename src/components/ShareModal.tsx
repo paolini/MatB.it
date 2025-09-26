@@ -134,7 +134,7 @@ export default function ShareModal({ resource, isOpen, onClose }: ShareModalProp
                     )}
                     
                     {data?.accessTokens?.map((token) => (
-                        <div key={token._id} className="border rounded-lg p-4 mb-3">
+                        <div key={token._id.toString()} className="border rounded-lg p-4 mb-3">
                             <div className="flex justify-between items-start mb-2">
                                 <div>
                                     <span className={`inline-block px-2 py-1 rounded text-sm ${
@@ -147,7 +147,7 @@ export default function ShareModal({ resource, isOpen, onClose }: ShareModalProp
                                     </p>
                                 </div>
                                 <button
-                                    onClick={() => handleDeleteToken(token._id)}
+                                    onClick={() => handleDeleteToken(token._id.toString())}
                                     disabled={deleting}
                                     className="text-red-500 hover:text-red-700 text-sm"
                                 >

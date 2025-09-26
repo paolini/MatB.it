@@ -118,7 +118,10 @@ function ViewTest({test, profile, accessToken}: {
     const canViewDetails = test.author._id === profile?._id || accessToken
     
     // Gestione del tab attivo
-    const activeTab = (searchParams.get('tab') as TabKey) || 'info'
+    const tabs = canViewDetails ? TABS : TABS.filter(tab => ['scores', 'exercises'].includes(tab.key))
+    // Scegli il tab di default: 'info' se presente, altrimenti 'scores'
+    const defaultTab = tabs.some(tab => tab.key === 'info') ? 'info' : 'scores'
+    const activeTab = (searchParams.get('tab') as TabKey) || defaultTab
     
     const switchTab = (tab: TabKey) => {
         const params = new URLSearchParams(searchParams)
@@ -146,8 +149,6 @@ function ViewTest({test, profile, accessToken}: {
         [test.open_on, test.close_on, now]
     )
 
-    const tabs = canViewDetails ? TABS : TABS.filter(tab => ['scores', 'exercises'].includes(tab.key))
-
     return <div className="matbit-test">
         <h1>
             {test.title || `Test ${test._id}`}
@@ -155,32 +156,36 @@ function ViewTest({test, profile, accessToken}: {
         {/* Funzionalità studente: login, inizia test, proprie submission */}
         <StudentTestActions test={test} profile={profile} accessToken={accessToken} isOpen={isOpen} />
         {/* Tab navigation */}
-        <div className="border-b border-gray-200 mb-6">
-            <nav className="flex space-x-8">
-                {/* Always show scores and exercises tabs */}
-                {tabs.map((tab) => (
-                    <button
-                        key={tab.key}
-                        onClick={() => switchTab(tab.key)}
-                        className={`py-2 px-1 border-b-2 font-medium text-sm ${
-                            activeTab === tab.key
-                                ? 'border-blue-500 text-blue-600'
-                                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                        }`}
-                    >
-                        {tab.icon} {tab.label}
-                    </button>
-                ))}
-            </nav>
-        </div>
+        {test.submissions && test.submissions.length > 0 && (
+            <div className="border-b border-gray-200 mb-6">
+                <nav className="flex space-x-8">
+                    {/* Always show scores and exercises tabs */}
+                    {tabs.map((tab) => (
+                        <button
+                            key={tab.key}
+                            onClick={() => switchTab(tab.key)}
+                            className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                                activeTab === tab.key
+                                    ? 'border-blue-500 text-blue-600'
+                                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                            }`}
+                        >
+                            {tab.icon} {tab.label}
+                        </button>
+                    ))}
+                </nav>
+            </div>
+        )}
 
         {/* Tab content */}
-        <div className="tab-content">
-            {activeTab === 'info' && canViewDetails && <TestInfoTab test={test} now={now} isOpen={isOpen} profile={profile} setShowShareModal={setShowShareModal} showShareModal={showShareModal} />}
-            {activeTab === 'scores' && test.stats && <TestScoresTab stats={test.stats} />}
-            {activeTab === 'exercises' && test.stats && <TestExercisesTab stats={test.stats} />}
-            {activeTab === 'submissions' && canViewDetails && test.submissions && <TestSubmissionsTab submissions={test.submissions} accessToken={accessToken} />}
-        </div>
+        {test.submissions && test.submissions.length > 0 && (
+            <div className="tab-content">
+                {activeTab === 'info' && canViewDetails && <TestInfoTab test={test} now={now} isOpen={isOpen} profile={profile} setShowShareModal={setShowShareModal} showShareModal={showShareModal} />}
+                {activeTab === 'scores' && test.stats && <TestScoresTab stats={test.stats} />}
+                {activeTab === 'exercises' && test.stats && <TestExercisesTab stats={test.stats} />}
+                {activeTab === 'submissions' && canViewDetails && test.submissions && <TestSubmissionsTab submissions={test.submissions} accessToken={accessToken} />}
+            </div>
+        )}
     </div>
 }
 

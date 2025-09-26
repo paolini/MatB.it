@@ -7,7 +7,7 @@ export function merge_answers(db_answers: MongoAnswer[], input_answers: AnswerIt
   // submission.answers: MongoAnswer[]
   return db_answers.map(a => {
     const note_id = a.note_id
-    const new_answer: number|undefined = answers_map[note_id.toString()]
+    const new_answer: number|undefined = answers_map[note_id.toString()] ?? undefined
 
     if (!a.permutation) return a
     if (!Array.isArray(a.permutation)) return a
@@ -34,4 +34,4 @@ export function compute_answer_score(answer: MongoAnswer): number {
     return 0 // risposta sbagliata
   }
   return 0
-} 
+}

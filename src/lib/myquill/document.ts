@@ -223,7 +223,7 @@ async function push_note_ref(context: Context, document: Document, note_ref: obj
           push_error_paragraph(document, `circular reference ${note_id}`)
           return
       }
-      const data = await note_loader(note_id)
+      const data = await note_loader(note_id.toString())
       if (data) {
         const sub_document: Document = await document_from_note_recurse({
           ...context, 

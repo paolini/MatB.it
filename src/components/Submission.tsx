@@ -4,7 +4,6 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 
 import { Profile, Submission } from '@/app/graphql/generated'
 import { Loading, Error, EDIT_BUTTON_CLASS, DELETE_BUTTON_CLASS } from '@/components/utils'
-// ...existing code...
 import DocumentElement, { DocumentContext, ContextAnswer, OrdinalContextProvider } from './DocumentElement'
 import { myTimestamp } from '@/lib/utils'
 import { useRouter } from 'next/navigation'
@@ -72,10 +71,10 @@ function SubmissionElement({submission, profile}: {
     profile?: Profile
 }) {
     const entries: [string, ContextAnswer][] = (submission.answers || []).map(answer => [
-        answer.note_id,
+        answer.note_id.toString(),
         {
             answer: answer.answer ?? null,
-            correct_answer: answer.correct_answer ?? null
+            correct_answer: answer.correct_answer ?? null,
         }
     ])
     const questionIds: string[] = entries.map(([id]) => id)

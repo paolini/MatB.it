@@ -58,7 +58,7 @@ export default function Tests() {
         { tests.length > 0 && <>
                 <div className="flex flex-col gap-4">
                     {tests.map((test: Test) =>
-                            <TestItem key={test._id} test={test} profile={profile}/>
+                            <TestItem key={test._id.toString()} test={test} profile={profile}/>
                         )}
                 </div>
             </>

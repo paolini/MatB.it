@@ -14,7 +14,7 @@ const Badge = ({ children, variant = 'default' }: { children: React.ReactNode, v
 )
 
 const GET_CLASSES = gql`
-  query GetClasses() {
+  query GetClasses {
     classes {
       _id
       name

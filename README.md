@@ -10,6 +10,29 @@ The following command will start a mongodb server in a container using the local
 ```
 Use `docker-compose down` to stop the container. Use `mongo` to access the database.
 
+### Clonare il database di produzione in locale
+
+1. Esegui il dump dal server remoto (es. contabo3) e scaricalo:
+> Prima verifica il nome del container MongoDB con:
+```bash
+ssh contabo3 'docker ps --format "{{.Names}}"'
+```
+Poi usa il nome corretto (ad esempio `matbit-mongodb` o `mongodb`):
+```bash
+ssh contabo3 'docker exec matbit-mongodb mongodump --archive' > dump.archive
+```
+2. Ripristina il dump nel database locale (assicurati che il container mongo sia attivo):
+```bash
+sudo docker exec -i docker-mongodb-1 mongorestore --archive < dump.archive
+```
+
+### Clonare il database di produzione in locale (one-liner)
+
+Esegui direttamente (sostituisci il nome del container se necessario):
+```bash
+ssh contabo3 'docker exec matbit-mongodb mongodump --archive' | sudo docker exec -i docker-mongodb-1 mongorestore --archive
+```
+
 To install node libraries:
 ```bash
     npm ci

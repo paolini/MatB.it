@@ -189,7 +189,7 @@ export default function Notes() {
         { notes && notes.length > 0 && <>
                 <div className="flex flex-col gap-4">
                     {notes.map((note: Note) =>
-                        (<NoteItem note={note} profile={profile} key={note._id} />)
+                        (<NoteItem note={note} profile={profile} key={note._id.toString()} />)
                     )}
                 </div>
                 

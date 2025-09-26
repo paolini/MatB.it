@@ -104,7 +104,7 @@ export default function SubmissionTable({submissions, accessToken}: {submissions
         const percentile = totalCompleted > 1 
             ? Math.round((totalCompleted - rank + 1) / totalCompleted * 100)
             : 100
-        rankMap.set(submission._id, { rank, percentile })
+        rankMap.set(submission._id.toString(), { rank, percentile })
     })
 
     return <table className="mt-4 w-full border-2 border-black" style={{borderCollapse: 'collapse'}}>
@@ -158,7 +158,7 @@ export default function SubmissionTable({submissions, accessToken}: {submissions
             </tr>
         </thead>
         <tbody>
-            {sortedSubmissions.map((submission, index) => <SubmissionRow key={submission._id} submission={submission} headers={headers} index={index + 1} rankMap={rankMap} accessToken={accessToken}/>)}
+            {sortedSubmissions.map((submission, index) => <SubmissionRow key={submission._id.toString()} submission={submission} headers={headers} index={index + 1} rankMap={rankMap} accessToken={accessToken}/>)}
         </tbody>
     </table>
 }
@@ -190,7 +190,7 @@ function SubmissionRow({submission, headers, index, rankMap, accessToken}:{
     }
 
     const getRank = () => {
-        const rankData = rankMap.get(submission._id)
+        const rankData = rankMap.get(submission._id.toString())
         return rankData ? `${rankData.rank} (${rankData.percentile}%)` : '-'
     }
     
