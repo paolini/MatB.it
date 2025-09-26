@@ -16,6 +16,22 @@ type Profile {
   image: String
 }
 
+type Class {
+  _id: ObjectId!
+  name: String!
+  description: String
+  owner_id: ObjectId!
+  owner: User!
+  teachers: [User!]!
+  students: [User!]!
+  notes: [Note!]!
+  tests: [Test!]!
+  created_on: Timestamp!
+  academic_year: String
+  subject: String
+  active: Boolean!
+}
+
 type Note {
   _id: ObjectId!
   title: String!
@@ -24,6 +40,8 @@ type Note {
   variant: String
   author_id: ObjectId!
   author: User!
+  class_id: ObjectId
+  class: Class
   private: Boolean!
   created_on: Timestamp!
   updated_on: Timestamp!
@@ -40,7 +58,9 @@ type Test {
     author: User!
     open_on: Timestamp
     close_on: Timestamp
-    private: Boolean!
+    class_id: ObjectId
+    class: Class
+  private: Boolean!
     submissions: [Submission!]
     stats: TestStats!
 }
@@ -95,21 +115,23 @@ type AccessToken {
 type Query {
   hello: String!
   note(_id: ObjectId!): Note
-  notes(mine: Boolean, private: Boolean, title: String, variant: String, limit: Int, skip: Int): [Note!]!
+  notes(mine: Boolean, private: Boolean, title: String, variant: String, class_id: ObjectId, limit: Int, skip: Int): [Note!]!
   profile: Profile
   test(_id: ObjectId!): Test
-  tests(mine: Boolean, open: Boolean, limit: Int): [Test!]!
+  tests(mine: Boolean, open: Boolean, class_id: ObjectId, limit: Int): [Test!]!
   submission(_id: ObjectId!): Submission
   accessTokens(resource_id: ObjectId!): [AccessToken!]!
+  class(_id: ObjectId!): Class
+  classes: [Class!]!
 }
 
 type Mutation {
-  newNote(title: String, delta: JSON, private: Boolean, variant: String, hide_title: Boolean): ObjectId!
-  updateNote(_id: ObjectId!, title: String, hide_title: Boolean, delta: JSON, private: Boolean, variant: String): Note
+  newNote(title: String, delta: JSON, private: Boolean, variant: String, hide_title: Boolean, class_id: ObjectId): ObjectId!
+  updateNote(_id: ObjectId!, title: String, hide_title: Boolean, delta: JSON, private: Boolean, variant: String, class_id: ObjectId): Note
   deleteNote(_id: ObjectId!): Boolean
 
-  newTest(note_id: ObjectId!, title: String, private: Boolean): Boolean
-  updateTest(_id: ObjectId!, title: String, open_on: Timestamp, close_on: Timestamp, private: Boolean): Test
+  newTest(note_id: ObjectId!, title: String, private: Boolean, class_id: ObjectId): Boolean
+  updateTest(_id: ObjectId!, title: String, open_on: Timestamp, close_on: Timestamp, private: Boolean,class_id: ObjectId): Test
   deleteTest(_id: ObjectId!): Boolean
 
   newSubmission(test_id: ObjectId!): ObjectId!
@@ -118,4 +140,13 @@ type Mutation {
 
   newAccessToken(resource_id: ObjectId!, permission: String!): AccessToken!
   deleteAccessToken(_id: ObjectId!): Boolean
+
+  newClass(name: String!, description: String, subject: String, academic_year: String): ObjectId!
+  updateClass(_id: ObjectId!, name: String, description: String, active: Boolean): Class
+  deleteClass(_id: ObjectId!): Boolean
+  
+  addTeacherToClass(class_id: ObjectId!, user_id: ObjectId!): Boolean
+  removeTeacherFromClass(class_id: ObjectId!, user_id: ObjectId!): Boolean
+  addStudentToClass(class_id: ObjectId!, user_id: ObjectId!): Boolean  
+  removeStudentFromClass(class_id: ObjectId!, user_id: ObjectId!): Boolean
 }

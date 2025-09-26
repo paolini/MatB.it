@@ -1,5 +1,6 @@
 import { GraphQLResolveInfo, GraphQLScalarType, GraphQLScalarTypeConfig } from 'graphql';
 import { Context } from './types';
+import { ObjectId } from "bson";
 export type Maybe<T> = T | null;
 export type InputMaybe<T> = Maybe<T>;
 export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
@@ -16,7 +17,7 @@ export type Scalars = {
   Int: { input: number; output: number; }
   Float: { input: number; output: number; }
   JSON: { input: any; output: any; }
-  ObjectId: { input: any; output: any; }
+  ObjectId: { input: ObjectId; output: ObjectId; }
   Timestamp: { input: any; output: any; }
 };
 
@@ -42,6 +43,23 @@ export type AnswerItemInput = {
   note_id: Scalars['ObjectId']['input'];
 };
 
+export type Class = {
+  __typename?: 'Class';
+  _id: Scalars['ObjectId']['output'];
+  academic_year: Maybe<Scalars['String']['output']>;
+  active: Scalars['Boolean']['output'];
+  created_on: Scalars['Timestamp']['output'];
+  description: Maybe<Scalars['String']['output']>;
+  name: Scalars['String']['output'];
+  notes: Array<Note>;
+  owner: User;
+  owner_id: Scalars['ObjectId']['output'];
+  students: Array<User>;
+  subject: Maybe<Scalars['String']['output']>;
+  teachers: Array<User>;
+  tests: Array<Test>;
+};
+
 export type ExerciseStats = {
   __typename?: 'ExerciseStats';
   average_score: Maybe<Scalars['Float']['output']>;
@@ -53,21 +71,45 @@ export type ExerciseStats = {
 
 export type Mutation = {
   __typename?: 'Mutation';
+  addStudentToClass: Maybe<Scalars['Boolean']['output']>;
+  addTeacherToClass: Maybe<Scalars['Boolean']['output']>;
   deleteAccessToken: Maybe<Scalars['Boolean']['output']>;
+  deleteClass: Maybe<Scalars['Boolean']['output']>;
   deleteNote: Maybe<Scalars['Boolean']['output']>;
   deleteSubmission: Maybe<Scalars['Boolean']['output']>;
   deleteTest: Maybe<Scalars['Boolean']['output']>;
   newAccessToken: AccessToken;
+  newClass: Scalars['ObjectId']['output'];
   newNote: Scalars['ObjectId']['output'];
   newSubmission: Scalars['ObjectId']['output'];
   newTest: Maybe<Scalars['Boolean']['output']>;
+  removeStudentFromClass: Maybe<Scalars['Boolean']['output']>;
+  removeTeacherFromClass: Maybe<Scalars['Boolean']['output']>;
+  updateClass: Maybe<Class>;
   updateNote: Maybe<Note>;
   updateSubmission: Maybe<Scalars['Boolean']['output']>;
   updateTest: Maybe<Test>;
 };
 
 
+export type MutationAddStudentToClassArgs = {
+  class_id: Scalars['ObjectId']['input'];
+  user_id: Scalars['ObjectId']['input'];
+};
+
+
+export type MutationAddTeacherToClassArgs = {
+  class_id: Scalars['ObjectId']['input'];
+  user_id: Scalars['ObjectId']['input'];
+};
+
+
 export type MutationDeleteAccessTokenArgs = {
+  _id: Scalars['ObjectId']['input'];
+};
+
+
+export type MutationDeleteClassArgs = {
   _id: Scalars['ObjectId']['input'];
 };
 
@@ -93,7 +135,16 @@ export type MutationNewAccessTokenArgs = {
 };
 
 
+export type MutationNewClassArgs = {
+  academic_year: InputMaybe<Scalars['String']['input']>;
+  description: InputMaybe<Scalars['String']['input']>;
+  name: Scalars['String']['input'];
+  subject: InputMaybe<Scalars['String']['input']>;
+};
+
+
 export type MutationNewNoteArgs = {
+  class_id: InputMaybe<Scalars['ObjectId']['input']>;
   delta: InputMaybe<Scalars['JSON']['input']>;
   hide_title: InputMaybe<Scalars['Boolean']['input']>;
   private: InputMaybe<Scalars['Boolean']['input']>;
@@ -108,14 +159,36 @@ export type MutationNewSubmissionArgs = {
 
 
 export type MutationNewTestArgs = {
+  class_id: InputMaybe<Scalars['ObjectId']['input']>;
   note_id: Scalars['ObjectId']['input'];
   private: InputMaybe<Scalars['Boolean']['input']>;
   title: InputMaybe<Scalars['String']['input']>;
 };
 
 
+export type MutationRemoveStudentFromClassArgs = {
+  class_id: Scalars['ObjectId']['input'];
+  user_id: Scalars['ObjectId']['input'];
+};
+
+
+export type MutationRemoveTeacherFromClassArgs = {
+  class_id: Scalars['ObjectId']['input'];
+  user_id: Scalars['ObjectId']['input'];
+};
+
+
+export type MutationUpdateClassArgs = {
+  _id: Scalars['ObjectId']['input'];
+  active: InputMaybe<Scalars['Boolean']['input']>;
+  description: InputMaybe<Scalars['String']['input']>;
+  name: InputMaybe<Scalars['String']['input']>;
+};
+
+
 export type MutationUpdateNoteArgs = {
   _id: Scalars['ObjectId']['input'];
+  class_id: InputMaybe<Scalars['ObjectId']['input']>;
   delta: InputMaybe<Scalars['JSON']['input']>;
   hide_title: InputMaybe<Scalars['Boolean']['input']>;
   private: InputMaybe<Scalars['Boolean']['input']>;
@@ -133,6 +206,7 @@ export type MutationUpdateSubmissionArgs = {
 
 export type MutationUpdateTestArgs = {
   _id: Scalars['ObjectId']['input'];
+  class_id: InputMaybe<Scalars['ObjectId']['input']>;
   close_on: InputMaybe<Scalars['Timestamp']['input']>;
   open_on: InputMaybe<Scalars['Timestamp']['input']>;
   private: InputMaybe<Scalars['Boolean']['input']>;
@@ -144,6 +218,8 @@ export type Note = {
   _id: Scalars['ObjectId']['output'];
   author: User;
   author_id: Scalars['ObjectId']['output'];
+  class: Maybe<Class>;
+  class_id: Maybe<Scalars['ObjectId']['output']>;
   created_on: Scalars['Timestamp']['output'];
   delta: Maybe<Scalars['JSON']['output']>;
   hide_title: Scalars['Boolean']['output'];
@@ -165,6 +241,8 @@ export type Profile = {
 export type Query = {
   __typename?: 'Query';
   accessTokens: Array<AccessToken>;
+  class: Maybe<Class>;
+  classes: Array<Class>;
   hello: Scalars['String']['output'];
   note: Maybe<Note>;
   notes: Array<Note>;
@@ -180,12 +258,18 @@ export type QueryAccessTokensArgs = {
 };
 
 
+export type QueryClassArgs = {
+  _id: Scalars['ObjectId']['input'];
+};
+
+
 export type QueryNoteArgs = {
   _id: Scalars['ObjectId']['input'];
 };
 
 
 export type QueryNotesArgs = {
+  class_id: InputMaybe<Scalars['ObjectId']['input']>;
   limit: InputMaybe<Scalars['Int']['input']>;
   mine: InputMaybe<Scalars['Boolean']['input']>;
   private: InputMaybe<Scalars['Boolean']['input']>;
@@ -206,6 +290,7 @@ export type QueryTestArgs = {
 
 
 export type QueryTestsArgs = {
+  class_id: InputMaybe<Scalars['ObjectId']['input']>;
   limit: InputMaybe<Scalars['Int']['input']>;
   mine: InputMaybe<Scalars['Boolean']['input']>;
   open: InputMaybe<Scalars['Boolean']['input']>;
@@ -230,6 +315,8 @@ export type Test = {
   _id: Scalars['ObjectId']['output'];
   author: User;
   author_id: Scalars['ObjectId']['output'];
+  class: Maybe<Class>;
+  class_id: Maybe<Scalars['ObjectId']['output']>;
   close_on: Maybe<Scalars['Timestamp']['output']>;
   created_on: Scalars['Timestamp']['output'];
   note: Note;
@@ -332,6 +419,7 @@ export type ResolversTypes = ResolversObject<{
   AnswerItem: ResolverTypeWrapper<AnswerItem>;
   AnswerItemInput: AnswerItemInput;
   Boolean: ResolverTypeWrapper<Scalars['Boolean']['output']>;
+  Class: ResolverTypeWrapper<Class>;
   ExerciseStats: ResolverTypeWrapper<ExerciseStats>;
   Float: ResolverTypeWrapper<Scalars['Float']['output']>;
   Int: ResolverTypeWrapper<Scalars['Int']['output']>;
@@ -355,6 +443,7 @@ export type ResolversParentTypes = ResolversObject<{
   AnswerItem: AnswerItem;
   AnswerItemInput: AnswerItemInput;
   Boolean: Scalars['Boolean']['output'];
+  Class: Class;
   ExerciseStats: ExerciseStats;
   Float: Scalars['Float']['output'];
   Int: Scalars['Int']['output'];
@@ -389,6 +478,23 @@ export type AnswerItemResolvers<ContextType = Context, ParentType extends Resolv
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
+export type ClassResolvers<ContextType = Context, ParentType extends ResolversParentTypes['Class'] = ResolversParentTypes['Class']> = ResolversObject<{
+  _id: Resolver<ResolversTypes['ObjectId'], ParentType, ContextType>;
+  academic_year: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  active: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  created_on: Resolver<ResolversTypes['Timestamp'], ParentType, ContextType>;
+  description: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  name: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  notes: Resolver<Array<ResolversTypes['Note']>, ParentType, ContextType>;
+  owner: Resolver<ResolversTypes['User'], ParentType, ContextType>;
+  owner_id: Resolver<ResolversTypes['ObjectId'], ParentType, ContextType>;
+  students: Resolver<Array<ResolversTypes['User']>, ParentType, ContextType>;
+  subject: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  teachers: Resolver<Array<ResolversTypes['User']>, ParentType, ContextType>;
+  tests: Resolver<Array<ResolversTypes['Test']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+}>;
+
 export type ExerciseStatsResolvers<ContextType = Context, ParentType extends ResolversParentTypes['ExerciseStats'] = ResolversParentTypes['ExerciseStats']> = ResolversObject<{
   average_score: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
   correct_answers: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
@@ -403,14 +509,21 @@ export interface JsonScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes
 }
 
 export type MutationResolvers<ContextType = Context, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = ResolversObject<{
+  addStudentToClass: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType, RequireFields<MutationAddStudentToClassArgs, 'class_id' | 'user_id'>>;
+  addTeacherToClass: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType, RequireFields<MutationAddTeacherToClassArgs, 'class_id' | 'user_id'>>;
   deleteAccessToken: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType, RequireFields<MutationDeleteAccessTokenArgs, '_id'>>;
+  deleteClass: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType, RequireFields<MutationDeleteClassArgs, '_id'>>;
   deleteNote: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType, RequireFields<MutationDeleteNoteArgs, '_id'>>;
   deleteSubmission: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType, RequireFields<MutationDeleteSubmissionArgs, '_id'>>;
   deleteTest: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType, RequireFields<MutationDeleteTestArgs, '_id'>>;
   newAccessToken: Resolver<ResolversTypes['AccessToken'], ParentType, ContextType, RequireFields<MutationNewAccessTokenArgs, 'permission' | 'resource_id'>>;
+  newClass: Resolver<ResolversTypes['ObjectId'], ParentType, ContextType, RequireFields<MutationNewClassArgs, 'name'>>;
   newNote: Resolver<ResolversTypes['ObjectId'], ParentType, ContextType, MutationNewNoteArgs>;
   newSubmission: Resolver<ResolversTypes['ObjectId'], ParentType, ContextType, RequireFields<MutationNewSubmissionArgs, 'test_id'>>;
   newTest: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType, RequireFields<MutationNewTestArgs, 'note_id'>>;
+  removeStudentFromClass: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType, RequireFields<MutationRemoveStudentFromClassArgs, 'class_id' | 'user_id'>>;
+  removeTeacherFromClass: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType, RequireFields<MutationRemoveTeacherFromClassArgs, 'class_id' | 'user_id'>>;
+  updateClass: Resolver<Maybe<ResolversTypes['Class']>, ParentType, ContextType, RequireFields<MutationUpdateClassArgs, '_id'>>;
   updateNote: Resolver<Maybe<ResolversTypes['Note']>, ParentType, ContextType, RequireFields<MutationUpdateNoteArgs, '_id'>>;
   updateSubmission: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType, RequireFields<MutationUpdateSubmissionArgs, '_id'>>;
   updateTest: Resolver<Maybe<ResolversTypes['Test']>, ParentType, ContextType, RequireFields<MutationUpdateTestArgs, '_id'>>;
@@ -420,6 +533,8 @@ export type NoteResolvers<ContextType = Context, ParentType extends ResolversPar
   _id: Resolver<ResolversTypes['ObjectId'], ParentType, ContextType>;
   author: Resolver<ResolversTypes['User'], ParentType, ContextType>;
   author_id: Resolver<ResolversTypes['ObjectId'], ParentType, ContextType>;
+  class: Resolver<Maybe<ResolversTypes['Class']>, ParentType, ContextType>;
+  class_id: Resolver<Maybe<ResolversTypes['ObjectId']>, ParentType, ContextType>;
   created_on: Resolver<ResolversTypes['Timestamp'], ParentType, ContextType>;
   delta: Resolver<Maybe<ResolversTypes['JSON']>, ParentType, ContextType>;
   hide_title: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
@@ -445,6 +560,8 @@ export type ProfileResolvers<ContextType = Context, ParentType extends Resolvers
 
 export type QueryResolvers<ContextType = Context, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = ResolversObject<{
   accessTokens: Resolver<Array<ResolversTypes['AccessToken']>, ParentType, ContextType, RequireFields<QueryAccessTokensArgs, 'resource_id'>>;
+  class: Resolver<Maybe<ResolversTypes['Class']>, ParentType, ContextType, RequireFields<QueryClassArgs, '_id'>>;
+  classes: Resolver<Array<ResolversTypes['Class']>, ParentType, ContextType>;
   hello: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   note: Resolver<Maybe<ResolversTypes['Note']>, ParentType, ContextType, RequireFields<QueryNoteArgs, '_id'>>;
   notes: Resolver<Array<ResolversTypes['Note']>, ParentType, ContextType, QueryNotesArgs>;
@@ -472,6 +589,8 @@ export type TestResolvers<ContextType = Context, ParentType extends ResolversPar
   _id: Resolver<ResolversTypes['ObjectId'], ParentType, ContextType>;
   author: Resolver<ResolversTypes['User'], ParentType, ContextType>;
   author_id: Resolver<ResolversTypes['ObjectId'], ParentType, ContextType>;
+  class: Resolver<Maybe<ResolversTypes['Class']>, ParentType, ContextType>;
+  class_id: Resolver<Maybe<ResolversTypes['ObjectId']>, ParentType, ContextType>;
   close_on: Resolver<Maybe<ResolversTypes['Timestamp']>, ParentType, ContextType>;
   created_on: Resolver<ResolversTypes['Timestamp'], ParentType, ContextType>;
   note: Resolver<ResolversTypes['Note'], ParentType, ContextType>;
@@ -506,6 +625,7 @@ export type UserResolvers<ContextType = Context, ParentType extends ResolversPar
 export type Resolvers<ContextType = Context> = ResolversObject<{
   AccessToken: AccessTokenResolvers<ContextType>;
   AnswerItem: AnswerItemResolvers<ContextType>;
+  Class: ClassResolvers<ContextType>;
   ExerciseStats: ExerciseStatsResolvers<ContextType>;
   JSON: GraphQLScalarType;
   Mutation: MutationResolvers<ContextType>;

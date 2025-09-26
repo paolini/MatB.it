@@ -24,6 +24,16 @@ import accessTokens from './resolvers/accessTokens'
 import newAccessToken from './resolvers/newAccessToken'
 import deleteAccessToken from './resolvers/deleteAccessToken'
 
+import classResolver from './resolvers/class'
+import classes from './resolvers/classes'
+import newClass from './resolvers/newClass'
+import updateClass from './resolvers/updateClass'
+import deleteClass from './resolvers/deleteClass'
+import addTeacherToClass from './resolvers/addTeacherToClass'
+import removeTeacherFromClass from './resolvers/removeTeacherFromClass'
+import addStudentToClass from './resolvers/addStudentToClass'
+import removeStudentFromClass from './resolvers/removeStudentFromClass'
+
 // Nota: usiamo 'any' qui perché GraphQL Code Generator genera tipi molto rigidi
 // che richiedono la definizione completa di tutti i field resolvers per ogni tipo.
 // Questo è un problema comune nella community GraphQL/TypeScript.
@@ -47,6 +57,9 @@ export const resolvers: any = {
     submission,
 
     accessTokens,
+
+    class: classResolver,
+    classes,
   },
 
   Test: {
@@ -68,6 +81,15 @@ export const resolvers: any = {
 
     newAccessToken,
     deleteAccessToken,
+
+    newClass,
+    updateClass,
+    deleteClass,
+    
+    addTeacherToClass,
+    removeTeacherFromClass,
+    addStudentToClass,
+    removeStudentFromClass,
   }
 }
 

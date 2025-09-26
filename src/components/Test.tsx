@@ -19,7 +19,6 @@ const TestQuery = gql`
             created_on
             open_on 
             close_on
-            private
             submissions {
                 _id
                 started_on
@@ -151,7 +150,7 @@ function ViewTest({test, profile, accessToken}: {
         <div className="flex flex-col gap-2">
             {test.submissions && test.submissions
                 .filter(submission => submission.author?._id === profile?._id)
-                .map(submission => <SubmissionElement key={submission._id} submission={submission} accessToken={accessToken} />)}
+                .map(submission => <SubmissionElement key={submission._id.toString()} submission={submission} accessToken={accessToken} />)}
         </div>
         { (test.author._id === profile?._id || accessToken) && test.stats && 
             <TestStatistics stats={test.stats} /> }
@@ -236,13 +235,7 @@ function TestInfo({test, now, isOpen, isOwner}: {
                             : <span className="text-red-600 font-semibold">Chiuso</span>
                     }
                 </div>
-                <div>
-                    <span className="font-bold">Privacy:</span> {
-                        test.private 
-                            ? <span className="text-yellow-600">Privato</span>
-                            : <span className="text-blue-600">Pubblico</span>
-                    }
-                </div>
+                {/* Privacy: rimosso, ora gestito da private/class_id */}
             </div>
         </div>
     )
@@ -260,7 +253,7 @@ function SubmissionElement({submission, accessToken}:{
         return `/submission/${submission._id}`
     }
 
-    return <a key={submission._id} className={BUTTON_CLASS} href={getSubmissionLink()}>
+    return <a key={submission._id.toString()} className={BUTTON_CLASS} href={getSubmissionLink()}>
         { submission.completed_on 
             ? `visualizza test completato il ${myTimestamp(submission.completed_on)}`
             : `riprendi test del ${myTimestamp(submission.started_on)}`
@@ -372,7 +365,7 @@ function SubmissionTable({submissions, accessToken}: {submissions: Submission[],
         const percentile = totalCompleted > 1 
             ? Math.round((totalCompleted - rank + 1) / totalCompleted * 100)
             : 100
-        rankMap.set(submission._id, { rank, percentile })
+        rankMap.set(submission._id.toString(), { rank, percentile })
     })
 
     return <table className="mt-4 w-full border-2 border-black" style={{borderCollapse: 'collapse'}}>
@@ -426,7 +419,7 @@ function SubmissionTable({submissions, accessToken}: {submissions: Submission[],
             </tr>
         </thead>
         <tbody>
-            {sortedSubmissions.map((submission, index) => <SubmissionRow key={submission._id} submission={submission} headers={headers} index={index + 1} rankMap={rankMap} accessToken={accessToken}/>)}
+            {sortedSubmissions.map((submission, index) => <SubmissionRow key={submission._id.toString()} submission={submission} headers={headers} index={index + 1} rankMap={rankMap} accessToken={accessToken}/>)}
         </tbody>
     </table>
 }
@@ -460,7 +453,7 @@ function SubmissionRow({submission, headers, index, rankMap, accessToken}:{
     }
 
     const getRank = () => {
-        const rankData = rankMap.get(submission._id)
+        const rankData = rankMap.get(submission._id.toString())
         return rankData ? `${rankData.rank} (${rankData.percentile}%)` : '-'
     }
     
@@ -609,13 +602,12 @@ const DeleteTestMutation = gql`
 }`
 
 const UpdateTestMutation = gql`
-    mutation UpdateTest($_id: ObjectId!, $title: String, $open_on: Timestamp, $close_on: Timestamp, $private: Boolean) {
-        updateTest(_id: $_id, title: $title, open_on: $open_on, close_on: $close_on, private: $private) {
+    mutation UpdateTest($_id: ObjectId!, $title: String, $open_on: Timestamp, $close_on: Timestamp) {
+        updateTest(_id: $_id, title: $title, open_on: $open_on, close_on: $close_on) {
             _id
             title
             open_on
             close_on
-            private
         }
     }
 `
@@ -634,7 +626,7 @@ function EditTest({test, profile}: {
 
     // Stati per il form
     const [title, setTitle] = useState(test.title || '')
-    const [isPrivate, setIsPrivate] = useState(test.private || false)
+    // const [isPrivate, setIsPrivate] = useState(test.private || false) // rimosso
     // Helpers per conversione locale <-> UTC compatibili con input datetime-local
     function toLocalDatetimeInputValue(date: Date|string|undefined|null) {
         if (!date) return '';
@@ -656,8 +648,7 @@ function EditTest({test, profile}: {
                 _id: test._id,
                 title: title || null,
                 open_on: openOn ? new Date(openOn) : null,
-                close_on: closeOn ? new Date(closeOn) : null,
-                private: isPrivate
+                close_on: closeOn ? new Date(closeOn) : null
             } 
         })
         router.push(`/test/${test._id}`)
@@ -714,21 +705,7 @@ function EditTest({test, profile}: {
                 </div>
             </div>
 
-            {/* Privacy */}
-            <div>
-                <label className="flex items-center gap-2">
-                    <input
-                        type="checkbox"
-                        checked={isPrivate}
-                        onChange={e => setIsPrivate(e.target.checked)}
-                        className="rounded"
-                    />
-                    <span className="text-sm font-medium text-gray-700">Test privato</span>
-                </label>
-                <p className="text-xs text-gray-500 mt-1">
-                    Solo tu puoi vedere e gestire questo test
-                </p>
-            </div>
+            {/* Privacy: rimosso, ora gestito da visibility */}
 
             {/* Errori */}
             {updateError && <Error error={updateError} />}

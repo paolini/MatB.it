@@ -25,7 +25,13 @@ const NoteQuery = gql`
             }
             created_on
             updated_on
-            private
+            class_id
+            class {
+                _id
+                name
+                subject
+            }
+            # visibility removed
             tests {
                 _id
                 note_id
@@ -34,7 +40,8 @@ const NoteQuery = gql`
                 author_id
                 open_on
                 close_on
-                private
+                class_id
+                # visibility removed
             }
         }
         profile {
@@ -65,16 +72,32 @@ function NoteView({note, profile}: {
 }) {
     const [showShareModal, setShowShareModal] = useState(false)
     
+    // ...existing code...
+    
     return <div>
         <div className={`ql-variant-container ql-var-${note.variant || 'default'}`}>
             {   
                 !note.hide_title &&
-                <h1>{note.title}</h1>
+                <div className="flex items-center gap-3 mb-4">
+                    <h1 className="flex-1">{note.title}</h1>
+                    <div className="flex items-center gap-2">
+                        {/* visibility UI removed */}
+                        {(note as any).class && (
+                            <span 
+                                className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700"
+                                title={`Classe: ${(note as any).class.name}`}
+                            >
+                                <span>🎓</span>
+                                <span>{(note as any).class.name}</span>
+                            </span>
+                        )}
+                    </div>
+                </div>
             }
             <div className="delta">
                 <NoteContent note={note} />
             </div>
-            {note.private && <span className="text-sm text-gray-500">Nota privata</span>}
+            {/* visibility UI removed */}
         </div>
         <TestList tests={note.tests} />
         <NoteFooter note={note} />
@@ -125,15 +148,17 @@ function NoteFooter({note}: {
 }
 
 const NewTestMutation = gql`
-    mutation NewTest($note_id: ObjectId!, $title: String, $private: Boolean) {
-        newTest(note_id: $note_id, title: $title, private: $private)
+    mutation NewTest($note_id: ObjectId!, $title: String, $class_id: ObjectId) {
+        newTest(note_id: $note_id, title: $title, class_id: $class_id)
     }
 `
 
 function CreateTestButton({note}: {note: Note}) {
     const note_id = note._id
     const title = note.title || ""
-    const private_test = note.private
+    // const private_test = note.private // rimosso
+    const class_id = (note as any).class_id || undefined
+    
     const [createTest, { loading, error }] = useMutation(NewTestMutation, {
         refetchQueries: ["Note"],
     })
@@ -141,7 +166,7 @@ function CreateTestButton({note}: {note: Note}) {
     return <>
         <button
             className="px-4 py-2 bg-green-500 text-white rounded mt-2 hover:bg-green-600 transition-colors"
-            onClick={() => createTest({ variables: { note_id, title, private: private_test } })}
+            onClick={() => createTest({ variables: { note_id, title, class_id } })}
             disabled={loading}
             >
                 {loading ? 'Creazione...' : 'Crea test'}

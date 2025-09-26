@@ -1,3 +1,39 @@
+m
+## Classi (Entità)
+
+Le **classi** sono entità che raccolgono note, test, studenti e docenti. Ogni classe ha:
+
+- Un proprietario (owner)
+- Una lista di insegnanti (teachers)
+- Una lista di studenti (students)
+- Un elenco di note e test associati tramite il campo `class_id`.
+
+### Struttura dati semplificata
+```typescript
+type MongoClass = {
+    _id: ObjectId
+    name: string
+    description?: string
+    owner_id: ObjectId
+    teachers: ObjectId[]
+    students: ObjectId[]
+    created_on: Date
+    academic_year?: string
+    subject?: string
+    active: boolean
+}
+```
+
+### Regole di visibilità
+- **Note/Test con `private=true` e collegate a una classe**: possono essere visualizzate da tutti i docenti della classe (owner e teachers), ma non dagli studenti.
+- **Note/Test con `private=true` e senza classe (`class_id=null`)**: possono essere visualizzate solo dal proprietario (author).
+- **Note/Test pubbliche (`private=false`)**: sono visibili a tutti gli utenti che hanno accesso alla classe, oppure a tutti se non collegate a una classe.
+
+### Relazioni
+- Le classi aggregano e organizzano contenuti (note, test) e utenti (docenti, studenti).
+- I permessi di visualizzazione e modifica sono gestiti tramite i ruoli e il campo `private` sugli oggetti.
+
+Questa struttura permette di gestire ambienti collaborativi, corsi, gruppi di studio e classi virtuali con regole di privacy flessibili e granulari.
 # MatBit - Project Overview for AI
 
 ## Project Description

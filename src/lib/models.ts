@@ -56,6 +56,7 @@ export type MongoNote = {
         last_contribution: Date
     }[]
     private: boolean            // Solo l'autore può vederla
+    class_id: ObjectId|null         // ✨ NUOVO: appartenenza alla classe
     created_on: Date
     description?: string        // Descrizione del branch
 }
@@ -77,6 +78,7 @@ export type MongoNoteInsert = Omit<MongoNote, '_id'>
 export type NoteVersionInsert = Omit<NoteVersion, '_id'>
 
 export type MongoUser = {
+    _id: ObjectId
     name: string
     email: string
     emailVerified: boolean
@@ -98,6 +100,7 @@ export type MongoTest = {
     open_on: Date|null // quando è possibile aprirlo
     close_on: Date|null // entro quando è possibile compilarlo
     private: boolean // solo l'autore può vederlo
+    class_id: ObjectId|null // classe di appartenenza
 }
 
 // risposte date da un utente al test
@@ -123,6 +126,22 @@ export type MongoAccessToken = {
     permission: 'read' | 'write' // livello di accesso
     created_on: Date             // quando è stato creato
 }
+
+// ✨ NUOVO: Collezione classi per organizzare note e test
+export type MongoClass = {
+    _id: ObjectId
+    name: string                    // "3A Scientifico", "Analisi I - 2024"
+    description?: string            // Descrizione opzionale
+    owner_id: ObjectId             // Proprietario principale
+    teachers: ObjectId[]           // Array di user_id degli insegnanti
+    students: ObjectId[]           // Array di user_id degli studenti
+    created_on: Date
+    academic_year?: string         // "2023/2024"
+    subject?: string              // "Matematica", "Fisica", etc.
+    active: boolean               // Per disattivare classi passate
+}
+
+// ✨ Tipi per la visibilità dei contenuti
 
 export function getNotesCollection(db: Db) {
     return db.collection<OptionalId<MongoNote>>('notes')
@@ -158,6 +177,15 @@ export function getDeletedSubmissionsCollection(db: Db) {
 
 export function getAccessTokensCollection(db: Db) {
     return db.collection<OptionalId<MongoAccessToken>>('access_tokens')
+}
+
+// ✨ NUOVO: Helper per collezioni classi
+export function getClassesCollection(db: Db) {
+    return db.collection<OptionalId<MongoClass>>('classes')
+}
+
+export function getDeletedClassesCollection(db: Db) {
+    return db.collection<OptionalId<MongoClass>>('deleted_classes')
 }
 
 // Collezione dei log
@@ -197,6 +225,87 @@ export function generateSecret(): string {
     })
 }
 
+// ✨ NUOVO: Funzioni per la gestione della visibilità dei contenuti
+
+export async function getUserClassRole(
+    db: Db,
+    user_id: ObjectId,
+    class_id: ObjectId
+): Promise<'owner' | 'teacher' | 'student' | null> {
+    const classDoc = await getClassesCollection(db).findOne({ _id: class_id })
+    
+    if (!classDoc) return null
+    
+    if (classDoc.owner_id.equals(user_id)) return 'owner'
+    if (classDoc.teachers.some((t: ObjectId) => t.equals(user_id))) return 'teacher'
+    if (classDoc.students.some((s: ObjectId) => s.equals(user_id))) return 'student'
+    
+    return null
+}
+
+export function canUserAccessContent(
+    user: MongoUser | null,
+    content: { class_id?: ObjectId, private: boolean, author_id: ObjectId },
+    userClassRole?: 'owner' | 'teacher' | 'student' | null
+): boolean {
+  // Nuova logica: solo private e class_id
+  if (!content.private) return true;
+  if (content.class_id) {
+    return userClassRole === 'owner' || userClassRole === 'teacher';
+  }
+  return user ? content.author_id.equals(user._id) : false;
+}
+
+export function validateContentCreation(
+    class_id: ObjectId | null,
+    isPrivate: boolean,
+    user: MongoUser,
+    userClasses: MongoClass[]
+): { valid: boolean; error?: string; normalized?: any } {
+    
+    if (class_id) {
+        const userClass = userClasses.find(c => 
+            c._id.equals(class_id) && 
+            (c.owner_id.equals(user._id) || c.teachers.includes(user._id))
+        )
+        if (!userClass) {
+            return { valid: false, error: 'Non hai i permessi per questa classe' }
+        }
+    }
+    
+    return { valid: true, normalized: { class_id, private: isPrivate } }
+}
+
+// ✨ NUOVO: Pipeline per le aggregazioni delle classi
+export const CLASS_PIPELINE = [
+  {
+    $lookup: {
+      from: 'users',
+      localField: 'owner_id',
+      foreignField: '_id',
+      as: 'owner'
+    }
+  }, {
+    $unwind: '$owner'
+  },
+  {
+    $lookup: {
+      from: 'users',
+      localField: 'teachers',
+      foreignField: '_id',
+      as: 'teachers'
+    }
+  },
+  {
+    $lookup: {
+      from: 'users',
+      localField: 'students', 
+      foreignField: '_id',
+      as: 'students'
+    }
+  }
+]
+
 export const TEST_PIPELINE = [
   // inserisce i dati dell'autore
   {
@@ -219,6 +328,17 @@ export const TEST_PIPELINE = [
   }, {
     $unwind: '$note'
   },
+  // ✨ NUOVO: Aggiungi informazioni sulla classe
+  {
+    $lookup: {
+      from: 'classes',
+      localField: 'class_id',
+      foreignField: '_id',
+      as: 'class'
+    }
+  }, {
+    $unwind: { path: '$class', preserveNullAndEmptyArrays: true }
+  }
 ]
 
 export const NOTE_PIPELINE = [
@@ -247,6 +367,17 @@ export const NOTE_PIPELINE = [
     $addFields: {
       updated_on: '$version.created_on' // L'ultima modifica è quando è stata creata l'ultima versione
     }
+  },
+  // ✨ NUOVO: Aggiungi informazioni sulla classe
+  {
+    $lookup: {
+      from: 'classes',
+      localField: 'class_id',
+      foreignField: '_id',
+      as: 'class'
+    }
+  }, {
+    $unwind: { path: '$class', preserveNullAndEmptyArrays: true }
   }
 ]
 
