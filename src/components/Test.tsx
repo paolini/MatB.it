@@ -1,19 +1,18 @@
 "use client"
 import { gql, useMutation, useQuery } from '@apollo/client'
 import { useSearchParams, useRouter, usePathname } from 'next/navigation'
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LabelList } from 'recharts'
 
-import { Test, Profile, Submission, AnswerItem, TestStats, ScoreDistributionEntry } from '@/app/graphql/generated'
-import { Loading, Error, EDIT_BUTTON_CLASS, CANCEL_BUTTON_CLASS, DELETE_BUTTON_CLASS, BUTTON_CLASS, SAVE_BUTTON_CLASS } from '@/components/utils'
-import { useEffect, useState, useMemo, memo } from 'react'
+import { Test, Profile, Submission, AnswerItem } from '@/app/graphql/generated'
+import { Loading, Error, CANCEL_BUTTON_CLASS, DELETE_BUTTON_CLASS, BUTTON_CLASS, SAVE_BUTTON_CLASS } from '@/components/utils'
+import { useEffect, useState, useMemo } from 'react'
 import { myTimestamp, formatDuration } from '@/lib/utils'
 import Link from 'next/link'
-import ShareModal from './ShareModal'
 import TestInfoTab from './TestInfoTab'
 import TestScoresTab from './TestScoresTab'
 import TestExercisesTab from './TestExercisesTab'
 import TestSubmissionsTab from './TestSubmissionsTab'
 import SubmissionElement from './SubmissionElement'
+import StudentTestActions from './StudentTestActions'
 
 // Definizione dei tab disponibili
 type TabKey = 'info' | 'scores' | 'exercises' | 'submissions'
@@ -113,11 +112,6 @@ function ViewTest({test, profile, accessToken}: {
     const pathname = usePathname()
     const searchParams = useSearchParams()
     const [showShareModal, setShowShareModal] = useState(false)
-    const [startSubmission, { loading: isStarting, error: startError }] = useMutation(NewSubmissionMutation, {
-    refetchQueries: [
-        { query: TestQuery, variables: { _id: test._id } }
-    ]
-})
     const [now, setNow] = useState(new Date())
     
     // Determina se l'utente può vedere i dettagli (è l'autore o ha un token)
@@ -151,71 +145,42 @@ function ViewTest({test, profile, accessToken}: {
         (!test.open_on || new Date(test.open_on) <= now) && (!test.close_on || new Date(test.close_on) >= now),
         [test.open_on, test.close_on, now]
     )
-    
+
+    const tabs = canViewDetails ? TABS : TABS.filter(tab => ['scores', 'exercises'].includes(tab.key))
+
     return <div className="matbit-test">
         <h1>
             {test.title || `Test ${test._id}`}
         </h1>
         {/* Funzionalità studente: login, inizia test, proprie submission */}
-        <div className="mb-6">
-            {/* Messaggio login per utenti non autenticati */}
-            { !profile && isOpen && (
-                <div className="bg-yellow-50 border border-yellow-200 rounded-md p-4 mb-4">
-                    <span>Fai il login per iniziare il test</span>
-                </div>
-            )}
-            {/* Pulsante inizia test per studenti che non hanno submission */}
-            {profile && test.submissions && test.submissions.length === 0 && isOpen && (
-                <button className={BUTTON_CLASS} disabled={isStarting} onClick={async () => {
-                    const result = await startSubmission({ variables: { test_id: test._id } })
-                    const submission_id = result.data?.newSubmission
-                    if (submission_id) {
-                        router.push(`/submission/${submission_id}`)
-                    }
-                }}>
-                    inizia test
-                </button>
-            )}
-            {startError && <Error error={startError} />}
-            {/* Elenco submission proprie */}
-            {profile && test.submissions && (
-                <div className="flex flex-col gap-2 mb-4">
-                    {test.submissions
-                        .filter(submission => submission.author?._id === profile._id)
-                        .map(submission => <SubmissionElement key={submission._id} submission={submission} accessToken={accessToken} />)}
-                </div>
-            )}
+        <StudentTestActions test={test} profile={profile} accessToken={accessToken} isOpen={isOpen} />
+        {/* Tab navigation */}
+        <div className="border-b border-gray-200 mb-6">
+            <nav className="flex space-x-8">
+                {/* Always show scores and exercises tabs */}
+                {tabs.map((tab) => (
+                    <button
+                        key={tab.key}
+                        onClick={() => switchTab(tab.key)}
+                        className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                            activeTab === tab.key
+                                ? 'border-blue-500 text-blue-600'
+                                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                        }`}
+                    >
+                        {tab.icon} {tab.label}
+                    </button>
+                ))}
+            </nav>
         </div>
-        {/* Tab navigation - solo se l'utente può vedere i dettagli */}
-        {canViewDetails && (
-            <>
-                <div className="border-b border-gray-200 mb-6">
-                    <nav className="flex space-x-8">
-                        {TABS.map((tab) => (
-                            <button
-                                key={tab.key}
-                                onClick={() => switchTab(tab.key)}
-                                className={`py-2 px-1 border-b-2 font-medium text-sm ${
-                                    activeTab === tab.key
-                                        ? 'border-blue-500 text-blue-600'
-                                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                                }`}
-                            >
-                                {tab.icon} {tab.label}
-                            </button>
-                        ))}
-                    </nav>
-                </div>
 
-                {/* Tab content */}
-                <div className="tab-content">
-                    {activeTab === 'info' && <TestInfoTab test={test} now={now} isOpen={isOpen} profile={profile} setShowShareModal={setShowShareModal} showShareModal={showShareModal} />}
-                    {activeTab === 'scores' && test.stats && <TestScoresTab stats={test.stats} />}
-                    {activeTab === 'exercises' && test.stats && <TestExercisesTab stats={test.stats} />}
-                    {activeTab === 'submissions' && test.submissions && <TestSubmissionsTab submissions={test.submissions} accessToken={accessToken} />}
-                </div>
-            </>
-        )}
+        {/* Tab content */}
+        <div className="tab-content">
+            {activeTab === 'info' && canViewDetails && <TestInfoTab test={test} now={now} isOpen={isOpen} profile={profile} setShowShareModal={setShowShareModal} showShareModal={showShareModal} />}
+            {activeTab === 'scores' && test.stats && <TestScoresTab stats={test.stats} />}
+            {activeTab === 'exercises' && test.stats && <TestExercisesTab stats={test.stats} />}
+            {activeTab === 'submissions' && canViewDetails && test.submissions && <TestSubmissionsTab submissions={test.submissions} accessToken={accessToken} />}
+        </div>
     </div>
 }
 
