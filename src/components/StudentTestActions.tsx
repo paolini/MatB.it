@@ -5,6 +5,7 @@ import { useMutation } from '@apollo/client'
 import { useRouter } from 'next/navigation'
 import { gql } from '@apollo/client'
 import { useState } from 'react'
+import { myTimestamp } from '@/lib/utils'
 
 const NewSubmissionMutation = gql`
     mutation NewSubmission($test_id: ObjectId!) {
@@ -29,11 +30,11 @@ export default function StudentTestActions({ test, profile, accessToken, isOpen 
             { !isOpen && (
                 <div className="bg-red-50 border border-red-200 rounded-md p-4 mb-4">
                     {test.open_on && new Date(test.open_on) > new Date() ? (
-                        <span>Il test non è ancora aperto. Apertura prevista: {new Date(test.open_on).toLocaleString()}</span>
+                        <span>Il test non è ancora aperto. Apertura prevista: {myTimestamp(test.open_on)}</span>
                     ) : test.close_on && new Date(test.close_on) < new Date() ? (
-                        <span>Il test è chiuso e non è possibile partecipare.</span>
+                        <span>Il test si è chiuso in data {myTimestamp(test.close_on)}.</span>
                     ) : (
-                        <span>Il test non è disponibile.</span>
+                        <span>Il test è chiuso.</span>
                     )}
                 </div>
             )}
