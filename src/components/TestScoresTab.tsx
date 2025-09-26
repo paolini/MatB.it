@@ -1,5 +1,4 @@
-import { TestStats, ScoreDistributionEntry } from '@/app/graphql/generated'
-import { memo } from 'react'
+import { TestStats } from '@/app/graphql/generated'
 import ScoreDistributionChart from './ScoreDistributionChart'
 
 export default function TestScoresTab({stats}: {stats: TestStats}) {
@@ -10,11 +9,11 @@ export default function TestScoresTab({stats}: {stats: TestStats}) {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                     <div className="text-center">
                         <div className="text-2xl font-bold text-blue-600">{stats.completed_submissions}</div>
-                        <div className="text-sm text-gray-600">Consegne totali</div>
+                        <div className="text-sm text-gray-600">Test completati</div>
                     </div>
                     <div className="text-center">
-                        <div className="text-2xl font-bold text-green-600">{stats.min_submissions_for_stats}</div>
-                        <div className="text-sm text-gray-600">Minimo per statistiche</div>
+                        <div className="text-2xl font-bold text-red-600">{stats.incompleted_submissions}</div>
+                        <div className="text-sm text-gray-600">Test non completati</div>
                     </div>
                     <div className="text-center">
                         <div className="text-2xl font-bold text-purple-600">{stats.score_distribution.length}</div>

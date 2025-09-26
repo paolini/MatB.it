@@ -8,12 +8,14 @@ export default async function testStats(parent: Test, _args: unknown, context: C
     const submissionsCollection = getSubmissionsCollection(context.db)
     
     // Recupera tutte le submissions completate per questo test
-    const submissions = await submissionsCollection.find({
+    const all_submissions = await submissionsCollection.find({
         test_id: parent._id,
-        completed_on: { $ne: null }
+        // completed_on: { $ne: null }
     }).toArray()
     
+    const submissions = all_submissions.filter(s => !!s.completed_on)
     const completed_submissions = submissions.length
+    const incompleted_submissions = all_submissions.length - completed_submissions
     const MIN_SUBMISSIONS_FOR_STATS = 5
     
     // Se ci sono meno di 5 submissions, non mostrare le statistiche dettagliate
@@ -21,6 +23,7 @@ export default async function testStats(parent: Test, _args: unknown, context: C
         return {
             __typename: 'TestStats',
             completed_submissions,
+            incompleted_submissions,
             exercises: [], // Array vuoto se non ci sono abbastanza submissions
             min_submissions_for_stats: MIN_SUBMISSIONS_FOR_STATS,
             score_distribution: [] // Array vuoto se non ci sono abbastanza submissions
@@ -122,6 +125,7 @@ export default async function testStats(parent: Test, _args: unknown, context: C
     return {
         __typename: 'TestStats',
         completed_submissions,
+        incompleted_submissions,
         exercises,
         min_submissions_for_stats: MIN_SUBMISSIONS_FOR_STATS,
         score_distribution

@@ -252,6 +252,7 @@ export type TestStats = {
   __typename?: 'TestStats';
   completed_submissions: Scalars['Int']['output'];
   exercises: Array<ExerciseStats>;
+  incompleted_submissions: Scalars['Int']['output'];
   min_submissions_for_stats: Scalars['Int']['output'];
   score_distribution: Array<ScoreDistributionEntry>;
 };
@@ -504,6 +505,7 @@ export type TestResolvers<ContextType = Context, ParentType extends ResolversPar
 export type TestStatsResolvers<ContextType = Context, ParentType extends ResolversParentTypes['TestStats'] = ResolversParentTypes['TestStats']> = ResolversObject<{
   completed_submissions: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   exercises: Resolver<Array<ResolversTypes['ExerciseStats']>, ParentType, ContextType>;
+  incompleted_submissions: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   min_submissions_for_stats: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   score_distribution: Resolver<Array<ResolversTypes['ScoreDistributionEntry']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;

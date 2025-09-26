@@ -56,6 +56,7 @@ const TestQuery = gql`
             }
             stats {
                 completed_submissions
+                incompleted_submissions
                 min_submissions_for_stats
                 exercises {
                     correct_answers
