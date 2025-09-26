@@ -152,60 +152,6 @@ function ViewTest({test, profile, accessToken}: {
             {test.title || `Test ${test._id}`}
         </h1>
         
-        {/* Sempre visibile: informazioni di base e controlli per tutti */}
-        <div className="mb-6">
-            <TestBasicInfo test={test} now={now} isOpen={isOpen} profile={profile} />
-            
-            {/* Controlli per l'autore */}
-            { profile?._id === test.author._id && (
-                <div className="flex gap-2 mb-4">
-                    <Link href={`/note/${test.note_id}?edit`} className={EDIT_BUTTON_CLASS}>
-                        Modifica nota con il testo del test
-                    </Link>
-                    <Link href={`?edit`} className={EDIT_BUTTON_CLASS}>
-                        Modifica proprietà del test
-                    </Link>
-                    <button 
-                        onClick={() => setShowShareModal(true)}
-                        className={EDIT_BUTTON_CLASS}
-                    >
-                        Condividi
-                    </button>
-                </div>
-            )}
-            
-            {/* Controlli per gli utenti non autenticati */}
-            { !profile && isOpen && (
-                <div className="bg-yellow-50 border border-yellow-200 rounded-md p-4 mb-4">
-                    <span>Fai il login per iniziare il test</span>
-                </div>
-            )}
-            
-            {/* Pulsante per iniziare il test */}
-            {profile && test.submissions && test.submissions.length === 0 && isOpen && (
-                <button className={BUTTON_CLASS} disabled={isStarting} onClick={async () => {
-                    const result = await startSubmission({ variables: { test_id: test._id } })
-                    const submission_id = result.data?.newSubmission
-                    if (submission_id) {
-                        router.push(`/submission/${submission_id}`)
-                    }
-                }}>
-                    inizia test
-                </button>
-            )}
-            
-            {startError && <Error error={startError} />}
-            
-            {/* Submission dell'utente corrente */}
-            {profile && test.submissions && (
-                <div className="flex flex-col gap-2 mb-4">
-                    {test.submissions
-                        .filter(submission => submission.author?._id === profile._id)
-                        .map(submission => <SubmissionElement key={submission._id} submission={submission} accessToken={accessToken} />)}
-                </div>
-            )}
-        </div>
-
         {/* Tab navigation - solo se l'utente può vedere i dettagli */}
         {canViewDetails && (
             <>
@@ -229,121 +175,14 @@ function ViewTest({test, profile, accessToken}: {
 
                 {/* Tab content */}
                 <div className="tab-content">
-                    {activeTab === 'info' && <TestInfoTab test={test} now={now} isOpen={isOpen} />}
+                    {activeTab === 'info' && <TestInfoTab test={test} now={now} isOpen={isOpen} profile={profile} setShowShareModal={setShowShareModal} showShareModal={showShareModal} />}
                     {activeTab === 'scores' && test.stats && <TestScoresTab stats={test.stats} />}
                     {activeTab === 'exercises' && test.stats && <TestExercisesTab stats={test.stats} />}
                     {activeTab === 'submissions' && test.submissions && <TestSubmissionsTab submissions={test.submissions} accessToken={accessToken} />}
                 </div>
             </>
         )}
-        
-        <ShareModal 
-            resource={test}
-            isOpen={showShareModal}
-            onClose={() => setShowShareModal(false)}
-        />
     </div>
-}
-
-function TestBasicInfo({test, now, isOpen, profile}: {
-    test: Test,
-    now: Date,
-    isOpen: boolean,
-    profile: Profile|null
-}) {
-    const isOwner = profile?._id === test.author._id
-    
-    if (!isOwner) {
-        // Visualizzazione semplificata per utenti non proprietari
-        return <div className="bg-gray-50 p-4 rounded-md mb-4">
-                <div className="space-y-2">
-                    <div>
-                        <span className="font-bold">Il test è</span> {
-                            isOpen
-                                ? <span className="text-green-600 font-semibold">aperto</span>
-                                : <span className="text-red-600 font-semibold">chiuso</span>
-                        }
-                    </div>
-                    {isOpen && test.close_on && (
-                        <div>
-                            <span className="font-bold">Si chiude il:</span> {myTimestamp(test.close_on)}
-                        </div>
-                    )}
-                    {!isOpen && test.close_on && new Date(test.close_on) < now && (
-                        <div>
-                            <span className="font-bold">Si è chiuso il:</span> {myTimestamp(test.close_on)}
-                        </div>
-                    )}
-                    {!isOpen && test.open_on && new Date(test.open_on) > now && (
-                        <div>
-                            <span className="font-bold">Si aprirà il:</span> {myTimestamp(test.open_on)}
-                        </div>
-                    )}
-                </div>
-        </div>
-    }
-
-    // Visualizzazione completa per il proprietario
-    return (
-        <div className="bg-gray-50 p-4 rounded-md mb-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                    <span className="font-bold">Autore:</span> {test.author?.email || 'Sconosciuto'}
-                </div>
-                <div>
-                    <span className="font-bold">Creato il:</span> {myTimestamp(test.created_on)}
-                </div>
-                <div>
-                    <span className="font-bold">Apertura:</span> {
-                        test.open_on 
-                            ? myTimestamp(test.open_on)
-                            : "Sempre aperto"
-                    }
-                </div>
-                <div>
-                    <span className="font-bold">Chiusura:</span> {
-                        test.close_on 
-                            ? myTimestamp(test.close_on)
-                            : "Sempre aperto"
-                    }
-                </div>
-                <div>
-                    <span className="font-bold">Stato:</span> {
-                        isOpen
-                            ? <span className="text-green-600 font-semibold">Aperto</span>
-                            : <span className="text-red-600 font-semibold">Chiuso</span>
-                    }
-                </div>
-                <div>
-                    <span className="font-bold">Privacy:</span> {
-                        test.private 
-                            ? <span className="text-yellow-600">Privato</span>
-                            : <span className="text-blue-600">Pubblico</span>
-                    }
-                </div>
-            </div>
-        </div>
-    )
-}
-
-function SubmissionElement({submission, accessToken}:{
-    submission: Submission
-    accessToken?: string | null
-}) {
-    // Costruisci il link con il token se presente
-    const getSubmissionLink = () => {
-        if (accessToken) {
-            return `/submission/${submission._id}?token=${accessToken}`
-        }
-        return `/submission/${submission._id}`
-    }
-
-    return <a key={submission._id} className={BUTTON_CLASS} href={getSubmissionLink()}>
-        { submission.completed_on 
-            ? `visualizza test completato il ${myTimestamp(submission.completed_on)}`
-            : `riprendi test del ${myTimestamp(submission.started_on)}`
-        }
-    </a>
 }
 
 function SubmissionTable({submissions, accessToken}: {submissions: Submission[], accessToken?: string | null}) {
@@ -580,11 +419,15 @@ function SubmissionRow({submission, headers, index, rankMap, accessToken}:{
 }
 
 // Componenti per i vari tab
-function TestInfoTab({test, now, isOpen}: {
+function TestInfoTab({test, now, isOpen, profile, setShowShareModal, showShareModal}: {
     test: Test,
     now: Date,
-    isOpen: boolean
+    isOpen: boolean,
+    profile: Profile|null,
+    setShowShareModal: (open: boolean) => void,
+    showShareModal: boolean
 }) {
+    const isOwner = profile?._id === test.author._id
     return (
         <div className="space-y-6">
             <div className="bg-white p-6 rounded-lg border border-gray-200">
@@ -635,6 +478,30 @@ function TestInfoTab({test, now, isOpen}: {
                     </Link>
                 </div>
             </div>
+
+            {/* Pulsanti autore, visibili solo all'autore */}
+            { isOwner && (
+                <div className="flex gap-2 mb-4">
+                    <Link href={`/note/${test.note_id}?edit`} className={EDIT_BUTTON_CLASS}>
+                        Modifica nota con il testo del test
+                    </Link>
+                    <Link href={`?edit`} className={EDIT_BUTTON_CLASS}>
+                        Modifica proprietà del test
+                    </Link>
+                    <button 
+                        onClick={() => setShowShareModal(true)}
+                        className={EDIT_BUTTON_CLASS}
+                    >
+                        Condividi
+                    </button>
+                </div>
+            )}
+            {/* ShareModal spostato qui */}
+            <ShareModal 
+                resource={test}
+                isOpen={showShareModal}
+                onClose={() => setShowShareModal(false)}
+            />
         </div>
     )
 }
@@ -680,75 +547,83 @@ function TestScoresTab({stats}: {stats: TestStats}) {
     )
 }
 
-function TestExercisesTab({stats}: {stats: TestStats}) {
-    const hasDetailedStats = stats.exercises.length > 0
-    
+// Tabella statistiche per esercizio
+function ExerciseStatsTable({exercises}: {exercises: any[]}) {
     return (
-        <div className="space-y-6">
-            <div className="bg-white p-6 rounded-lg border border-gray-200">
-                <h3 className="text-lg font-semibold mb-4">Statistiche per esercizio</h3>
-                
-                {!hasDetailedStats ? (
-                    <div className="bg-yellow-50 border border-yellow-200 rounded-md p-4">
-                        <p className="text-yellow-800">
-                            📊 Sono necessarie almeno {stats.min_submissions_for_stats} consegne per visualizzare le statistiche per esercizio.
-                            Attualmente ci sono {stats.completed_submissions} consegne.
-                        </p>
-                    </div>
-                ) : (
-                    <>
-                        {/* Tabella statistiche */}
-                        <div className="overflow-x-auto mb-6">
-                            <table className="w-full border-collapse border border-gray-300">
-                                <thead>
-                                    <tr className="bg-gray-50">
-                                        <th className="border border-gray-300 px-4 py-2 text-left">Esercizio</th>
-                                        <th className="border border-gray-300 px-4 py-2 text-center">Risposte totali</th>
-                                        <th className="border border-gray-300 px-4 py-2 text-center">Risposte corrette</th>
-                                        <th className="border border-gray-300 px-4 py-2 text-center">Risposte vuote</th>
-                                        <th className="border border-gray-300 px-4 py-2 text-center">% Successo</th>
-                                        <th className="border border-gray-300 px-4 py-2 text-center">Punteggio medio</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {stats.exercises.map((exercise, index) => (
-                                        <tr key={index} className="hover:bg-gray-50">
-                                            <td className="border border-gray-300 px-4 py-2 font-medium">Esercizio {index + 1}</td>
-                                            <td className="border border-gray-300 px-4 py-2 text-center">{exercise.total_answers}</td>
-                                            <td className="border border-gray-300 px-4 py-2 text-center text-green-600 font-semibold">{exercise.correct_answers}</td>
-                                            <td className="border border-gray-300 px-4 py-2 text-center text-red-600">{exercise.empty_answers}</td>
-                                            <td className="border border-gray-300 px-4 py-2 text-center">
-                                                {exercise.total_answers > 0 ? Math.round((exercise.correct_answers / exercise.total_answers) * 100) : 0}%
-                                            </td>
-                                            <td className="border border-gray-300 px-4 py-2 text-center">
-                                                {exercise.average_score !== null ? (exercise.average_score * 100).toFixed(1) + '%' : 'N/A'}
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
-
-                        {/* Grafico statistiche per esercizio */}
-                        <div>
-                            <h4 className="text-md font-semibold mb-3">Grafico prestazioni per esercizio</h4>
-                            <ExerciseStatisticsChart exercises={stats.exercises} />
-                        </div>
-
-                        <div className="mt-4 text-sm text-gray-600">
-                            <p>💡 <strong>Legenda:</strong></p>
-                            <ul className="list-disc list-inside mt-2 space-y-1">
-                                <li><strong>Risposte corrette:</strong> numero di risposte che hanno ottenuto il punteggio massimo</li>
-                                <li><strong>% Successo:</strong> percentuale di risposte corrette sul totale</li>
-                                <li><strong>Punteggio medio:</strong> media dei punteggi ottenuti per questo esercizio</li>
-                                <li><strong>Risposte vuote:</strong> numero di esercizi lasciati senza risposta</li>
-                            </ul>
-                        </div>
-                    </>
-                )}
-            </div>
+        <div className="overflow-x-auto mb-6">
+            <table className="w-full border-collapse border border-gray-300">
+                <thead>
+                    <tr className="bg-gray-50">
+                        <th className="border border-gray-300 px-4 py-2 text-left">Esercizio</th>
+                        <th className="border border-gray-300 px-4 py-2 text-center">Risposte totali</th>
+                        <th className="border border-gray-300 px-4 py-2 text-center">Risposte corrette</th>
+                        <th className="border border-gray-300 px-4 py-2 text-center">Risposte vuote</th>
+                        <th className="border border-gray-300 px-4 py-2 text-center">% Successo</th>
+                        <th className="border border-gray-300 px-4 py-2 text-center">Punteggio medio</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {exercises.map((exercise, index) => (
+                        <tr key={index} className="hover:bg-gray-50">
+                            <td className="border border-gray-300 px-4 py-2 font-medium">Esercizio {index + 1}</td>
+                            <td className="border border-gray-300 px-4 py-2 text-center">{exercise.total_answers}</td>
+                            <td className="border border-gray-300 px-4 py-2 text-center text-green-600 font-semibold">{exercise.correct_answers}</td>
+                            <td className="border border-gray-300 px-4 py-2 text-center text-red-600">{exercise.empty_answers}</td>
+                            <td className="border border-gray-300 px-4 py-2 text-center">
+                                {exercise.total_answers > 0 ? Math.round((exercise.correct_answers / exercise.total_answers) * 100) : 0}%
+                            </td>
+                            <td className="border border-gray-300 px-4 py-2 text-center">
+                                {exercise.average_score !== null ? (exercise.average_score * 100).toFixed(1) + '%' : 'N/A'}
+                            </td>
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
         </div>
     )
+}
+
+// Grafico prestazioni per esercizio
+function ExerciseStatsChart({exercises}: {exercises: any[]}) {
+    return (
+        <div>
+            <h4 className="text-md font-semibold mb-3">Grafico prestazioni per esercizio</h4>
+            <ExerciseStatisticsChart exercises={exercises} />
+        </div>
+    )
+}
+
+function TestExercisesTab({stats}: {stats: TestStats}) {
+    const hasDetailedStats = stats.exercises.length > 0
+
+    if (!hasDetailedStats) {
+        return <div className="bg-yellow-50 border border-yellow-200 rounded-md p-4">
+                <p className="text-yellow-800">
+                    📊 Sono necessarie almeno {stats.min_submissions_for_stats} consegne per visualizzare le statistiche per esercizio.
+                </p>
+        </div>
+    }
+
+    return <div className="space-y-6">
+        <div className="bg-white p-6 rounded-lg border border-gray-200">
+            <h3 className="text-lg font-semibold mb-4">Statistiche per esercizio</h3>
+            {/* Grafico statistiche per esercizio */}
+            <ExerciseStatsChart exercises={stats.exercises} />
+            {/* Spazio verticale tra grafico e tabella */}
+            <div className="my-8" />
+            {/* Tabella statistiche */}
+            <ExerciseStatsTable exercises={stats.exercises} />
+            <div className="mt-4 text-sm text-gray-600">
+                <p>💡 <strong>Legenda:</strong></p>
+                <ul className="list-disc list-inside mt-2 space-y-1">
+                    <li><strong>Risposte corrette:</strong> numero di risposte che hanno ottenuto il punteggio massimo</li>
+                    <li><strong>% Successo:</strong> percentuale di risposte corrette sul totale</li>
+                    <li><strong>Punteggio medio:</strong> media dei punteggi ottenuti per questo esercizio</li>
+                    <li><strong>Risposte vuote:</strong> numero di esercizi lasciati senza risposta</li>
+                </ul>
+            </div>
+        </div>
+    </div>
 }
 
 function TestSubmissionsTab({submissions, accessToken}: {
