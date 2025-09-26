@@ -10,11 +10,15 @@ const ScoreDistributionChart = memo(function ScoreDistributionChart({ distributi
             </div>
         )
     }
-    const chartData = distribution.map(entry => ({
-        scoreRange: `${entry.score_range}-${entry.score_range + 1}`,
-        count: entry.count,
-        label: `${entry.score_range} - ${entry.score_range + 1} punti`
-    }))
+    const chartData = distribution.map(entry => {
+        const min = entry.score_min.toFixed(1);
+        const max = entry.score_max.toFixed(1);
+        return {
+            scoreRange: max > min ? `${min}-${max}` : `${min}`,
+            count: entry.count,
+            label: max > min ? `${entry.score_min} - ${entry.score_max} punti` : `${entry.score_min} punti`
+        }
+    })
     return (
         <div>
             <div className="text-sm text-gray-600 mb-4">

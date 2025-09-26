@@ -92,21 +92,32 @@ export default async function testStats(parent: Test, _args: unknown, context: C
     }
     
     // Calcola la distribuzione dei punteggi usando i punteggi già memorizzati
-    const scoreDistribution = new Map<number, number>()
-    
+    const scoreDistribution = new Map<number, {min: number, max: number, count: number}>()
+
+    function getOrCreate(key: number) {
+        if (!scoreDistribution.has(key)) {
+            scoreDistribution.set(key, {min: Infinity, max: -Infinity, count: 0});
+        }
+        return scoreDistribution.get(key)!;
+    }
+
     for (const totalScore of submissionScores) {
-        const scoreRange = Math.floor(totalScore)
-        scoreDistribution.set(scoreRange, (scoreDistribution.get(scoreRange) || 0) + 1)
+        const key = Math.floor(totalScore+0.00001); // Aggiungi una piccola epsilon per gestire i casi come 2.9999999
+        const range = getOrCreate(key);
+        range.count++;
+        range.min = Math.min(range.min, totalScore);
+        range.max = Math.max(range.max, totalScore);
     }
     
-    // Converti la mappa in array di ScoreDistributionEntry, ordinato per score_range
-    const score_distribution = Array.from(scoreDistribution.entries())
-        .map(([score_range, count]) => ({
+    // Converti la mappa in array di ScoreDistributionEntry, ordinato per score_min
+    const score_distribution = Array.from(scoreDistribution.values())
+        .map(({min, max, count}) => ({
             __typename: 'ScoreDistributionEntry' as const,
-            score_range,
+            score_min: min,
+            score_max: max,
             count
         }))
-        .sort((a, b) => a.score_range - b.score_range)
+        .sort((a, b) => a.score_min - b.score_min)
 
     return {
         __typename: 'TestStats',

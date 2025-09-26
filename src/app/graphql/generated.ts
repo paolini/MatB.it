@@ -214,7 +214,8 @@ export type QueryTestsArgs = {
 export type ScoreDistributionEntry = {
   __typename?: 'ScoreDistributionEntry';
   count: Scalars['Int']['output'];
-  score_range: Scalars['Int']['output'];
+  score_max: Scalars['Float']['output'];
+  score_min: Scalars['Float']['output'];
 };
 
 export type Submission = {
@@ -465,7 +466,8 @@ export type QueryResolvers<ContextType = Context, ParentType extends ResolversPa
 
 export type ScoreDistributionEntryResolvers<ContextType = Context, ParentType extends ResolversParentTypes['ScoreDistributionEntry'] = ResolversParentTypes['ScoreDistributionEntry']> = ResolversObject<{
   count: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
-  score_range: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  score_max: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
+  score_min: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 

@@ -3,7 +3,7 @@ import { gql, useMutation, useQuery } from '@apollo/client'
 import { useSearchParams, useRouter, usePathname } from 'next/navigation'
 
 import { Test, Profile, Submission, AnswerItem } from '@/app/graphql/generated'
-import { Loading, Error, CANCEL_BUTTON_CLASS, DELETE_BUTTON_CLASS, BUTTON_CLASS, SAVE_BUTTON_CLASS } from '@/components/utils'
+import { Loading, Error, CANCEL_BUTTON_CLASS, DELETE_BUTTON_CLASS, SAVE_BUTTON_CLASS } from '@/components/utils'
 import { useEffect, useState, useMemo } from 'react'
 import { myTimestamp, formatDuration } from '@/lib/utils'
 import Link from 'next/link'
@@ -11,7 +11,6 @@ import TestInfoTab from './TestInfoTab'
 import TestScoresTab from './TestScoresTab'
 import TestExercisesTab from './TestExercisesTab'
 import TestSubmissionsTab from './TestSubmissionsTab'
-import SubmissionElement from './SubmissionElement'
 import StudentTestActions from './StudentTestActions'
 
 // Definizione dei tab disponibili
@@ -66,7 +65,8 @@ const TestQuery = gql`
                     correlation_to_total
                 }
                 score_distribution {
-                    score_range
+                    score_min
+                    score_max
                     count
                 }
             }
