@@ -114,12 +114,19 @@ type ExerciseStats {
     correlation_to_total: Float
 }
 
+type ClassSummary {
+  name: String!
+  academic_year: String
+  description: String
+}
+
 type AccessToken {
     _id: ObjectId!
     resource_id: ObjectId!
     secret: String!
     permission: String!
     created_on: Timestamp!
+    class: ClassSummary
 }
 
 type Query {

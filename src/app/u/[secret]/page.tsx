@@ -2,7 +2,6 @@
 import { use, useEffect, useState } from 'react';
 import { gql, useQuery, useMutation } from '@apollo/client';
 import { Error, Loading } from '@/components/utils';
-import { access } from 'fs';
 import { useRouter } from 'next/navigation';
 
 const ENROLL_WITH_CODE = gql`
@@ -16,20 +15,15 @@ const ACCESS_TOKEN_QUERY = gql`
     accessToken(secret: $secret) {
       resource_id
       permission
+      secret
+      class {
+        name
+        academic_year
+        description
+      }
     }
   }
 `;
-
-const GET_CLASS_QUERY = gql`
-  query Class($classId: ObjectId!) {
-    class(_id: $classId) {
-      _id
-      name
-      description
-      academic_year
-    }
-  }
-`
 
 const GET_PROFILE_QUERY = gql`
   query Profile {
@@ -61,11 +55,6 @@ export default function SecretPage({ params }: { params: Promise<{ secret: strin
 
 function Enroll({ accessToken, profile }: { accessToken: any, profile: any }) {
   const router = useRouter();
-  const {data, loading, error} = useQuery(GET_CLASS_QUERY, {
-    variables: {
-      classId: accessToken.resource_id
-    }
-  })
   const [enrollWithCode, { loading: loadingEnroll, error: errorEnroll }] = useMutation(ENROLL_WITH_CODE);
 
   // Redirect to login if not authenticated
@@ -76,16 +65,31 @@ function Enroll({ accessToken, profile }: { accessToken: any, profile: any }) {
     }
   }, [profile, router]);
 
-  if (loading) return <Loading />
-  if (error) return <Error error={error} />
-
-  return <div>
-    { accessToken.permission === 'teacher_enrollment'  
-       ? <h2>iscriviti come docente</h2>
-       : <h2>iscrizione</h2>
-      }
-    <h2>Enroll with Access Token</h2>
-    <p>Resource ID: {accessToken.resource_id}</p>
-    <p>Permission: {accessToken.permission}</p>
+  // Mostra i dati della classe e il pulsante di iscrizione
+  return <div className="max-w-lg mx-auto p-6 bg-white rounded shadow mt-8 text-green-700">
+    <h2 className="text-xl font-bold mb-2">
+      {accessToken.permission === 'teacher_enrollment' ? 'Iscriviti come docente' : 'Iscrizione'}
+    </h2>
+    <div className="mb-4">
+      <div className="text-lg font-semibold">{accessToken.class?.name || "classe senza nome"}</div>
+      <div className="text-gray-600">Anno accademico: {accessToken.class?.academic_year || "non disponibile"}</div>
+      <div className="text-gray-600">Descrizione: {accessToken.class?.description || "non disponibile"}</div>
+    </div>
+    <button
+      className="w-full py-3 px-6 bg-blue-600 text-white font-bold rounded-lg shadow hover:bg-blue-700 transition"
+      disabled={loadingEnroll}
+      onClick={async () => {
+        try {
+          await enrollWithCode({ variables: { code: accessToken.secret } });
+          router.push(`/class/${accessToken.resource_id}`);
+        } catch (e) {
+          // gestisci errore
+          alert('Errore durante l\'iscrizione');
+        }
+      }}
+    >
+      {loadingEnroll ? 'Iscrizione in corso...' : 'Iscriviti'}
+    </button>
+    {errorEnroll && <div className="text-red-600 mt-2">{errorEnroll.message}</div>}
   </div>
 }

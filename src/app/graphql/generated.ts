@@ -24,6 +24,7 @@ export type Scalars = {
 export type AccessToken = {
   __typename?: 'AccessToken';
   _id: Scalars['ObjectId']['output'];
+  class: Maybe<ClassSummary>;
   created_on: Scalars['Timestamp']['output'];
   permission: Scalars['String']['output'];
   resource_id: Scalars['ObjectId']['output'];
@@ -60,6 +61,13 @@ export type Class = {
   teacher_enrollment_url: Maybe<Scalars['String']['output']>;
   teachers: Array<User>;
   tests: Array<Test>;
+};
+
+export type ClassSummary = {
+  __typename?: 'ClassSummary';
+  academic_year: Maybe<Scalars['String']['output']>;
+  description: Maybe<Scalars['String']['output']>;
+  name: Scalars['String']['output'];
 };
 
 export type ExerciseStats = {
@@ -457,6 +465,7 @@ export type ResolversTypes = ResolversObject<{
   AnswerItemInput: AnswerItemInput;
   Boolean: ResolverTypeWrapper<Scalars['Boolean']['output']>;
   Class: ResolverTypeWrapper<Class>;
+  ClassSummary: ResolverTypeWrapper<ClassSummary>;
   ExerciseStats: ResolverTypeWrapper<ExerciseStats>;
   Float: ResolverTypeWrapper<Scalars['Float']['output']>;
   Int: ResolverTypeWrapper<Scalars['Int']['output']>;
@@ -482,6 +491,7 @@ export type ResolversParentTypes = ResolversObject<{
   AnswerItemInput: AnswerItemInput;
   Boolean: Scalars['Boolean']['output'];
   Class: Class;
+  ClassSummary: ClassSummary;
   ExerciseStats: ExerciseStats;
   Float: Scalars['Float']['output'];
   Int: Scalars['Int']['output'];
@@ -502,6 +512,7 @@ export type ResolversParentTypes = ResolversObject<{
 
 export type AccessTokenResolvers<ContextType = Context, ParentType extends ResolversParentTypes['AccessToken'] = ResolversParentTypes['AccessToken']> = ResolversObject<{
   _id: Resolver<ResolversTypes['ObjectId'], ParentType, ContextType>;
+  class: Resolver<Maybe<ResolversTypes['ClassSummary']>, ParentType, ContextType>;
   created_on: Resolver<ResolversTypes['Timestamp'], ParentType, ContextType>;
   permission: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   resource_id: Resolver<ResolversTypes['ObjectId'], ParentType, ContextType>;
@@ -533,6 +544,13 @@ export type ClassResolvers<ContextType = Context, ParentType extends ResolversPa
   teacher_enrollment_url: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   teachers: Resolver<Array<ResolversTypes['User']>, ParentType, ContextType>;
   tests: Resolver<Array<ResolversTypes['Test']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+}>;
+
+export type ClassSummaryResolvers<ContextType = Context, ParentType extends ResolversParentTypes['ClassSummary'] = ResolversParentTypes['ClassSummary']> = ResolversObject<{
+  academic_year: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  description: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  name: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
@@ -680,6 +698,7 @@ export type Resolvers<ContextType = Context> = ResolversObject<{
   AccessToken: AccessTokenResolvers<ContextType>;
   AnswerItem: AnswerItemResolvers<ContextType>;
   Class: ClassResolvers<ContextType>;
+  ClassSummary: ClassSummaryResolvers<ContextType>;
   ExerciseStats: ExerciseStatsResolvers<ContextType>;
   JSON: GraphQLScalarType;
   Mutation: MutationResolvers<ContextType>;

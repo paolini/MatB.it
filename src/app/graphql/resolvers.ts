@@ -36,6 +36,7 @@ import addStudentToClass from './resolvers/addStudentToClass'
 import removeStudentFromClass from './resolvers/removeStudentFromClass'
 import generateEnrollmentCode from './resolvers/generateEnrollmentCode'
 import deleteEnrollmentCode from './resolvers/deleteEnrollmentCode'
+import enrollWithCode from './resolvers/enrollWithCode'
 
 // Nota: usiamo 'any' qui perché GraphQL Code Generator genera tipi molto rigidi
 // che richiedono la definizione completa di tutti i field resolvers per ogni tipo.
@@ -96,6 +97,7 @@ export const resolvers: any = {
     removeStudentFromClass,
     generateEnrollmentCode,
     deleteEnrollmentCode,
+    enrollWithCode,
   }
 }
 
