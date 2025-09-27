@@ -73,6 +73,12 @@ const REMOVE_TEACHER_FROM_CLASS = gql`
   }
 `
 
+const DELETE_CLASS = gql`
+  mutation DeleteClass($_id: ObjectId!) {
+    deleteClass(_id: $_id)
+  }
+`
+
 type ClassProps = {
   classId: string
   currentUserId?: string
@@ -104,6 +110,8 @@ export function Class({ classId, currentUserId }: ClassProps) {
   const [removeTeacher] = useMutation(REMOVE_TEACHER_FROM_CLASS, {
     onCompleted: () => refetch()
   })
+
+  const [deleteClassMutation, { loading: deletingClass, error: deleteError }] = useMutation(DELETE_CLASS)
 
   const searchParams = useSearchParams()
   const pathname = usePathname()
@@ -268,15 +276,17 @@ export function Class({ classId, currentUserId }: ClassProps) {
               <div>
                 <button
                   className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600"
+                  disabled={deletingClass}
                   onClick={async () => {
                     if (confirm('Sei sicuro di voler eliminare questa classe? L\'operazione è irreversibile.')) {
-                      // TODO: implementare la mutation di cancellazione
-                      alert('Funzionalità di cancellazione classe non ancora implementata.')
+                      await deleteClassMutation({ variables: { _id: classId } })
+                      window.location.href = '/classes'
                     }
                   }}
                 >
                   Elimina classe
                 </button>
+                <Error error={deleteError} />
               </div>
             )}
           </div>
