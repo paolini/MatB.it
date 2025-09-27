@@ -1,4 +1,3 @@
-import { ObjectId } from 'mongodb'
 import { AuthenticationError, ForbiddenError } from 'apollo-server-errors'
 
 import { Context } from '../types'

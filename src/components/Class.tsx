@@ -1,5 +1,9 @@
-import { useState } from 'react'
 import { gql, useQuery, useMutation } from '@apollo/client'
+import { useState, useEffect } from 'react'
+import { ClassEnrollmentCodes } from './ClassEnrollmentCodes'
+import { useSearchParams, usePathname } from 'next/navigation'
+import { BUTTON_CLASS, Error } from './utils'
+import { ObjectId } from 'bson'
 
 // Componente Badge semplice per le classi
 const Badge = ({ children, variant = 'default' }: { children: React.ReactNode, variant?: 'default' | 'secondary' }) => (
@@ -38,6 +42,8 @@ const GET_CLASS = gql`
       academic_year
       subject
       active
+      student_enrollment_url
+      teacher_enrollment_url
     }
   }
 `
@@ -74,6 +80,8 @@ type ClassProps = {
 export function Class({ classId, currentUserId }: ClassProps) {
   const [newMemberEmail, setNewMemberEmail] = useState('')
   const [memberType, setMemberType] = useState<'student' | 'teacher'>('student')
+  const [enrollmentCode, setEnrollmentCode] = useState('')
+  const [enrollmentError, setEnrollmentError] = useState<string|null>(null)
 
   const { data, loading, error, refetch } = useQuery(GET_CLASS, {
     variables: { id: classId }
@@ -95,8 +103,22 @@ export function Class({ classId, currentUserId }: ClassProps) {
     onCompleted: () => refetch()
   })
 
+  const searchParams = useSearchParams()
+  const pathname = usePathname()
+
+  useEffect(() => {
+    // Path: /class/ID/CODICE
+    const parts = pathname.split('/')
+    // Cerca il codice dopo l'ID della classe
+    const idx = parts.findIndex(p => p === classId)
+    const codeFromUrl = idx !== -1 && parts.length > idx + 1 ? parts[idx + 1] : ''
+    if (codeFromUrl) {
+      setEnrollmentCode(codeFromUrl)
+    }
+  }, [pathname, classId])
+
   if (loading) return <div>Loading...</div>
-  if (error) return <div>Error: {error.message}</div>
+  if (error) return <Error error={error} />
   if (!data?.class) return <div>Classe non trovata</div>
 
   const classData = data.class
@@ -104,6 +126,7 @@ export function Class({ classId, currentUserId }: ClassProps) {
   const isTeacher = classData.teachers.some((t: any) => t._id === currentUserId)
   const isStudent = classData.students.some((s: any) => s._id === currentUserId)
   const canManage = isOwner || isTeacher
+  const isMember = isOwner || isTeacher || isStudent
 
   const handleRemoveMember = async (userId: string, type: 'student' | 'teacher') => {
     if (!confirm(`Sei sicuro di voler rimuovere questo ${type === 'student' ? 'studente' : 'insegnante'}?`)) {
@@ -227,39 +250,46 @@ export function Class({ classId, currentUserId }: ClassProps) {
 
       {/* Add Members - Solo per owner e teacher */}
       {canManage && (
-        <div className="border-t pt-6">
-          <h3 className="text-lg font-semibold mb-3">Aggiungi Membri</h3>
-          <div className="flex gap-4 items-end">
-            <div className="flex-1">
-              <label className="block text-sm font-medium mb-1">Email Utente</label>
-              <input
-                type="email"
-                value={newMemberEmail}
-                onChange={(e) => setNewMemberEmail(e.target.value)}
-                placeholder="email@example.com"
-                className="w-full p-2 border border-gray-300 rounded-md"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-1">Ruolo</label>
-              <select
-                value={memberType}
-                onChange={(e) => setMemberType(e.target.value as 'student' | 'teacher')}
-                className="p-2 border border-gray-300 rounded-md"
+        <>
+          <div className="border-t pt-6">
+            <h3 className="text-lg font-semibold mb-3">Aggiungi Membri</h3>
+            <div className="flex gap-4 items-end">
+              <div className="flex-1">
+                <label className="block text-sm font-medium mb-1">Email Utente</label>
+                <input
+                  type="email"
+                  value={newMemberEmail}
+                  onChange={(e) => setNewMemberEmail(e.target.value)}
+                  placeholder="email@example.com"
+                  className="w-full p-2 border border-gray-300 rounded-md"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Ruolo</label>
+                <select
+                  value={memberType}
+                  onChange={(e) => setMemberType(e.target.value as 'student' | 'teacher')}
+                  className="p-2 border border-gray-300 rounded-md"
+                >
+                  <option value="student">Studente</option>
+                  {isOwner && <option value="teacher">Insegnante</option>}
+                </select>
+              </div>
+              <button
+                onClick={handleAddMember}
+                disabled={!newMemberEmail.trim()}
+                className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 disabled:opacity-50"
               >
-                <option value="student">Studente</option>
-                {isOwner && <option value="teacher">Insegnante</option>}
-              </select>
+                Aggiungi
+              </button>
             </div>
-            <button
-              onClick={handleAddMember}
-              disabled={!newMemberEmail.trim()}
-              className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 disabled:opacity-50"
-            >
-              Aggiungi
-            </button>
           </div>
-        </div>
+          { canManage &&
+            <ClassEnrollmentCodes
+              classData={classData}
+              refetch={refetch}
+            />}
+        </>
       )}
 
       {/* User Role Badge */}

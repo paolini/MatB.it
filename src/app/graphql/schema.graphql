@@ -30,6 +30,8 @@ type Class {
   academic_year: String
   subject: String
   active: Boolean!
+  student_enrollment_url: String
+  teacher_enrollment_url: String
 }
 
 type Note {
@@ -60,7 +62,7 @@ type Test {
     close_on: Timestamp
     class_id: ObjectId
     class: Class
-  private: Boolean!
+    private: Boolean!
     submissions: [Submission!]
     stats: TestStats!
 }
@@ -128,6 +130,7 @@ type Query {
   test(_id: ObjectId!): Test
   tests(mine: Boolean, open: Boolean, class_id: ObjectId, limit: Int): [Test!]!
   submission(_id: ObjectId!): Submission
+  accessToken(secret: String!): AccessToken!
   accessTokens(resource_id: ObjectId!): [AccessToken!]!
   class(_id: ObjectId!): Class
   classes: [Class!]!
@@ -157,4 +160,8 @@ type Mutation {
   removeTeacherFromClass(class_id: ObjectId!, user_id: ObjectId!): Boolean
   addStudentToClass(class_id: ObjectId!, user_id: ObjectId!): Boolean  
   removeStudentFromClass(class_id: ObjectId!, user_id: ObjectId!): Boolean
+
+  generateEnrollmentCode(class_id: ObjectId!, role: String!): String
+  deleteEnrollmentCode(class_id: ObjectId!, role: String!): Boolean
+  enrollWithCode(code: String!): ObjectId!
 }

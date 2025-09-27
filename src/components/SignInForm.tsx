@@ -13,7 +13,7 @@ type Provider = {
 
 type Providers = Record<string, Provider>;
 
-export default function SignInForm() {
+export default function SignInForm({callbackUrl}: {callbackUrl?: string}) {
   const [providers, setProviders] = useState<Providers | null>(null);
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -50,7 +50,7 @@ export default function SignInForm() {
   };
 
   const handleOAuthSignIn = (providerId: string) => {
-    signIn(providerId, { callbackUrl: "/" });
+    signIn(providerId, { callbackUrl: callbackUrl || "/" });
   };
 
   if (emailSent) {

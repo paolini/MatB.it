@@ -57,6 +57,7 @@ docker push paolini/matbit
 Use environment variables.
 ```
 MONGODB_URI=mongodb://127.0.0.1:27017/matbit
+NEXT_PUBLIC_BASE_URL=http://localhost:3000
 ```
 
 Environment variables can also be put in a `.env` file

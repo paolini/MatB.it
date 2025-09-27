@@ -1,6 +1,6 @@
 import { ObjectId } from 'mongodb'
 import { Context } from '../types'
-import { getClassesCollection, getUserClassRole, CLASS_PIPELINE } from '@/lib/models'
+import { getClassesCollection, getUserClassRole, CLASS_PIPELINE, getAccessTokensCollection } from '@/lib/models'
 import { NOTE_PIPELINE, TEST_PIPELINE } from '@/lib/models'
 
 export default async function classResolver(_parent: unknown, args: { _id: ObjectId }, context: Context) {
@@ -60,5 +60,27 @@ export default async function classResolver(_parent: unknown, args: { _id: Objec
 
     if (classAgg.length !== 1) throw new Error('Classe non trovata dopo aggregazione')
 
-    return classAgg[0]
+    let student_enrollment_url = null
+    let teacher_enrollment_url = null
+
+    if (isTeacher) {
+        const tokens = await getAccessTokensCollection(db).find({
+            resource_id: _id,
+            permission: { $in: ['student_enrollment', 'teacher_enrollment'] },
+        }).toArray()
+
+        for (const token of tokens) {
+            if (token.permission === 'student_enrollment') {
+                student_enrollment_url = `${process.env.NEXT_PUBLIC_BASE_URL}/u/${token.secret}`
+            } else if (token.permission === 'teacher_enrollment') {
+                teacher_enrollment_url = `${process.env.NEXT_PUBLIC_BASE_URL}/u/${token.secret}`
+            }
+        }
+    }
+
+    return {
+        ...classAgg[0],
+        student_enrollment_url,
+        teacher_enrollment_url
+    }
 }

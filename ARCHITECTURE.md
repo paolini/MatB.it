@@ -21,8 +21,21 @@ type MongoClass = {
     academic_year?: string
     subject?: string
     active: boolean
+    // Codici di arruolamento per studenti e docenti
+    student_enrollment_code?: string   // Codice segreto per arruolamento studenti
+    teacher_enrollment_code?: string   // Codice segreto per arruolamento docenti
 }
 ```
+
+### Arruolamento tramite codice segreto
+- Ogni classe può avere codici di arruolamento generati e gestiti tramite una collection dedicata (`secrets`).
+- Ogni codice contiene: stringa segreta, timestamp di scadenza, azione (`enroll_student` o `enroll_teacher`), e un `class_id`.
+- I codici possono essere generati, copiati e revocati tramite UI e API GraphQL.
+- Chi accede tramite codice viene aggiunto al ruolo corrispondente (studente/docente) nella classe specificata.
+- I codici sono segreti, sufficientemente lunghi e randomici (UUID v4).
+- Solo owner e docenti possono generare/revocare i codici.
+- Un utente non può arruolarsi due volte nella stessa classe.
+- L'accesso avviene tramite endpoint `/u/<secret>` che gestisce la validazione e l'iscrizione automatica.
 
 ### Regole di visibilità
 - **Note/Test con `private=true` e collegate a una classe**: possono essere visualizzate da tutti i docenti della classe (owner e teachers), ma non dagli studenti.
@@ -292,119 +305,20 @@ type MongoAnswer = {
 - `updateSubmission(_id, answers, completed)`: Update submission with answers
 - `deleteSubmission(_id)`: Delete submission
 
-## Key Components
+// Gestione codici di arruolamento classi
+- `generateEnrollmentCode(class_id, role: "student"|"teacher")`: genera e salva un nuovo codice per il ruolo indicato (il codice è un UUID v4 generato tramite la funzione `generateSecret()` già usata per i token di accesso)
+    - Solo owner o docenti possono chiamare la mutation.
+    - Sovrascrive eventuale codice esistente.
+    - Restituisce il nuovo codice.
+- `deleteEnrollmentCode(class_id, role: "student"|"teacher")`: cancella il codice per il ruolo indicato (imposta a null)
+    - Solo owner o docenti possono chiamare la mutation.
+    - Imposta il campo corrispondente a null.
+    - Restituisce conferma.
+- `enrollWithCode(code: String)`: arruola l’utente nella classe corrispondente al codice (come studente o docente)
+    - Cerca la classe con il codice (student/teacher).
+    - Se trovato, aggiunge l’utente al ruolo corrispondente (se non già presente).
+    - Restituisce la classe aggiornata.
 
-### Note.tsx
-Complex component handling:
-- **NoteWrapper**: Data fetching and mutation setup
-- **NoteInner**: Display/edit mode switching with DeltaContent integration
-- **NoteEditInner**: Rich editing interface with:
-  - Title editing
-  - **Variant selection** - dropdown for choosing note type (theorem, lemma, proof, etc.)
-  - Quill editor integration
-  - Privacy toggle
-  - **Streamlined UI** - action buttons (Save/Cancel/Delete) managed by MyQuill component
-  - Confirmation dialogs handled by MyQuill
-
-### MyQuill Custom Editor
-- Extended Quill.js with mathematical features
-- LaTeX formula insertion and rendering with proper cursor positioning
-- **Note reference system** with visual embedding and recursive content rendering
-- **DeltaContent React component integration** for view mode with full embedded note display
-- **Edit mode note references** display as styled badges with variant information
-- Custom toolbar configuration with note reference button (※)
-- Delta format content handling with consistent `note-ref` blot naming
-- **Variant-aware styling** with CSS-based labels and color coding
-- **Formula editor improvements** - proper cursor positioning after formula insertion and editing
-- **Unified action button system** - all Save/Cancel/Delete buttons consolidated in MyQuill component
-- **NoteReferenceModal integration** with both existing note selection and new note creation workflows
-- **Selection range preservation** - automatically saves cursor position before opening modals to ensure accurate note insertion
-
-### DeltaContent React Component
-- **Modern React component** replacing legacy HTML string generation
-- **Apollo GraphQL integration** with useQuery for direct note fetching
-- **Synchronous KaTeX rendering** using renderToString for mathematical formulas
-- **Recursive note embedding** with configurable depth limits and loading states
-- **Variant styling** using CSS classes for visual distinction
-- **Note information popups** for metadata access (author, dates, privacy)
-- **TypeScript support** with proper type definitions for better development experience
-- **Security improvements** with controlled dangerouslySetInnerHTML only for KaTeX-rendered content
-- **Proper HTML structure** - embedded notes rendered as block elements to prevent hydration errors
-- **Standardized note reference parsing** - consistent handling of `{ "note-ref": { "note_id": "..." } }` format
-
-## Development Workflow
-
-### Setup
-```bash
-docker-compose up -d        # Start MongoDB
-npm ci                      # Install dependencies
-npm run dev                 # Start development server
-```
-
-### Database Management
-```bash
-npm run migrate:status      # Check migration status
-npm run migrate:up          # Apply pending migrations
-npm run migrate:create      # Create new migration
-```
-
-### Code Generation
-```bash
-npm run codegen            # Generate TypeScript types from GraphQL schema
-```
-
-## Security & Privacy
-
-### Authentication
-- OAuth-based authentication (GitHub, Google)
-- **Passwordless email authentication** with magic links
-- JWT tokens for session management
-- User sessions persisted in MongoDB
-- Email verification through trusted providers (SMTP/Resend)
-
-### Authorization
-- Users can only edit/delete their own notes
-- Private notes only visible to authors
-- Profile information access controlled
-
-### Data Migration
-- Automatic migration system for schema changes
-- Legacy user account consolidation
-- Text-to-Delta content format migration
-- **Variant field migration** - copying variant from NoteVersion to Note for denormalization
-
-## Deployment
-- Dockerized application with multi-stage builds
-- Environment-based configuration
-- Docker Compose for production deployment
-- MongoDB Atlas or self-hosted MongoDB support
-
-## AI Integration Considerations
-
-### Content Format
-- Notes stored as Quill Delta JSON (structured, parseable)
-- LaTeX formulas preserved and identifiable
-- **Note references** embedded as structured data with note IDs
-- **Variant system** for mathematical content classification
-- Rich metadata (author, timestamps, privacy, versioning)
-- Complete version history available for analysis
-- **Recursive embedding structure** enables content relationship analysis
-
-### API Access
-- GraphQL endpoint provides structured data access
-- Type-safe operations with generated TypeScript types
-- Authentication context available for user-specific operations
-- Version history accessible for content evolution analysis
-
-### Extension Points
-- Custom Quill modules for additional features
-- GraphQL schema extensible for new functionality
-- Component-based architecture allows easy feature additions
-- Migration system supports schema evolution
-- **Versioning system** enables content timeline analysis and collaboration insights
-- **DeltaContent React component** extensible for new content types and rendering modes
-- **Variant system** supports new mathematical environment types
-- **Apollo GraphQL integration** enables real-time data fetching and caching
-- **Standardized note references** with consistent Delta format across the entire system
-
-This application demonstrates a modern full-stack approach with strong typing, real-time editing capabilities, mathematical content support, **recursive note embedding**, **visual variant system**, **Git-like versioning for collaborative research scenarios**, **modern React patterns** with Apollo GraphQL integration, and **robust content format consistency** for note references.
+// Token di accesso già presente
+- `MongoAccessToken.secret`: codice segreto (UUID v4) usato per permessi granulari su risorse (note/test)
+    - Generato tramite la stessa funzione `generateSecret()`.

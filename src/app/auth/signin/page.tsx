@@ -71,8 +71,8 @@ export default async function SignInPage({ searchParams }: Props) {
             </div>
           </div>
         )}
-        
-        <SignInForm />
+
+        <SignInForm callbackUrl={resolvedSearchParams.callbackUrl} />
       </div>
     </div>
   );

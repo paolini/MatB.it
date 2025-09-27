@@ -120,15 +120,6 @@ export type MongoAnswer = {
     answer: number | null // risposta depermutata 0-index
 }
 
-export type MongoAccessToken = {
-    _id: ObjectId
-    resource_id: ObjectId         // ID della nota o test
-    secret: string               // codice segreto (UUID)
-    permission: 'read' | 'write' // livello di accesso
-    created_on: Date             // quando è stato creato
-}
-
-// ✨ NUOVO: Collezione classi per organizzare note e test
 export type MongoClass = {
     _id: ObjectId
     name: string                    // "3A Scientifico", "Analisi I - 2024"
@@ -140,6 +131,14 @@ export type MongoClass = {
     academic_year?: string         // "2023/2024"
     subject?: string              // "Matematica", "Fisica", etc.
     active: boolean               // Per disattivare classi passate
+}
+
+export type MongoAccessToken = {
+    _id: ObjectId
+    resource_id: ObjectId         // ID della nota o test
+    secret: string               // codice segreto (UUID)
+    permission: 'read' | 'write' | 'student_enrollment' | 'teacher_enrollment' // livello di accesso
+    created_on: Date             // quando è stato creato
 }
 
 // ✨ Tipi per la visibilità dei contenuti
@@ -180,7 +179,6 @@ export function getAccessTokensCollection(db: Db) {
     return db.collection<OptionalId<MongoAccessToken>>('access_tokens')
 }
 
-// ✨ NUOVO: Helper per collezioni classi
 export function getClassesCollection(db: Db) {
     return db.collection<OptionalId<MongoClass>>('classes')
 }
@@ -226,7 +224,7 @@ export function generateSecret(): string {
     })
 }
 
-// ✨ NUOVO: Funzioni per la gestione della visibilità dei contenuti
+// Funzioni per la gestione della visibilità dei contenuti
 
 export async function getUserClassRole(
     db: Db,
