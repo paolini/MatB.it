@@ -41,7 +41,7 @@ Change version number in `package.json`.
 
 Esegui direttamente (sostituisci il nome del container se necessario):
 ```bash
-ssh contabo3 'docker exec matbit-mongodb mongodump --archive' | sudo docker exec -i docker-mongodb-1 mongorestore --archive
+ssh contabo3 'docker exec matbit-mongodb mongodump --archive' | sudo docker exec -i docker-mongodb-1 mongorestore --archive --drop
 ```
 
 ## create docker image
