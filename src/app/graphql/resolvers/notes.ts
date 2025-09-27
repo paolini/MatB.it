@@ -46,7 +46,6 @@ export const NOTES_LOOKUP_PIPELINE = [
 ]
 
 export default async function notes(_parent: unknown, args: any, context: Context) {
-    console.log('notes resolver called', { args, userId: context.user?._id });
     const userId = context.user?._id
     
     // Costruiamo la pipeline
@@ -59,14 +58,17 @@ export default async function notes(_parent: unknown, args: any, context: Contex
     if (classId) {
         if (!userId) throw new Error('Devi essere autenticato per accedere alle note di una classe');
         const cls = await context.db.collection('classes').findOne({ _id: classId });
-        const userObjectId = new ObjectId(userId);
+        const allNotes = await context.db.collection('notes').find({}).toArray();
         let userRole: 'owner' | 'teacher' | 'student' | null = null;
         if (cls) {
-            userRole = cls.owner_id.equals(userObjectId)
+            const isOwner = cls.owner_id.equals(new ObjectId(userId));
+            const isTeacher = cls.teachers?.some((t: any) => t.equals(new ObjectId(userId)));
+            const isStudent = cls.students?.some((s: any) => s.equals(new ObjectId(userId)));
+            userRole = isOwner
                 ? 'owner'
-                : cls.teachers?.some((t: any) => t.equals(userObjectId))
+                : isTeacher
                 ? 'teacher'
-                : cls.students?.some((s: any) => s.equals(userObjectId))
+                : isStudent
                 ? 'student'
                 : null;
         }
@@ -87,6 +89,7 @@ export default async function notes(_parent: unknown, args: any, context: Contex
         };
     }
     pipeline.push({ $match: match })
+    const filteredNotes = await context.db.collection('notes').find(match).toArray();
     
     // Match per filtri specifici
     const additionalMatch: any = {}
@@ -121,8 +124,6 @@ export default async function notes(_parent: unknown, args: any, context: Contex
     // Aggiungi le operazioni per i lookup PRIMA dell'ordinamento e paginazione
     pipeline.push(...NOTES_LOOKUP_PIPELINE)
     
-    // ...existing code...
-    
     // Ordinamento finale (dopo aver calcolato updated_on)
     pipeline.push({ $sort: { updated_on: -1 } })
     
@@ -138,7 +139,6 @@ export default async function notes(_parent: unknown, args: any, context: Contex
         .aggregate<any>(pipeline)
         .toArray()
 
-    // ...existing code...
     return notes;
 }
 
