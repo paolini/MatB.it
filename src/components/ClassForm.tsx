@@ -19,6 +19,32 @@ const UPDATE_CLASS = gql`
   }
 `
 
+const GET_CLASSES = gql`
+  query GetClasses {
+    classes {
+      _id
+      name
+      description
+      owner_id
+      owner {
+        _id
+        name
+      }
+      teachers {
+        _id
+        name
+      }
+      students {
+        _id
+        name
+      }
+      created_on
+      academic_year
+      active
+    }
+  }
+`
+
 type ClassFormProps = {
   initialData?: {
     _id?: string
@@ -44,6 +70,7 @@ export function ClassForm({ initialData, isEditing = false }: ClassFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   const [createClass] = useMutation(CREATE_CLASS, {
+    refetchQueries: [{ query: GET_CLASSES }],
     onCompleted: (data) => {
       router.push(`/class/${data.newClass}`)
     },

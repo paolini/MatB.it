@@ -2,11 +2,9 @@
 import { gql, useMutation, useQuery } from '@apollo/client'
 import { useSearchParams, useRouter, usePathname } from 'next/navigation'
 
-import { Test, Profile, Submission, AnswerItem } from '@/app/graphql/generated'
+import { Test, Profile } from '@/app/graphql/generated'
 import { Loading, Error, CANCEL_BUTTON_CLASS, DELETE_BUTTON_CLASS, SAVE_BUTTON_CLASS } from '@/components/utils'
 import { useEffect, useState, useMemo } from 'react'
-import { myTimestamp, formatDuration } from '@/lib/utils'
-import Link from 'next/link'
 import TestInfoTab from './TestInfoTab'
 import TestScoresTab from './TestScoresTab'
 import TestExercisesTab from './TestExercisesTab'
@@ -90,11 +88,6 @@ export default function TestWrapper({_id}: {_id: string}) {
     if (editMode) return <EditTest test={test} profile={profile}/>
     return <ViewTest test={test} profile={profile} accessToken={accessToken} />
 }
-
-const NewSubmissionMutation = gql`
-    mutation NewSubmission($test_id: ObjectId!) {
-        newSubmission(test_id: $test_id)
-}`
 
 const TABS: TabInfo[] = [
     { key: 'info', label: 'Informazioni', icon: '📋' },
@@ -192,6 +185,13 @@ const ClassesQuery = gql`
     classes {
       _id
       name
+        owner_id
+        teachers {
+          _id
+        }
+        students {
+        _id
+        }
     }
   }
 `
