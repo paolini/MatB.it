@@ -19,7 +19,6 @@ type MongoClass = {
     students: ObjectId[]
     created_on: Date
     academic_year?: string
-    subject?: string
     active: boolean
     // Codici di arruolamento per studenti e docenti
     student_enrollment_code?: string   // Codice segreto per arruolamento studenti

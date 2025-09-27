@@ -57,7 +57,6 @@ export type Class = {
   owner_id: Scalars['ObjectId']['output'];
   student_enrollment_url: Maybe<Scalars['String']['output']>;
   students: Array<User>;
-  subject: Maybe<Scalars['String']['output']>;
   teacher_enrollment_url: Maybe<Scalars['String']['output']>;
   teachers: Array<User>;
   tests: Array<Test>;
@@ -169,7 +168,6 @@ export type MutationNewClassArgs = {
   academic_year: InputMaybe<Scalars['String']['input']>;
   description: InputMaybe<Scalars['String']['input']>;
   name: Scalars['String']['input'];
-  subject: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -540,7 +538,6 @@ export type ClassResolvers<ContextType = Context, ParentType extends ResolversPa
   owner_id: Resolver<ResolversTypes['ObjectId'], ParentType, ContextType>;
   student_enrollment_url: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   students: Resolver<Array<ResolversTypes['User']>, ParentType, ContextType>;
-  subject: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   teacher_enrollment_url: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   teachers: Resolver<Array<ResolversTypes['User']>, ParentType, ContextType>;
   tests: Resolver<Array<ResolversTypes['Test']>, ParentType, ContextType>;

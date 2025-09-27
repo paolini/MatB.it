@@ -3,8 +3,8 @@ import { gql, useMutation } from '@apollo/client'
 import { useRouter } from 'next/navigation'
 
 const CREATE_CLASS = gql`
-  mutation CreateClass($name: String!, $description: String, $subject: String, $academicYear: String) {
-    newClass(name: $name, description: $description, subject: $subject, academic_year: $academicYear)
+  mutation CreateClass($name: String!, $description: String, $academicYear: String) {
+    newClass(name: $name, description: $description, academic_year: $academicYear)
   }
 `
 
@@ -24,7 +24,6 @@ type ClassFormProps = {
     _id?: string
     name: string
     description?: string
-    subject?: string
     academic_year?: string
     active?: boolean
   }
@@ -37,7 +36,6 @@ export function ClassForm({ initialData, isEditing = false }: ClassFormProps) {
   const [formData, setFormData] = useState({
     name: initialData?.name || '',
     description: initialData?.description || '',
-    subject: initialData?.subject || '',
     academic_year: initialData?.academic_year || '',
     active: initialData?.active !== false
   })
@@ -78,10 +76,6 @@ export function ClassForm({ initialData, isEditing = false }: ClassFormProps) {
       newErrors.description = 'La descrizione non può superare i 500 caratteri'
     }
 
-    if (formData.subject.length > 50) {
-      newErrors.subject = 'La materia non può superare i 50 caratteri'
-    }
-
     if (formData.academic_year.length > 20) {
       newErrors.academic_year = 'L\'anno accademico non può superare i 20 caratteri'
     }
@@ -113,7 +107,6 @@ export function ClassForm({ initialData, isEditing = false }: ClassFormProps) {
           variables: {
             name: formData.name.trim(),
             description: formData.description.trim() || undefined,
-            subject: formData.subject.trim() || undefined,
             academicYear: formData.academic_year.trim() || undefined
           }
         })
@@ -181,25 +174,6 @@ export function ClassForm({ initialData, isEditing = false }: ClassFormProps) {
 
         {!isEditing && (
           <>
-            {/* Materia */}
-            <div>
-              <label htmlFor="subject" className="block text-sm font-medium text-gray-700 mb-1">
-                Materia
-              </label>
-              <input
-                type="text"
-                id="subject"
-                value={formData.subject}
-                onChange={(e) => handleInputChange('subject', e.target.value)}
-                placeholder="es. Matematica, Fisica, Informatica"
-                className={`w-full p-3 border rounded-md ${
-                  errors.subject ? 'border-red-300' : 'border-gray-300'
-                } focus:ring-blue-500 focus:border-blue-500`}
-                disabled={isSubmitting}
-              />
-              {errors.subject && <p className="mt-1 text-sm text-red-600">{errors.subject}</p>}
-            </div>
-
             {/* Anno Accademico */}
             <div>
               <label htmlFor="academic_year" className="block text-sm font-medium text-gray-700 mb-1">

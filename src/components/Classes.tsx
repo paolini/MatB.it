@@ -34,7 +34,6 @@ const GET_CLASSES = gql`
       }
       created_on
       academic_year
-      subject
       active
     }
   }
@@ -127,9 +126,6 @@ export function Classes({ currentUserId }: ClassesProps) {
               )}
 
               <div className="space-y-2 mb-4">
-                {classData.subject && (
-                  <Badge>{classData.subject}</Badge>
-                )}
                 {classData.academic_year && (
                   <div className="text-sm text-gray-500">
                     A.A. {classData.academic_year}

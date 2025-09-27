@@ -41,7 +41,6 @@ const GET_CLASS = gql`
       }
       created_on
       academic_year
-      subject
       active
       student_enrollment_url
       teacher_enrollment_url
@@ -167,9 +166,6 @@ export function Class({ classId, currentUserId }: ClassProps) {
           <h1 className="text-3xl font-bold">{classData.name}</h1>
           {!classData.active && (
             <Badge variant="secondary">Archiviata</Badge>
-          )}
-          {classData.subject && (
-            <Badge>{classData.subject}</Badge>
           )}
         </div>
         

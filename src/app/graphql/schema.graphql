@@ -28,7 +28,6 @@ type Class {
   tests: [Test!]!
   created_on: Timestamp!
   academic_year: String
-  subject: String
   active: Boolean!
   student_enrollment_url: String
   teacher_enrollment_url: String
@@ -159,7 +158,7 @@ type Mutation {
   newAccessToken(resource_id: ObjectId!, permission: String!): AccessToken!
   deleteAccessToken(_id: ObjectId!): Boolean
 
-  newClass(name: String!, description: String, subject: String, academic_year: String): ObjectId!
+  newClass(name: String!, description: String, academic_year: String): ObjectId!
   updateClass(_id: ObjectId!, name: String, description: String, active: Boolean): Class
   deleteClass(_id: ObjectId!): Boolean
   

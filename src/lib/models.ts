@@ -129,7 +129,6 @@ export type MongoClass = {
     students: ObjectId[]           // Array di user_id degli studenti
     created_on: Date
     academic_year?: string         // "2023/2024"
-    subject?: string              // "Matematica", "Fisica", etc.
     active: boolean               // Per disattivare classi passate
 }
 

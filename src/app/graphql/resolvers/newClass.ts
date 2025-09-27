@@ -7,12 +7,11 @@ export default async function newClassResolver(
     args: { 
         name: string
         description?: string
-        subject?: string
         academic_year?: string
     }, 
     context: Context
 ) {
-    const { name, description, subject, academic_year } = args
+    const { name, description, academic_year } = args
     const { user, db } = context
 
     if (!user) {
@@ -33,7 +32,6 @@ export default async function newClassResolver(
         students: [],
         created_on: new Date(),
         academic_year: academic_year?.trim() || undefined,
-        subject: subject?.trim() || undefined,
         active: true
     }
 

@@ -29,8 +29,7 @@ const NoteQuery = gql`
             class {
                 _id
                 name
-                subject
-            }
+                academic_year}
             # visibility removed
             tests {
                 _id
