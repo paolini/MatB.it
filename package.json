@@ -17,9 +17,11 @@
   },
   "dependencies": {
     "@apollo/client": "^3.13.8",
+    "@apollo/server": "^4.12.2",
     "@as-integrations/next": "^3.2.0",
     "@auth/mongodb-adapter": "^3.9.1",
     "@graphql-tools/load-files": "^7.0.1",
+    "@graphql-tools/merge": "^9.1.1",
     "@tailwindcss/postcss": "^4",
     "@types/nodemailer": "^6.4.17",
     "apollo-server-errors": "^3.3.1",
@@ -39,7 +41,6 @@
     "typescript": "^5.8.3"
   },
   "devDependencies": {
-    "@apollo/server": "^5.0.0",
     "@eslint/eslintrc": "^3.3.1",
     "@graphql-codegen/cli": "^5.0.6",
     "@graphql-codegen/typescript-resolvers": "^4.5.1",
