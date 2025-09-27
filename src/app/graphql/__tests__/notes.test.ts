@@ -1,66 +1,24 @@
 import { ApolloServer } from '@apollo/server';
 import { typeDefs } from '../typedefs';
 import { resolvers } from '../resolvers';
-import { ObjectId, MongoClient } from 'mongodb';
+import { MongoClient, ObjectId } from 'mongodb';
 import { MongoMemoryServer } from 'mongodb-memory-server';
+import {
+  mockNotes,
+  mockClass,
+  mockTests,
+  mockNoteVersions,
+  mockUsers,
+  userId,
+  teacherId,
+  classId,
+  testId,
+  studentId
+} from './mocks';
 
 let mongoServer: MongoMemoryServer;
 let client: MongoClient;
 let db: any;
-
-const userId = new ObjectId();
-const noteId = new ObjectId();
-const versionId = new ObjectId();
-const classId = new ObjectId();
-const testId = new ObjectId();
-const studentId = new ObjectId();
-const teacherId = new ObjectId();
-
-const mockNotes = [
-  // 1. Pubblica senza class_id
-  { _id: new ObjectId(), title: 'Pubblica senza classe', hide_title: false, delta: {}, author_id: userId, note_version_id: new ObjectId(), contributors: [], private: false, class_id: null, created_on: new Date(), description: '' },
-  // 2. Privata senza class_id
-  { _id: new ObjectId(), title: 'Privata senza classe', hide_title: false, delta: {}, author_id: userId, note_version_id: new ObjectId(), contributors: [], private: true, class_id: null, created_on: new Date(), description: '' },
-  // 3. Pubblica con class_id
-  { _id: new ObjectId(), title: 'Pubblica con classe', hide_title: false, delta: {}, author_id: teacherId, note_version_id: new ObjectId(), contributors: [], private: false, class_id: classId, created_on: new Date(), description: '' },
-  // 4. Privata con class_id
-  { _id: new ObjectId(), title: 'Privata con classe', hide_title: false, delta: {}, author_id: teacherId, note_version_id: new ObjectId(), contributors: [], private: true, class_id: classId, created_on: new Date(), description: '' }
-];
-
-const mockClass = {
-  _id: classId,
-  name: 'Classe mock',
-  description: 'Classe di test',
-  owner_id: teacherId,
-  owner: { _id: userId, name: 'User', email: 'user@example.com', image: '' },
-  teachers: [teacherId], // insegnante
-  students: [studentId], // studente
-  notes: [noteId],
-  tests: [testId],
-  created_on: new Date(),
-  academic_year: '2025/2026',
-  active: true,
-  student_enrollment_url: '',
-  teacher_enrollment_url: ''
-};
-
-const mockTests = [
-  // 1. Pubblico senza class_id
-  { _id: new ObjectId(), title: 'Test pubblico senza classe', note_id: mockNotes[0]._id, note: mockNotes[0], created_on: new Date(), author_id: userId, author: { _id: userId, name: 'User', email: 'user@example.com', image: '' }, open_on: null, close_on: null, class_id: null, class: null, private: false, submissions: [], stats: {} },
-  // 2. Privato senza class_id
-  { _id: new ObjectId(), title: 'Test privato senza classe', note_id: mockNotes[1]._id, note: mockNotes[1], created_on: new Date(), author_id: userId, author: { _id: userId, name: 'User', email: 'user@example.com', image: '' }, open_on: null, close_on: null, class_id: null, class: null, private: true, submissions: [], stats: {} },
-  // 3. Pubblico con class_id
-  { _id: new ObjectId(), title: 'Test pubblico con classe', note_id: mockNotes[2]._id, note: mockNotes[2], created_on: new Date(), author_id: teacherId, author: { _id: teacherId, name: 'Teacher', email: 'teacher@example.com', image: '' }, open_on: null, close_on: null, class_id: classId, class: mockClass, private: false, submissions: [], stats: {} },
-  // 4. Privato con class_id
-  { _id: new ObjectId(), title: 'Test privato con classe', note_id: mockNotes[3]._id, note: mockNotes[3], created_on: new Date(), author_id: teacherId, author: { _id: teacherId, name: 'Teacher', email: 'teacher@example.com', image: '' }, open_on: null, close_on: null, class_id: classId, class: mockClass, private: true, submissions: [], stats: {} }
-];
-
-const mockNoteVersions = mockNotes.map(note => ({
-  _id: note.note_version_id,
-  note_id: note._id,
-  created_on: note.created_on,
-  // altri campi necessari per la tua logica
-}));
 
 describe('GraphQL Notes Query (real resolvers, mongodb-memory-server)', () => {
   let server: ApolloServer;
@@ -86,11 +44,7 @@ describe('GraphQL Notes Query (real resolvers, mongodb-memory-server)', () => {
     await db.collection('notes').insertMany(mockNotes);
     await db.collection('classes').insertOne(mockClass);
     await db.collection('tests').insertMany(mockTests);
-    await db.collection('users').insertMany([
-      { _id: userId, name: 'User', email: 'user@example.com', image: '' },
-      { _id: teacherId, name: 'Teacher', email: 'teacher@example.com', image: '' },
-      { _id: studentId, name: 'Student', email: 'student@example.com', image: '' }
-    ]);
+    await db.collection('users').insertMany(mockUsers);
     await db.collection('note_versions').insertMany(mockNoteVersions);
   });
 
