@@ -48,16 +48,15 @@ export default async function tests(_parent: unknown, args: any, context: Contex
             match.private = { $ne: true }
         }
     } else {
+        // Filtra sempre per class_id
+        match.class_id = null
         if (userId) {
             match.$or = [
-                { private: { $ne: true }, class_id: null },
-                { author_id: new ObjectId(userId) },
-                { class_id: { $ne: null }, private: { $ne: true } },
-                { class_id: { $ne: null }, private: true }
+                { private: { $ne: true } },
+                { author_id: new ObjectId(userId) }
             ]
         } else {
             match.private = { $ne: true }
-            match.class_id = null
         }
     }
     const pipeline: any[] = [

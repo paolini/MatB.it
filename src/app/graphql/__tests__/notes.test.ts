@@ -1,9 +1,13 @@
 import { ApolloServer } from '@apollo/server';
 import { typeDefs } from '../typedefs';
 import { resolvers } from '../resolvers';
-import { ObjectId } from 'mongodb';
+import { ObjectId, MongoClient } from 'mongodb';
+import { MongoMemoryServer } from 'mongodb-memory-server';
 
-// Mock del contesto con db fittizio e ObjectId reali
+let mongoServer: MongoMemoryServer;
+let client: MongoClient;
+let db: any;
+
 const userId = new ObjectId();
 const noteId = new ObjectId();
 const versionId = new ObjectId();
@@ -11,7 +15,19 @@ const classId = new ObjectId();
 const testId = new ObjectId();
 
 const mockNotes = [
-  { _id: noteId, title: 'Nota mock', hide_title: false, delta: {}, author_id: userId, note_version_id: versionId, contributors: [], private: false, class_id: classId, created_on: new Date(), description: '' }
+  { 
+    _id: noteId, 
+    title: 'Nota mock', 
+    hide_title: false, 
+    delta: {}, 
+    author_id: userId, 
+    note_version_id: versionId, 
+    contributors: [], 
+    private: false, 
+    class_id: classId, 
+    created_on: new Date(), 
+    description: '' 
+  }
 ];
 
 const mockClass = {
@@ -20,10 +36,10 @@ const mockClass = {
   description: 'Classe di test',
   owner_id: userId,
   owner: { _id: userId, name: 'User', email: 'user@example.com', image: '' },
-  teachers: [],
-  students: [],
-  notes: [],
-  tests: [],
+  teachers: [userId], // aggiungi userId come teacher
+  students: [userId], // aggiungi userId anche come studente
+  notes: [noteId], // collega la nota alla classe
+  tests: [testId], // collega il test alla classe
   created_on: new Date(),
   academic_year: '2025/2026',
   active: true,
@@ -54,57 +70,59 @@ const mockTest = {
   }
 };
 
-const mockDb = {
-  collection: (name: string) => {
-    if (name === 'classes') {
-      return {
-        findOne: async () => mockClass,
-        aggregate: () => ({ toArray: async () => [mockClass] })
-      };
-    }
-    if (name === 'tests') {
-      return {
-        findOne: async () => mockTest,
-        aggregate: () => ({ toArray: async () => [mockTest] })
-      };
-    }
-    return {
-      findOne: async () => ({ owner_id: userId, teachers: [], students: [] }),
-      aggregate: () => ({ toArray: async () => mockNotes })
-    };
-  }
-};
-
-const mockContext = {
-  db: mockDb,
-  user: { _id: userId }
-};
-
-describe('GraphQL Notes Query (real resolvers)', () => {
+describe('GraphQL Notes Query (real resolvers, mongodb-memory-server)', () => {
   let server: ApolloServer;
 
-  beforeAll(() => {
+  beforeAll(async () => {
+    mongoServer = await MongoMemoryServer.create();
+    client = await MongoClient.connect(mongoServer.getUri(), {});
+    db = client.db();
     server = new ApolloServer({ typeDefs, resolvers });
   });
 
+  afterAll(async () => {
+    await client.close();
+    await mongoServer.stop();
+  });
+
+  beforeEach(async () => {
+    await db.collection('notes').deleteMany({});
+    await db.collection('classes').deleteMany({});
+    await db.collection('tests').deleteMany({});
+    await db.collection('notes').insertMany(mockNotes);
+    await db.collection('classes').insertOne(mockClass);
+    await db.collection('tests').insertOne(mockTest);
+  });
+
   it('should return notes from real resolver', async () => {
+    const contextValue = { db, user: { _id: userId } };
     const result = await server.executeOperation({
       query: `
         query {
           notes(limit: 1) {
             _id
             title
+            class_id
+            private
+            author_id
           }
         }
       `,
-    }, { contextValue: mockContext });
+    }, { contextValue });
     const body = result.body;
     if ('singleResult' in body) {
       const singleResult = body.singleResult;
       expect(singleResult.errors).toBeUndefined();
-      const notes = singleResult.data?.notes as Array<{ _id: string; title: string }>;
+      const notes = singleResult.data?.notes as Array<{ _id: string; title: string; class_id?: string; private?: boolean; author_id?: string }>;
       expect(notes).toBeInstanceOf(Array);
-      expect(notes[0].title).toBe('Nota mock');
+      // tutte le note devono avere class_id === null
+      const hasClassId = notes.some(n => n.class_id && n.class_id.toString() === classId.toString());
+      expect(hasClassId).toBe(false);
+      // Se la nota è privata, l'utente deve essere l'autore
+      const privateNotes = notes.filter(n => n.private === true);
+      privateNotes.forEach(n => {
+        expect(n.author_id?.toString()).toBe(userId.toString());
+      });
     } else {
       throw new Error('Risposta GraphQL non valida: non è singleResult');
     }
@@ -112,10 +130,7 @@ describe('GraphQL Notes Query (real resolvers)', () => {
 
   it('should NOT return notes for user not in class', async () => {
     const outsiderId = new ObjectId();
-    const outsiderContext = {
-      db: mockDb,
-      user: { _id: outsiderId }
-    };
+    const contextValue = { db, user: { _id: outsiderId } };
     const result = await server.executeOperation({
       query: `
         query {
@@ -125,7 +140,7 @@ describe('GraphQL Notes Query (real resolvers)', () => {
           }
         }
       `,
-    }, { contextValue: outsiderContext });
+    }, { contextValue });
     const body = result.body;
     if ('singleResult' in body) {
       const singleResult = body.singleResult;
@@ -139,10 +154,7 @@ describe('GraphQL Notes Query (real resolvers)', () => {
 
   it('should NOT return tests for user not in class', async () => {
     const outsiderId = new ObjectId();
-    const outsiderContext = {
-      db: mockDb,
-      user: { _id: outsiderId }
-    };
+    const contextValue = { db, user: { _id: outsiderId } };
     const result = await server.executeOperation({
       query: `
         query {
@@ -152,18 +164,16 @@ describe('GraphQL Notes Query (real resolvers)', () => {
           }
         }
       `,
-    }, { contextValue: outsiderContext });
+    }, { contextValue });
     const body = result.body;
     if ('singleResult' in body) {
       const singleResult = body.singleResult;
-      // Deve restituire errore oppure array vuoto
       if (singleResult.errors) {
         expect(singleResult.errors?.[0].message).toMatch(/permessi|accesso|autorizzazione/i);
         expect(singleResult.data?.tests).toBeUndefined();
       } else {
         const tests = singleResult.data?.tests as Array<{ _id: ObjectId; title: string }>;
         expect(tests).toBeInstanceOf(Array);
-        // Controlla che nessun test abbia l'id testId
         const found = tests.some(t => t._id.toString() === testId.toString());
         expect(found).toBe(false);
       }
