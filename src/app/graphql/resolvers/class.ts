@@ -23,9 +23,9 @@ export default async function classResolver(_parent: unknown, args: { _id: Objec
 
     // Step 3: Run aggregation with privilege-based filters
     const match = isTeacher
-        ? { $expr: { $eq: ['$class_id', '$_id'] } }
+        ? { $expr: { $eq: ['$class_id', '$$class_id'] } }
         : { $expr: { $and: [
-                { $eq: ['$class_id', '$_id'] },
+                { $eq: ['$class_id', '$$class_id'] },
                 { $eq: ['$private', false] }
             ] } }
 
@@ -36,7 +36,7 @@ export default async function classResolver(_parent: unknown, args: { _id: Objec
             {
                 $lookup: {
                     from: 'notes',
-                    let: { classId: '$_id' },
+                    let: { class_id: '$_id' },
                     pipeline: [
                         { $match: match },
                         ...NOTE_PIPELINE
@@ -47,7 +47,7 @@ export default async function classResolver(_parent: unknown, args: { _id: Objec
             {
                 $lookup: {
                     from: 'tests',
-                    let: { classId: '$_id' },
+                    let: { class_id: '$_id' }, // fix: use class_id for consistency
                     pipeline: [
                         { $match: match },
                         ...TEST_PIPELINE

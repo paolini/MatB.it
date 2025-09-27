@@ -2,9 +2,9 @@ import { gql, useQuery, useMutation } from '@apollo/client'
 import { useState, useEffect } from 'react'
 import { ClassEnrollmentCodes } from './ClassEnrollmentCodes'
 import { useSearchParams, usePathname } from 'next/navigation'
-import { BUTTON_CLASS, Error } from './utils'
-import { ObjectId } from 'bson'
+import { Error } from './utils'
 import { myTimestamp } from '@/lib/utils'
+import Link from 'next/link'
 
 // Componente Badge semplice per le classi
 const Badge = ({ children, variant = 'default' }: { children: React.ReactNode, variant?: 'default' | 'secondary' }) => (
@@ -38,6 +38,14 @@ const GET_CLASS = gql`
         _id
         name
         email
+      }
+      tests {
+        _id
+        class_id
+        private
+        title
+        open_on
+        close_on
       }
       created_on
       academic_year
@@ -220,7 +228,36 @@ export function Class({ classId, currentUserId }: ClassProps) {
         {activeTab === 'tests' && (
           <div>
             <h2 className="text-xl font-semibold mb-3">Test della classe</h2>
-            <p className="text-gray-500 italic">(Qui verranno mostrati i test della classe)</p>
+            {classData.tests && classData.tests.length > 0 ? (
+              <ul className="space-y-3">
+                {classData.tests.map((test: any) => {
+                  const isClosed = test.close_on && new Date(test.close_on) < new Date();
+                  return (
+                    <li key={test._id} className="bg-yellow-50 p-3 rounded-lg">
+                      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
+                        <div>
+                          <Link href={`/test/${test._id}`} className="font-medium text-lg text-blue-700 hover:underline">
+                            {test.title}
+                          </Link>
+                          {test.private && (
+                            <span className="ml-2 px-2 py-1 rounded bg-red-100 text-red-700 text-xs font-semibold">Privato</span>
+                          )}
+                          {isClosed && (
+                            <span className="ml-2 px-2 py-1 rounded bg-gray-200 text-gray-700 text-xs font-semibold">Chiuso</span>
+                          )}
+                        </div>
+                        <div className="text-sm text-gray-600">
+                          {test.open_on && <span>Apre: {myTimestamp(test.open_on)} </span>}
+                          {test.close_on && <span>Chiude: {myTimestamp(test.close_on)}</span>}
+                        </div>
+                      </div>
+                    </li>
+                  );
+                })}
+              </ul>
+            ) : (
+              <p className="text-gray-500 italic">Nessun test presente per questa classe</p>
+            )}
           </div>
         )}
         {activeTab === 'teachers' && (
