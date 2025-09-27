@@ -22,13 +22,6 @@ interface TabInfo {
     icon: string
 }
 
-const TABS: TabInfo[] = [
-    { key: 'info', label: 'Informazioni', icon: '📋' },
-    { key: 'scores', label: 'Punteggi', icon: '📊' },
-    { key: 'exercises', label: 'Esercizi', icon: '🧮' },
-    { key: 'submissions', label: 'Consegne', icon: '📝' }
-]
-
 const TestQuery = gql`
     query Test($_id: ObjectId!) {
         test(_id: $_id) {
@@ -103,6 +96,13 @@ const NewSubmissionMutation = gql`
         newSubmission(test_id: $test_id)
 }`
 
+const TABS: TabInfo[] = [
+    { key: 'info', label: 'Informazioni', icon: '📋' },
+    { key: 'scores', label: 'Punteggi', icon: '📊' },
+    { key: 'exercises', label: 'Esercizi', icon: '🧮' },
+    { key: 'submissions', label: 'Consegne', icon: '📝' }
+]
+
 function ViewTest({test, profile, accessToken}: {
     test: Test,
     profile: Profile|null,
@@ -118,7 +118,10 @@ function ViewTest({test, profile, accessToken}: {
     const canViewDetails = test.author._id === profile?._id || accessToken
     
     // Gestione del tab attivo
-    const tabs = canViewDetails ? TABS : TABS.filter(tab => ['scores', 'exercises'].includes(tab.key))
+    let tabs = TABS
+    if (!canViewDetails) tabs = tabs.filter(tab => ['scores', 'exercises'].includes(tab.key))
+
+    if (!test.submissions || test.submissions.length < 1) tabs = tabs.filter(tab => !['scores', 'exercises', 'submissions'].includes(tab.key))
     // Scegli il tab di default: 'info' se presente, altrimenti 'scores'
     const defaultTab = tabs.some(tab => tab.key === 'info') ? 'info' : 'scores'
     const activeTab = (searchParams.get('tab') as TabKey) || defaultTab
@@ -156,38 +159,42 @@ function ViewTest({test, profile, accessToken}: {
         {/* Funzionalità studente: login, inizia test, proprie submission */}
         <StudentTestActions test={test} profile={profile} accessToken={accessToken} isOpen={isOpen} />
         {/* Tab navigation */}
-        {test.submissions && test.submissions.length > 0 && (
-            <div className="border-b border-gray-200 mb-6">
-                <nav className="flex space-x-8">
-                    {/* Always show scores and exercises tabs */}
-                    {tabs.map((tab) => (
-                        <button
-                            key={tab.key}
-                            onClick={() => switchTab(tab.key)}
-                            className={`py-2 px-1 border-b-2 font-medium text-sm ${
-                                activeTab === tab.key
-                                    ? 'border-blue-500 text-blue-600'
-                                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                            }`}
-                        >
-                            {tab.icon} {tab.label}
-                        </button>
-                    ))}
-                </nav>
-            </div>
-        )}
+        <div className="border-b border-gray-200 mb-6">
+            <nav className="flex space-x-8">
+                {tabs.map((tab) => (
+                    <button
+                        key={tab.key}
+                        onClick={() => switchTab(tab.key)}
+                        className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                            activeTab === tab.key
+                                ? 'border-blue-500 text-blue-600'
+                                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                        }`}
+                    >
+                        {tab.icon} {tab.label}
+                    </button>
+                ))}
+            </nav>
+        </div>
 
         {/* Tab content */}
-        {test.submissions && test.submissions.length > 0 && (
-            <div className="tab-content">
-                {activeTab === 'info' && canViewDetails && <TestInfoTab test={test} now={now} isOpen={isOpen} profile={profile} setShowShareModal={setShowShareModal} showShareModal={showShareModal} />}
-                {activeTab === 'scores' && test.stats && <TestScoresTab stats={test.stats} />}
-                {activeTab === 'exercises' && test.stats && <TestExercisesTab stats={test.stats} />}
-                {activeTab === 'submissions' && canViewDetails && test.submissions && <TestSubmissionsTab submissions={test.submissions} accessToken={accessToken} />}
-            </div>
-        )}
+        <div className="tab-content">
+            {activeTab === 'info' && canViewDetails && <TestInfoTab test={test} now={now} isOpen={isOpen} profile={profile} setShowShareModal={setShowShareModal} showShareModal={showShareModal} />}
+            {activeTab === 'scores' && test.stats && canViewDetails && <TestScoresTab stats={test.stats} />}
+            {activeTab === 'exercises' && test.stats && canViewDetails && <TestExercisesTab stats={test.stats} />}
+            {activeTab === 'submissions' && canViewDetails && test.submissions && <TestSubmissionsTab submissions={test.submissions} accessToken={accessToken} />}
+        </div>
     </div>
 }
+
+const ClassesQuery = gql`
+  query Classes {
+    classes {
+      _id
+      name
+    }
+  }
+`
 
 function EditTest({test, profile}: {
     test: Test,
@@ -200,9 +207,10 @@ function EditTest({test, profile}: {
             { query: TestQuery, variables: { _id: test._id } }
         ]
     })
-
+    const { data: classesData, loading: loadingClasses } = useQuery(ClassesQuery)
     // Stati per il form
     const [title, setTitle] = useState(test.title || '')
+    const [classId, setClassId] = useState(test.class_id || '')
     // const [isPrivate, setIsPrivate] = useState(test.private || false) // rimosso
     // Helpers per conversione locale <-> UTC compatibili con input datetime-local
     function toLocalDatetimeInputValue(date: Date|string|undefined|null) {
@@ -224,17 +232,16 @@ function EditTest({test, profile}: {
             variables: { 
                 _id: test._id,
                 title: title || null,
+                class_id: classId || null,
                 open_on: openOn ? new Date(openOn) : null,
                 close_on: closeOn ? new Date(closeOn) : null
             } 
         })
         router.push(`/test/${test._id}`)
     }
-
     return <>
         <div className="space-y-4 mb-6">
             <h2 className="text-xl font-bold">Modifica Test</h2>
-            
             {/* Titolo */}
             <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -248,7 +255,30 @@ function EditTest({test, profile}: {
                     placeholder="Titolo del test"
                 />
             </div>
-
+            {/* Selezione classe */}
+            <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Classe associata
+                </label>
+                <select
+                    className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    value={classId?.toString() || ''}
+                    onChange={e => setClassId(e.target.value)}
+                    disabled={loadingClasses}
+                >
+                    <option value="">-- Nessuna classe --</option>
+                    {classesData?.classes?.map((cls: any) => {
+                        const isOwner = cls.owner_id === profile?._id
+                        const isTeacher = cls.teachers?.some((t: any) => t._id === profile?._id)
+                        return (
+                            <option key={cls._id} value={cls._id.toString()} disabled={!isOwner && !isTeacher}>
+                                {cls.name} {(!isOwner && !isTeacher) ? '(non autorizzato)' : ''}
+                            </option>
+                        )
+                    })}
+                </select>
+                <p className="text-xs text-gray-500 mt-1">Solo il proprietario o un insegnante della classe può selezionarla.</p>
+            </div>
             {/* Date di apertura e chiusura */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
@@ -321,10 +351,11 @@ const DeleteTestMutation = gql`
 `
 
 const UpdateTestMutation = gql`
-    mutation UpdateTest($_id: ObjectId!, $title: String, $open_on: Timestamp, $close_on: Timestamp, $private: Boolean) {
-        updateTest(_id: $_id, title: $title, open_on: $open_on, close_on: $close_on, private: $private) {
+    mutation UpdateTest($_id: ObjectId!, $title: String, $class_id: ObjectId, $open_on: Timestamp, $close_on: Timestamp, $private: Boolean) {
+        updateTest(_id: $_id, title: $title, class_id: $class_id, open_on: $open_on, close_on: $close_on, private: $private) {
             _id
             title
+            class_id
             open_on
             close_on
             private
