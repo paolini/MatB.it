@@ -211,7 +211,7 @@ function EditTest({test, profile}: {
     // Stati per il form
     const [title, setTitle] = useState(test.title || '')
     const [classId, setClassId] = useState(test.class_id || '')
-    // const [isPrivate, setIsPrivate] = useState(test.private || false) // rimosso
+    const [isPrivate, setIsPrivate] = useState(test.private || false)
     // Helpers per conversione locale <-> UTC compatibili con input datetime-local
     function toLocalDatetimeInputValue(date: Date|string|undefined|null) {
         if (!date) return '';
@@ -234,7 +234,8 @@ function EditTest({test, profile}: {
                 title: title || null,
                 class_id: classId || null,
                 open_on: openOn ? new Date(openOn) : null,
-                close_on: closeOn ? new Date(closeOn) : null
+                close_on: closeOn ? new Date(closeOn) : null,
+                private: isPrivate
             } 
         })
         router.push(`/test/${test._id}`)
@@ -279,6 +280,29 @@ function EditTest({test, profile}: {
                 </select>
                 <p className="text-xs text-gray-500 mt-1">Solo il proprietario o un insegnante della classe può selezionarla.</p>
             </div>
+            {/* Privacy */}
+            <div>
+                <label className="flex items-center gap-2">
+                    <input
+                        type="checkbox"
+                        checked={isPrivate}
+                        onChange={e => setIsPrivate(e.target.checked)}
+                        className="rounded"
+                    />
+                    <span className="text-sm font-medium text-gray-700">Test privato</span>
+                </label>
+                <p className="text-xs text-gray-500 mt-1">
+                    {isPrivate ? (
+                        classId ?
+                        'Solo i docenti della classe selezionata possono vedere e svolgere il test.' :
+                        'Solo tu puoi vedere e svolgere questo test.'
+                    ) : (
+                        classId ?
+                        'Tutti gli utenti della classe selezionata possono vedere e svolgere il test.' :
+                        'Tutti gli utenti possono vedere e svolgere questo test.'
+                    )}
+                </p>
+            </div>
             {/* Date di apertura e chiusura */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
@@ -311,8 +335,6 @@ function EditTest({test, profile}: {
                     </p>
                 </div>
             </div>
-
-            {/* Privacy: rimosso, ora gestito da visibility */}
 
             {/* Errori */}
             {updateError && <Error error={updateError} />}

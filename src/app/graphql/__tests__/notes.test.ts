@@ -15,6 +15,7 @@ import {
   testId,
   studentId
 } from './mocks';
+import newSubmission from '../resolvers/newSubmission';
 
 let mongoServer: MongoMemoryServer;
 let client: MongoClient;
@@ -257,4 +258,13 @@ describe('GraphQL Notes Query (real resolvers, mongodb-memory-server)', () => {
       throw new Error('Risposta GraphQL non valida: non è singleResult');
     }
   });
+
+  it('should allow first submission and block duplicate (real db)', async () => {
+    const context = { db, user: { _id: studentId } }
+    // Prima submission: deve andare a buon fine
+    const id = await newSubmission(null, { test_id: testId }, context)
+    expect(id).toBeInstanceOf(ObjectId)
+    // Seconda submission: deve fallire
+    await expect(newSubmission(null, { test_id: testId }, context)).rejects.toThrow('Already submitted for this test')
+  })
 });

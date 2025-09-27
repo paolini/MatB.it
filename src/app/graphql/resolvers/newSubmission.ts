@@ -28,6 +28,9 @@ const newSubmission = async function (
     if (test.close_on && test.close_on < now) throw new Error('Test already closed')
 
     const collection = getSubmissionsCollection(context.db)
+    // Controllo: non permettere più di una submission per test/utente
+    const existing = await collection.findOne({ test_id: test._id, author_id: context.user._id })
+    if (existing) throw new Error('Already submitted for this test')
     const doc = {
         test_id: test._id,
         author_id: context.user._id,

@@ -26,13 +26,6 @@ ssh contabo3 'docker exec matbit-mongodb mongodump --archive' > dump.archive
 sudo docker exec -i docker-mongodb-1 mongorestore --archive < dump.archive
 ```
 
-### Clonare il database di produzione in locale (one-liner)
-
-Esegui direttamente (sostituisci il nome del container se necessario):
-```bash
-ssh contabo3 'docker exec matbit-mongodb mongodump --archive' | sudo docker exec -i docker-mongodb-1 mongorestore --archive
-```
-
 To install node libraries:
 ```bash
     npm ci
@@ -43,6 +36,13 @@ To start the server locally:
 ```
 
 Change version number in `package.json`.
+
+### Clonare il database di produzione in locale (one-liner)
+
+Esegui direttamente (sostituisci il nome del container se necessario):
+```bash
+ssh contabo3 'docker exec matbit-mongodb mongodump --archive' | sudo docker exec -i docker-mongodb-1 mongorestore --archive
+```
 
 ## create docker image
 
