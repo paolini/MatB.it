@@ -31,6 +31,10 @@ const TestQuery = gql`
             close_on
             class_id
             private
+            class {
+                _id
+                name
+            }
             submissions {
                 _id
                 started_on
@@ -148,6 +152,11 @@ function ViewTest({test, profile, accessToken}: {
     )
 
     return <div className="matbit-test">
+        { test.class && <h2>
+            <a href={`/class/${test.class._id}`}>
+                {test.class.name}
+            </a>
+        </h2>}
         <h1>
             {test.title || `Test ${test._id}`}
         </h1>
