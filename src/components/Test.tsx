@@ -34,6 +34,9 @@ const TestQuery = gql`
             class {
                 _id
                 name
+                teachers {
+                    _id
+                }
             }
             submissions {
                 _id

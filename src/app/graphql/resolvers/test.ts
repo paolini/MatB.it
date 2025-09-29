@@ -34,6 +34,15 @@ export default async function test (_parent: unknown, {_id}: { _id: ObjectId }, 
         { $match: { _id } },
         { $match: { $or: authConditions } },
         ...TEST_PIPELINE,
+        // Popola i teacher della classe
+        {
+            $lookup: {
+                from: 'users',
+                localField: 'class.teachers',
+                foreignField: '_id',
+                as: 'class.teachers'
+            }
+        },
         {
             // Aggiunge le sottomissioni
             $lookup: {
