@@ -113,8 +113,10 @@ function ViewTest({test, profile, accessToken}: {
     const [showShareModal, setShowShareModal] = useState(false)
     const [now, setNow] = useState(new Date())
     
-    // Determina se l'utente può vedere i dettagli (è l'autore o ha un token)
-    const canViewDetails = test.author._id === profile?._id || accessToken
+    // Determina se l'utente può vedere i dettagli (è l'autore, un teacher della classe o ha un token)
+    const isOwner = test.author._id === profile?._id;
+    const isTeacher = test.class?.teachers?.some((t: any) => t._id === profile?._id);
+    const canViewDetails = isOwner || isTeacher || accessToken
     
     // Gestione del tab attivo
     let tabs = TABS
