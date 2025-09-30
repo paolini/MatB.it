@@ -1,7 +1,7 @@
 "use client"
 import { useState } from 'react'
 import dynamic from "next/dynamic"
-import { gql, useMutation } from '@apollo/client'
+import { gql, useMutation, useQuery } from '@apollo/client'
 import { useRouter } from 'next/navigation'
 
 import { Note } from '@/app/graphql/generated'
@@ -11,8 +11,8 @@ import { VARIANT_NAMES } from '@/lib/models'
 const MyQuill = dynamic(() => import('@/lib/myquill/MyQuill'), { ssr: false });
 
 const UpdateNoteMutation = gql`
-mutation UpdateNote($_id: ObjectId!, $title: String, $hide_title: Boolean, $delta: JSON, $private: Boolean, $variant: String) {
-  updateNote(_id: $_id, title: $title, hide_title: $hide_title, delta: $delta, private: $private, variant: $variant) {
+mutation UpdateNote($_id: ObjectId!, $title: String, $hide_title: Boolean, $delta: JSON, $private: Boolean, $variant: String, $class_id: ObjectId) {
+  updateNote(_id: $_id, title: $title, hide_title: $hide_title, delta: $delta, private: $private, variant: $variant, class_id: $class_id) {
     _id
     title
     hide_title
@@ -21,6 +21,17 @@ mutation UpdateNote($_id: ObjectId!, $title: String, $hide_title: Boolean, $delt
     private
     updated_on
     author { _id name }
+    class_id
+    class { _id name }
+  }
+}`
+const ClassesQuery = gql`
+query Classes {
+  classes {
+    _id
+    name
+    owner_id
+    teachers { _id }
   }
 }`
 
@@ -39,6 +50,10 @@ export default function NoteForm({ note }: {
   const [variant, setVariant] = useState(note.variant || 'default')
   const [isPrivate, setIsPrivate] = useState(note.private || false)
   const [hideTitle, setHideTitle] = useState(note.hide_title || false)
+  const [classId, setClassId] = useState(note.class_id ? String(note.class_id) : '')
+
+  // Recupera le classi dove l'utente è owner/teacher
+  const { data: classesData, loading: loadingClasses } = useQuery(ClassesQuery)
 
   const [updateNote, { loading: isUpdating, error: updateError }] = useMutation(UpdateNoteMutation)
   const [deleteNote, { loading: isDeleting, error: deleteError }] = useMutation(DeleteNoteMutation)
@@ -51,7 +66,8 @@ export default function NoteForm({ note }: {
         hide_title: hideTitle, 
         delta: currentDelta, 
         private: isPrivate, 
-        variant 
+        variant,
+        class_id: classId || null
       } 
     });
     router.push(`/note/${note._id}`);
@@ -82,6 +98,29 @@ export default function NoteForm({ note }: {
           { Object.entries(VARIANT_NAMES).map(([key, label]) => (
             <option key={key} value={key}>{label || "nota generica"}</option>
           )) }
+        </select>
+      </div>
+
+      {/* Selettore classe */}
+      <div>
+        <select
+          className="border rounded px-3 py-2 w-full max-w-xs focus:outline-none focus:ring-2 focus:ring-green-500"
+          value={classId}
+          onChange={e => setClassId(e.target.value)}
+          disabled={loadingClasses}
+        >
+          <option value="">Nessuna classe</option>
+          {classesData?.classes?.map((c: any) => {
+            const authorId = note.author?._id ?? note.author_id;
+            const isOwner = c.owner_id == authorId;
+            const isTeacher = c.teachers.some((t: any) => String(t._id) === String(authorId));
+            return (
+              <option key={c._id} value={c._id} disabled={!(isOwner || isTeacher)}>
+                {c.name}
+                {!(isOwner || isTeacher) ? ' (non abilitato)' : ''}
+              </option>
+            );
+          })}
         </select>
       </div>
 
