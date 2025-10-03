@@ -17,6 +17,7 @@ const NoteQuery = gql`
             _id
             title
             hide_title
+            private
             delta
             variant
             author {
