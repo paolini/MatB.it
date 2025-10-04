@@ -20,6 +20,10 @@ const SubmissionQuery = gql`
                 author {
                     _id
                 }
+                class {
+                    _id
+                    name
+                }
             }
             author {
                 _id
@@ -150,6 +154,11 @@ function SubmissionElement({submission, profile}: {
     }
 
     return <OrdinalContextProvider>
+        { submission.test.class && <h2>
+            <a href={`/class/${submission.test.class._id}`}>
+                {submission.test.class.name}
+            </a>
+        </h2>}        
         <h1>{submission.test.title || `submission ${submission._id}`}</h1>
         <Info submission={submission} profile={profile}/>
         <DocumentElement
