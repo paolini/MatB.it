@@ -76,24 +76,19 @@ function NoteView({note, profile}: {
     
     return <div>
         <div className={`ql-variant-container ql-var-${note.variant || 'default'}`}>
-            {   
-                !note.hide_title &&
-                <div className="flex items-center gap-3 mb-4">
-                    <h1 className="flex-1">{note.title}</h1>
-                    <div className="flex items-center gap-2">
-                        {/* visibility UI removed */}
-                        {(note as any).class && (
-                            <span 
-                                className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700"
-                                title={`Classe: ${(note as any).class.name}`}
-                            >
-                                <span>🎓</span>
-                                <span>{(note as any).class.name}</span>
-                            </span>
-                        )}
-                    </div>
-                </div>
-            }
+            <div className="flex items-center gap-3 mb-4">
+                {!note.hide_title && <h1 className="flex-1">{note.title}</h1>}
+                {note.class?._id && (
+                    <a
+                        href={`/class/${(note as any).class._id}`}
+                        className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700 hover:bg-blue-200 transition-colors"
+                        title={`Classe: ${(note as any).class.name}`}
+                    >
+                        <span>🎓</span>
+                        <span>{note.class.name}</span>
+                    </a>
+                )}
+            </div>
             <div className="delta">
                 <NoteContent note={note} />
             </div>

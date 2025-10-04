@@ -58,29 +58,33 @@ export default function TestInfoTab({test, now, isOpen, profile, setShowShareMod
             <div className="bg-white p-6 rounded-lg border border-gray-200">
                 <h3 className="text-lg font-semibold mb-4">Contenuto del test</h3>
                 <div className="text-gray-600">
-                    <Link href={`/note/${test.note_id}`} className="text-blue-600 hover:text-blue-800 underline">
-                        Visualizza il contenuto del test →
-                    </Link>
+                    {/* Spostato il pulsante sotto */}
                 </div>
             </div>
 
             {/* Pulsanti autore, visibili solo all'autore */}
-            { isOwner && (
-                <div className="flex gap-2 mb-4">
-                    <Link href={`/note/${test.note_id}?edit`} className={EDIT_BUTTON_CLASS}>
-                        Modifica nota con il testo del test
-                    </Link>
-                    <Link href={`?edit`} className={EDIT_BUTTON_CLASS}>
-                        Modifica proprietà del test
-                    </Link>
-                    <button 
-                        onClick={() => setShowShareModal(true)}
-                        className={EDIT_BUTTON_CLASS}
-                    >
-                        Condividi
-                    </button>
-                </div>
-            )}
+            <div className="flex gap-2 mb-4">
+                <Link href={`/note/${test.note_id}`} className={EDIT_BUTTON_CLASS}>
+                    Visualizza test
+                </Link>
+                { isOwner && (
+                    <>
+                        <Link href={`/note/${test.note_id}?edit`} className={EDIT_BUTTON_CLASS}>
+                            Modifica nota con il testo del test
+                        </Link>
+                        <Link href={`?edit`} className={EDIT_BUTTON_CLASS}>
+                            Modifica proprietà del test
+                        </Link>
+                        <button 
+                            onClick={() => setShowShareModal(true)}
+                            className={EDIT_BUTTON_CLASS}
+                        >
+                            Condividi
+                        </button>
+                    </>
+                )}
+            </div>
+
             {/* ShareModal spostato qui */}
             <ShareModal 
                 resource={test}

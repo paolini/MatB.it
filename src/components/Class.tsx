@@ -1,10 +1,11 @@
 import { gql, useQuery, useMutation } from '@apollo/client'
 import { useState, useEffect } from 'react'
 import { ClassEnrollmentCodes } from './ClassEnrollmentCodes'
-import { useSearchParams, usePathname } from 'next/navigation'
+import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { Error } from './utils'
 import { myTimestamp } from '@/lib/utils'
 import Link from 'next/link'
+import Notes from './Notes'
 
 // Componente Badge semplice per le classi
 const Badge = ({ children, variant = 'default' }: { children: React.ReactNode, variant?: 'default' | 'secondary' }) => (
@@ -91,12 +92,18 @@ type ClassProps = {
   currentUserId?: string
 }
 
+const tabOptions = ['notes', 'tests', 'teachers', 'students', 'manage'] as const;
+type TabType = typeof tabOptions[number];
+
 export function Class({ classId, currentUserId }: ClassProps) {
   const [newMemberEmail, setNewMemberEmail] = useState('')
   const [memberType, setMemberType] = useState<'student' | 'teacher'>('student')
   const [enrollmentCode, setEnrollmentCode] = useState('')
-  const [enrollmentError, setEnrollmentError] = useState<string|null>(null)
-  const [activeTab, setActiveTab] = useState<'notes' | 'tests' | 'teachers' | 'students' | 'manage'>('tests')
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const tabFromUrl = searchParams.get('tab');
+  const initialTab: TabType = tabOptions.includes(tabFromUrl as TabType) ? (tabFromUrl as TabType) : 'notes';
+  const [activeTab, setActiveTab] = useState<TabType>(initialTab);
 
   const { data, loading, error, refetch } = useQuery(GET_CLASS, {
     variables: { id: classId }
@@ -120,10 +127,12 @@ export function Class({ classId, currentUserId }: ClassProps) {
 
   const [deleteClassMutation, { loading: deletingClass, error: deleteError }] = useMutation(DELETE_CLASS)
 
-  const searchParams = useSearchParams()
   const pathname = usePathname()
 
   useEffect(() => {
+    if (tabFromUrl && tabOptions.includes(tabFromUrl as TabType) && tabFromUrl !== activeTab) {
+      setActiveTab(tabFromUrl as TabType);
+    }
     // Path: /class/ID/CODICE
     const parts = pathname.split('/')
     // Cerca il codice dopo l'ID della classe
@@ -132,18 +141,14 @@ export function Class({ classId, currentUserId }: ClassProps) {
     if (codeFromUrl) {
       setEnrollmentCode(codeFromUrl)
     }
-  }, [pathname, classId])
+  }, [tabFromUrl, activeTab, pathname, classId]);
 
-  if (loading) return <div>Loading...</div>
-  if (error) return <Error error={error} />
-  if (!data?.class) return <div>Classe non trovata</div>
-
-  const classData = data.class
-  const isOwner = currentUserId === classData.owner_id
-  const isTeacher = classData.teachers.some((t: any) => t._id === currentUserId)
-  const isStudent = classData.students.some((s: any) => s._id === currentUserId)
-  const canManage = isOwner || isTeacher
-  const isMember = isOwner || isTeacher || isStudent
+  const handleTabChange = (tab: TabType) => {
+    setActiveTab(tab);
+    const params = new URLSearchParams(window.location.search);
+    params.set('tab', tab);
+    window.history.replaceState({}, '', `${window.location.pathname}?${params.toString()}`);
+  };
 
   const handleRemoveMember = async (userId: string, type: 'student' | 'teacher') => {
     if (!confirm(`Sei sicuro di voler rimuovere questo ${type === 'student' ? 'studente' : 'insegnante'}?`)) {
@@ -166,6 +171,16 @@ export function Class({ classId, currentUserId }: ClassProps) {
     // Per ora questo è un placeholder
     alert('Funzionalità di aggiunta membri non ancora implementata')
   }
+
+  if (loading) return <div>Loading...</div>
+  if (error) return <Error error={error} />
+  if (!data?.class) return <div>Classe non trovata</div>
+
+  const classData = data.class
+  const isOwner = currentUserId === classData.owner_id
+  const isTeacher = classData.teachers.some((t: any) => t._id === currentUserId)
+  const isStudent = classData.students.some((s: any) => s._id === currentUserId)
+  const canManage = isOwner || isTeacher
 
   return (
     <div className="max-w-4xl mx-auto p-6 bg-white rounded-lg shadow">
@@ -195,24 +210,24 @@ export function Class({ classId, currentUserId }: ClassProps) {
       <div className="mb-6 border-b flex gap-2">
         <button
           className={`px-4 py-2 -mb-px border-b-2 font-medium ${activeTab === 'notes' ? 'border-blue-500 text-blue-700' : 'border-transparent text-gray-500'}`}
-          onClick={() => setActiveTab('notes')}
+          onClick={() => handleTabChange('notes')}
         >Note</button>
         <button
           className={`px-4 py-2 -mb-px border-b-2 font-medium ${activeTab === 'tests' ? 'border-blue-500 text-blue-700' : 'border-transparent text-gray-500'}`}
-          onClick={() => setActiveTab('tests')}
+          onClick={() => handleTabChange('tests')}
         >Test</button>
         <button
           className={`px-4 py-2 -mb-px border-b-2 font-medium ${activeTab === 'teachers' ? 'border-blue-500 text-blue-700' : 'border-transparent text-gray-500'}`}
-          onClick={() => setActiveTab('teachers')}
+          onClick={() => handleTabChange('teachers')}
         >Docenti</button>
         <button
           className={`px-4 py-2 -mb-px border-b-2 font-medium ${activeTab === 'students' ? 'border-blue-500 text-blue-700' : 'border-transparent text-gray-500'}`}
-          onClick={() => setActiveTab('students')}
+          onClick={() => handleTabChange('students')}
         >Studenti</button>
         {canManage && (
           <button
             className={`px-4 py-2 -mb-px border-b-2 font-medium ${activeTab === 'manage' ? 'border-blue-500 text-blue-700' : 'border-transparent text-gray-500'}`}
-            onClick={() => setActiveTab('manage')}
+            onClick={() => handleTabChange('manage')}
           >Gestione classe</button>
         )}
       </div>
@@ -220,10 +235,7 @@ export function Class({ classId, currentUserId }: ClassProps) {
       {/* Tab Content */}
       <div className="mt-4">
         {activeTab === 'notes' && (
-          <div>
-            <h2 className="text-xl font-semibold mb-3">Note della classe</h2>
-            <p className="text-gray-500 italic">(Qui verranno mostrate le note della classe)</p>
-          </div>
+          <Notes class_id={classId} />
         )}
         {activeTab === 'tests' && (
           <div>

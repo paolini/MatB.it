@@ -4,6 +4,7 @@ import Badge from "@/components/Badge"
 import { gql, useQuery, NetworkStatus } from "@apollo/client"
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
+import { ObjectId } from 'bson'
 
 import { Loading, Error } from "@/components/utils"
 import { Note, Profile } from "@/app/graphql/generated"
@@ -12,8 +13,8 @@ import { myTimestamp } from "@/lib/utils"
 import { VARIANT_NAMES } from "@/lib/models"
 
 const notesQuery = gql`
-    query Notes($mine: Boolean, $private: Boolean, $title: String, $variant: String, $limit: Int, $skip: Int) {
-        notes(mine: $mine, private: $private, title: $title, variant: $variant, limit: $limit, skip: $skip) {
+    query Notes($class_id: ObjectId, $mine: Boolean, $private: Boolean, $title: String, $variant: String, $limit: Int, $skip: Int) {
+        notes(class_id: $class_id, mine: $mine, private: $private, title: $title, variant: $variant, limit: $limit, skip: $skip) {
             _id
             title
             private
@@ -29,7 +30,7 @@ const notesQuery = gql`
         }
     }
 `
-export default function Notes() {
+export default function Notes({ class_id }: { class_id?: string }) {
     const router = useRouter()
     const searchParams = useSearchParams()
     
@@ -89,8 +90,9 @@ export default function Notes() {
         setVariantFilter(newVariant)
     }
     
-    const { loading, error, data, fetchMore, networkStatus, refetch } = useQuery(notesQuery, {
+    const { loading, error, data, fetchMore, networkStatus } = useQuery(notesQuery, {
         variables: { 
+            class_id: class_id ? new ObjectId(class_id) : null,
             mine: filter === 'mine', 
             private: filter === 'private',
             title: debouncedTitleFilter || undefined,
@@ -133,7 +135,11 @@ export default function Notes() {
     return <>
         <div className="flex flex-col items-start gap-2 w-full">
             <div className="flex items-center gap-3 w-full justify-start">
-                <h2 className="text-2xl font-bold">Note</h2>
+                <h2 className="text-2xl font-bold">
+                    {class_id 
+                        ? 'Note della classe' 
+                        : 'Note'}
+                </h2>
                 {isAuthenticated && <NewNoteButton />}
             </div>
             <div className="flex items-center justify-between w-full gap-4">
