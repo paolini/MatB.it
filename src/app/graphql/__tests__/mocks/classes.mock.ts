@@ -3,12 +3,12 @@ import { userId, teacherId, classId, studentId, testId } from './ids.mock';
 
 export const mockClass = {
   _id: classId,
-  name: 'Classe mock',
+  name: 'Classe di test',
+  teachers: [teacherId], // array di ObjectId
+  students: [studentId], // array di ObjectId
   description: 'Classe di test',
   owner_id: teacherId,
   owner: { _id: userId, name: 'User', email: 'user@example.com', image: '' },
-  teachers: [teacherId],
-  students: [studentId],
   notes: [], // da popolare nel test se serve
   tests: [testId],
   created_on: new Date(),

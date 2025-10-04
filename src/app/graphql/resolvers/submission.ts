@@ -34,17 +34,23 @@ const submission = async function (_parent: unknown, {_id}: { _id: ObjectId }, c
         )
     }
     
-    // Se non ha accesso tramite token, verifica se è utente autorizzato
+    // Se non ha accesso tramite token, verifica se è utente autenticato
+    if (!hasAccess && !user) {
+        throw new AuthenticationError('Not authenticated')
+    }
+
+    // l'autore della submission può vedere la propria submission
+    hasAccess = hasAccess || submission.author_id.equals(user?._id) 
+
+    // l'autore del test può vedere tutte le submission di tutti
+    hasAccess = hasAccess || test.author_id.equals(user?._id)
+
+    // i teacher della classe possono vedere tutte le submission di tutti
+    console.log('DEBUG class.teachers:', test?.class?.teachers)
+    hasAccess = hasAccess || !!test?.class?.teachers?.some(t => t._id.equals(context.user?._id));
+
     if (!hasAccess) {
-        if (!user) {
-            throw new AuthenticationError('Not authenticated')
-        }
-        
-        if (test.author_id.equals(user._id) || submission.author_id.equals(user._id)) {
-            hasAccess = true
-        } else {
-            throw new ForbiddenError('Not authorized to view this submission')
-        }
+        throw new ForbiddenError('Not authorized to view this submission');
     }
 
     const note = await note_loader(test.note_id.toString())

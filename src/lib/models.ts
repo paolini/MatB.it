@@ -405,7 +405,32 @@ export const SUBMISSION_PIPELINE = [
           foreignField: '_id',
           as: 'author'
         }},
-        { $unwind: { path: '$author', preserveNullAndEmptyArrays: true }}
+        { $unwind: { path: '$author', preserveNullAndEmptyArrays: true }},
+        // aggiungi lookup e unwind per la classe
+        { $lookup: {
+          from: 'classes',
+          localField: 'class_id',
+          foreignField: '_id',
+          as: 'class'
+        }},
+        { $unwind: { path: '$class', preserveNullAndEmptyArrays: true }},
+        // normalizza teachers e students per lookup successivo
+        { $addFields: {
+          'class.teachers': {
+            $map: {
+              input: '$class.teachers',
+              as: 'tid',
+              in: { _id: '$$tid' }
+            }
+          },
+          'class.students': {
+            $map: {
+              input: '$class.students',
+              as: 'sid',
+              in: { _id: '$$sid' }
+            }
+          }
+        }}
       ]
     }
   }, {

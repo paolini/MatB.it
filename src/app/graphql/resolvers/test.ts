@@ -12,7 +12,9 @@ export default async function test (_parent: unknown, {_id}: { _id: ObjectId }, 
     // Costruisci le condizioni di autorizzazione
     const authConditions: any[] = [
         { private: { $ne: true } }, // test pubblici
-        ...(context.user ? [{ author_id: context.user._id }] : []) // test dell'autore
+        ...(context.user ? [{ author_id: context.user._id }] : []), // test dell'autore
+        ...(context.user ? [{ 'class.teachers': context.user._id }] : []), // test per teacher della classe
+        ...(context.user ? [{ 'class.students': context.user._id }] : []) // test per studenti della classe
     ]
     
     // Se c'è un token di accesso, verifica se è valido per questa risorsa
@@ -51,7 +53,8 @@ export default async function test (_parent: unknown, {_id}: { _id: ObjectId }, 
                     test_id: '$_id', 
                     user_id: user?._id,
                     test_author_id: '$author_id',
-                    has_valid_token: hasValidToken
+                    has_valid_token: hasValidToken,
+                    class_teacher_ids: '$class.teachers'
                 },
                 pipeline: [
                     { $match: { $expr: { $and: [ 
@@ -59,7 +62,11 @@ export default async function test (_parent: unknown, {_id}: { _id: ObjectId }, 
                         { $or: [
                                 { $eq: ['$author_id', '$$user_id'] },
                                 { $eq: ['$$test_author_id', '$$user_id'] },
-                                { $eq: ['$$has_valid_token', true] }
+                                { $eq: ['$$has_valid_token', true] },
+                                { $in: [
+                                    '$$user_id',
+                                    { $map: { input: '$$class_teacher_ids', as: 't', in: '$$t._id' } }
+                                ] } // controllo teacher solo se teachers è array di {_id}
                                 ] }, 
                         ]}}}, 
                     { $sort: { started_on: -1 } },
@@ -76,7 +83,9 @@ export default async function test (_parent: unknown, {_id}: { _id: ObjectId }, 
         }
     ]).toArray()
 
-    if (tests.length === 0) throw new UserInputError('Test not found')
+    if (tests.length === 0) {
+        throw new UserInputError('Test not found')
+    }
     const test = tests[0]
 
     return test
