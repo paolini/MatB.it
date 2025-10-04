@@ -55,13 +55,6 @@ export default function TestInfoTab({test, now, isOpen, profile, setShowShareMod
                 </div>
             </div>
             
-            <div className="bg-white p-6 rounded-lg border border-gray-200">
-                <h3 className="text-lg font-semibold mb-4">Contenuto del test</h3>
-                <div className="text-gray-600">
-                    {/* Spostato il pulsante sotto */}
-                </div>
-            </div>
-
             {/* Pulsanti autore, visibili solo all'autore */}
             <div className="flex gap-2 mb-4">
                 <Link href={`/note/${test.note_id}`} className={EDIT_BUTTON_CLASS}>
