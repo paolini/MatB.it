@@ -25,6 +25,10 @@ mutation UpdateNote($_id: ObjectId!, $title: String, $hide_title: Boolean, $delt
     class { _id name }
   }
 }`
+const NewNoteMutation = gql`
+mutation NewNote($title: String, $hide_title: Boolean, $delta: JSON, $private: Boolean, $variant: String, $class_id: ObjectId) {
+  newNote(title: $title, hide_title: $hide_title, delta: $delta, private: $private, variant: $variant, class_id: $class_id)
+}`
 const ClassesQuery = gql`
 query Classes {
   classes {
@@ -40,8 +44,9 @@ mutation DeleteNote($_id: ObjectId!) {
   deleteNote(_id: $_id)
 }`
 
-export default function NoteForm({ note }: {
+export default function NoteForm({ note, isNew }: {
   note: Note,
+  isNew?: boolean
 }) {
   const router = useRouter()
   
@@ -54,23 +59,37 @@ export default function NoteForm({ note }: {
 
   // Recupera le classi dove l'utente è owner/teacher
   const { data: classesData, loading: loadingClasses } = useQuery(ClassesQuery)
-
   const [updateNote, { loading: isUpdating, error: updateError }] = useMutation(UpdateNoteMutation)
+  const [createNote, { loading: isCreating, error: createError }] = useMutation(NewNoteMutation)
   const [deleteNote, { loading: isDeleting, error: deleteError }] = useMutation(DeleteNoteMutation)
     
   const handleSaveWithDelta = async (currentDelta: any) => {
-    await updateNote({ 
-      variables: { 
-        _id: note._id, 
-        title,
-        hide_title: hideTitle, 
-        delta: currentDelta, 
-        private: isPrivate, 
-        variant,
-        class_id: classId || null
-      } 
-    });
-    router.push(`/note/${note._id}`);
+    if (isNew) {
+      const { data } = await createNote({
+        variables: {
+          title,
+          hide_title: hideTitle,
+          delta: currentDelta,
+          private: isPrivate,
+          variant,
+          class_id: classId || null
+        }
+      })
+      if (data?.newNote) router.replace(`/note/${data.newNote}`)
+    } else {
+      await updateNote({
+        variables: {
+          _id: note._id,
+          title,
+          hide_title: hideTitle,
+          delta: currentDelta,
+          private: isPrivate,
+          variant,
+          class_id: classId || null
+        }
+      })
+      router.push(`/note/${note._id}`)
+    }
   }
 
   const handleDelete = async () => {
@@ -153,10 +172,10 @@ export default function NoteForm({ note }: {
             readOnly={false}
             content={note.delta}
             onSave={handleSaveWithDelta}
-            onCancel={() => router.push(`/note/${note._id}`)}
+            onCancel={() => router.push(isNew ? '/' : `/note/${note._id}`)}
             onDelete={handleDelete}
-            isSaving={isUpdating || isDeleting}
-            saveError={updateError}
+            isSaving={isUpdating || isCreating || isDeleting}
+            saveError={updateError || createError}
             deleteError={deleteError}
           />
         </div>

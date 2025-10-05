@@ -1,6 +1,7 @@
 "use client"
 import { gql, useQuery, useMutation } from '@apollo/client'
 import { useState } from 'react'
+import { useRouter } from 'next/navigation';
 
 import { useSearchParams } from 'next/navigation';
 
@@ -10,6 +11,16 @@ import { Loading, Error, EDIT_BUTTON_CLASS } from '@/components/utils'
 import NoteContent from '@/components/NoteContent'
 import NoteForm from '@/components/NoteForm'
 import ShareModal from '@/components/ShareModal'
+import { ObjectId } from 'bson';
+
+const ProfileQuery = gql`
+    query Profile {
+        profile {
+            _id
+            name
+        }
+    }
+`
 
 const NoteQuery = gql`
     query Note($_id: ObjectId!) {
@@ -44,36 +55,66 @@ const NoteQuery = gql`
                 # visibility removed
             }
         }
-        profile {
-            _id
-        }
     }
 `
+
+function emptyNote(profile: Profile): Note {
+    return {
+        _id: new ObjectId('000000000000000000000000'),
+        title: '',
+        hide_title: false,
+        private: false,
+        delta: null,
+        variant: '',
+        created_on: null,
+        updated_on: null,
+        class_id: null,
+        class: null,
+        tests: [],
+        author: {
+            _id: profile._id,
+            name: profile.name,
+            email: profile.email,
+            image: profile.image
+        },
+        author_id: profile._id,
+    }
+}
 
 export default function NoteWrapper({ _id }: { _id: string }) {
     const searchParams = useSearchParams();
     const editMode = searchParams.get('edit') !== null;
+    const isNew = _id === '__new__';
     const { loading, error, data } = useQuery<{ note: Note, profile: Profile }>(
-        NoteQuery, { variables: { _id } })
-    
-    if (error) return <Error error={error} />    
-    if (loading || !data) return <Loading />
+        NoteQuery, { variables: { _id }, skip: isNew })
+    const { loading: profileLoading, error: profileError, data: profileData } = useQuery<{ profile: Profile }>(
+        ProfileQuery)
 
-    const note = data?.note
-    const profile = data?.profile
+    if (error || profileError) return <Error error={error || profileError} />
+    if (loading || profileLoading || !profileData) return <Loading />
 
-    if (editMode) return <NoteEdit note={note} />
+    const profile = profileData?.profile
+    const note = data?.note || emptyNote(profile);
+
+    if (editMode || isNew) return <NoteEdit note={note} isNew={isNew} />
     else return <NoteView note={note} profile={profile} />
 }
+
+const DeleteNoteMutation = gql`
+    mutation DeleteNote($_id: ObjectId!) {
+        deleteNote(_id: $_id)
+    }
+`
 
 function NoteView({note, profile}: {
     note: Note,
     profile: Profile,
 }) {
     const [showShareModal, setShowShareModal] = useState(false)
-    
-    // ...existing code...
-    
+    const [deleteNote, { loading: deleting, error: deleteError }] = useMutation(DeleteNoteMutation, {
+        refetchQueries: ["Note"],
+    })
+
     return <div>
         <div className={`ql-variant-container ql-var-${note.variant || 'default'}`}>
             <div className="flex items-center gap-3 mb-4">
@@ -98,7 +139,7 @@ function NoteView({note, profile}: {
         <NoteFooter note={note} />
         <div className="flex gap-2">
         {note?.author?._id === profile?._id  && 
-            <a className={EDIT_BUTTON_CLASS} href={`?edit`}>
+            <a className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors" href={`?edit`}>
                 Edit
             </a>
         }
@@ -110,6 +151,21 @@ function NoteView({note, profile}: {
                 Condividi
             </button>
         }
+        {note?.author?._id === profile?._id  && 
+            <button
+                onClick={async () => {
+                    if (window.confirm('Sei sicuro di voler eliminare questa nota?')) {
+                        await deleteNote({ variables: { _id: note._id } })
+                        window.location.href = '/';
+                    }
+                }}
+                className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
+                disabled={deleting}
+            >
+                {deleting ? 'Eliminazione...' : 'Elimina'}
+            </button>
+        }
+        {deleteError && <Error error={deleteError} />}
         {note?.variant === 'test' && (
             <CreateTestButton note={note} />
         )}
@@ -123,9 +179,15 @@ function NoteView({note, profile}: {
     </div>
 }
 
-function NoteEdit({note}: {note: Note}) {
+const CREATE_NOTE_MUTATION = gql`
+    mutation NewNote($title: String, $delta: JSON, $variant: String, $private: Boolean, $hide_title: Boolean, $class_id: ObjectId) {
+        newNote(title: $title, delta: $delta, variant: $variant, private: $private, hide_title: $hide_title, class_id: $class_id)
+    }
+`
+
+function NoteEdit({note, isNew}: {note: Note, isNew?: boolean}) {
     return <div>
-        <NoteForm note={note}/>
+        <NoteForm note={note} isNew={isNew} />
         <NoteFooter note={note} />
     </div>
 }
