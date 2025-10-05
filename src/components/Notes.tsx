@@ -8,7 +8,7 @@ import { ObjectId } from 'bson'
 
 import { Loading, Error } from "@/components/utils"
 import { Note, Profile } from "@/app/graphql/generated"
-import NewNoteButton from "./NewNoteButton"
+import PlusButton from './PlusButton'
 import { myTimestamp } from "@/lib/utils"
 import { VARIANT_NAMES } from "@/lib/models"
 
@@ -140,7 +140,7 @@ export default function Notes({ class_id }: { class_id?: string }) {
                         ? 'Note della classe' 
                         : 'Note'}
                 </h2>
-                {isAuthenticated && <NewNoteButton />}
+                {isAuthenticated && <PlusButton href="/note/__new__" title="Crea nuova nota" />}
             </div>
             <div className="flex items-center justify-between w-full gap-4">
                 <div className="flex gap-2">

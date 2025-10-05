@@ -24,8 +24,8 @@ const ScoreDistributionChart = memo(function ScoreDistributionChart({ distributi
             <div className="text-sm text-gray-600 mb-4">
                 Numero di studenti per fascia di punteggio
             </div>
-            <div className="w-full h-80">
-                <ResponsiveContainer width="100%" height="100%">
+            <div className="w-full h-80 overflow-x-auto" style={{ width: chartData.length * 120 }}>
+                <ResponsiveContainer width="100%" height={320}>
                     <BarChart
                         data={chartData}
                         margin={{

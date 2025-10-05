@@ -8,7 +8,7 @@ export default function Providers({ children }: { children: React.ReactNode }) {
     <SessionProvider>
       <ApolloContainer>
         <NavBar />
-        <div className="max-w-4xl mx-auto px-4 py-6">
+        <div className="mx-auto px-4 py-6">
           {children}
         </div>
       </ApolloContainer>

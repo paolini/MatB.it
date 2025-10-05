@@ -55,7 +55,9 @@ export default function SubmissionWrapper({_id}: {_id: string}) {
 
     const { submission, profile } = data
 
-    return <SubmissionElement submission={submission} profile={profile} />
+    return <div className="max-w-4xl">
+        <SubmissionElement submission={submission} profile={profile} />
+    </div>
 }
 
 const SUBMIT_MUTATION = gql`

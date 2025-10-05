@@ -1,10 +1,10 @@
 import { TestStats } from '@/app/graphql/generated'
-import ScoreDistributionChart from './ScoreDistributionChart'
+import ScoreDistributionChart from './TestScoreDistributionChart'
 
 export default function TestScoresTab({stats}: {stats: TestStats}) {
     return (
         <div className="space-y-6">
-            <div className="bg-white p-6 rounded-lg border border-gray-200">
+            <div className="max-w-3xl bg-white p-6 rounded-lg border border-gray-200">
                 <h3 className="text-lg font-semibold mb-4">Riepilogo punteggi</h3>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                     <div className="text-center">

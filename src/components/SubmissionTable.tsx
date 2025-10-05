@@ -107,7 +107,7 @@ export default function SubmissionTable({submissions, accessToken}: {submissions
         rankMap.set(submission._id.toString(), { rank, percentile })
     })
 
-    return <table className="mt-4 w-full border-2 border-black" style={{borderCollapse: 'collapse'}}>
+    return <table className="mt-4 border-2 border-black" style={{borderCollapse: 'collapse'}}>
         <thead className="bg-gray-100">
             <tr>
                 <th className="px-2 py-1 text-left border border-black">#</th>
@@ -197,7 +197,7 @@ function SubmissionRow({submission, headers, index, rankMap, accessToken}:{
     return (
         <tr className="hover:bg-gray-50">
             <td className={`${COMMON_CLASSNAME} text-center`}>
-                <Link href={getSubmissionLink()} className="block w-full h-full">
+                <Link href={getSubmissionLink()} className="block w-full h-full" target="_blank" rel="noopener noreferrer">
                     {index} 👁
                 </Link>
             </td>

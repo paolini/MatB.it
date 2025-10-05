@@ -1,6 +1,6 @@
 export default function ExerciseStatsTable({exercises}: {exercises: any[]}) {
     return (
-        <div className="overflow-x-auto mb-6">
+        <div className="max-w-3xl overflow-x-auto mb-6">
             <table className="w-full border-collapse border border-gray-300">
                 <thead>
                     <tr className="bg-gray-50">

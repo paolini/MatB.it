@@ -1,6 +1,6 @@
-import { useState } from 'react'
 import { gql, useQuery } from '@apollo/client'
 import Link from 'next/link'
+import PlusButton from './PlusButton'
 
 // Componente Badge semplice
 const Badge = ({ children, variant = 'default' }: { children: React.ReactNode, variant?: 'default' | 'secondary' }) => (
@@ -77,15 +77,10 @@ export function Classes({ currentUserId }: ClassesProps) {
   }
 
   return (
-    <div className="max-w-6xl mx-auto p-6">
+    <div className="max-w-6xl p-6">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-3xl font-bold">Le Mie Classi</h1>
-        <Link
-          href="/classes/new"
-          className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
-        >
-          + Nuova Classe
-        </Link>
+        <PlusButton href="/classes/new" title="Crea nuova classe" />
       </div>
 
       {/* Lista classi */}

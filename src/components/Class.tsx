@@ -183,7 +183,7 @@ export function Class({ classId, currentUserId }: ClassProps) {
   const canManage = isOwner || isTeacher
 
   return (
-    <div className="max-w-4xl mx-auto p-6 bg-white rounded-lg shadow">
+    <div className="max-w-4xl">
       <div className="mb-6">
         <div className="flex items-center gap-3 mb-2">
           <h1 className="text-3xl font-bold">{classData.name}</h1>

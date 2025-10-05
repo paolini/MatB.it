@@ -40,7 +40,7 @@ const ExerciseStatisticsChart = memo(function ExerciseStatisticsChart({ exercise
             <div className="text-sm text-gray-600 mb-4">
                 Percentuale di successo e punteggio medio per ciascun esercizio
             </div>
-            <div className="w-full h-80">
+            <div className="w-full h-80" style={{width: chartData.length * 120}}>
                 <ResponsiveContainer width="100%" height="100%">
                     <BarChart
                         data={chartData}
