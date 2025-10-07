@@ -189,8 +189,8 @@ function ViewTest({test, profile, accessToken}: {
         {/* Tab content */}
         <div className="tab-content">
             {activeTab === 'info' && canViewDetails && <TestInfoTab test={test} now={now} isOpen={isOpen} profile={profile} setShowShareModal={setShowShareModal} showShareModal={showShareModal} />}
-            {activeTab === 'scores' && test.stats && canViewDetails && <TestScoresTab stats={test.stats} />}
-            {activeTab === 'exercises' && test.stats && canViewDetails && <TestExercisesTab stats={test.stats} />}
+            {activeTab === 'scores' && test.stats && <TestScoresTab stats={test.stats} />}
+            {activeTab === 'exercises' && test.stats && <TestExercisesTab stats={test.stats} />}
             {activeTab === 'submissions' && canViewDetails && test.submissions && <TestSubmissionsTab submissions={test.submissions} accessToken={accessToken} />}
         </div>
     </div>

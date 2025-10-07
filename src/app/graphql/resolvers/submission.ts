@@ -71,7 +71,7 @@ const submission = async function (_parent: unknown, {_id}: { _id: ObjectId }, c
     return {
         ...submission,
         answers: answers.map((a:MongoAnswer) => {
-            if (a.permutation && typeof a.answer === 'number') {
+            if (a.permutation) {
                 const inv = inverse_permutation(a.permutation)
                 return {
                     note_id: a.note_id,
