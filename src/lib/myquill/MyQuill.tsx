@@ -5,8 +5,9 @@ import Delta from 'quill-delta-es'
 import 'katex/dist/katex.min.css';
 import './delta-variants.css';
 import { useRef, useEffect, useState } from 'react';
-import CreateNoteModal from '@/components/NoteReferenceModal';
+import NoteReferenceModal from '@/components/NoteReferenceModal';
 import { Error as ErrorElement, ErrorType, BUTTON_CLASS, CANCEL_BUTTON_CLASS, DELETE_BUTTON_CLASS, SAVE_BUTTON_CLASS } from '@/components/utils'
+import { ObjectId } from 'bson';
 
 const config = {
     theme: "snow",
@@ -32,6 +33,7 @@ const readonlyConfig = {
 export default function MyQuill({
     readOnly, 
     content, 
+    class_id,
     onSave, 
     onCancel, 
     onDelete,
@@ -41,6 +43,7 @@ export default function MyQuill({
 }: {
     readOnly?: boolean
     content?: Delta
+    class_id?: ObjectId
     onSave?: (delta: Delta) => void
     onCancel?: () => void
     onDelete?: () => void
@@ -158,13 +161,13 @@ export default function MyQuill({
         )}
         
         {/* Modal per inserire riferimento nota */}
-        <CreateNoteModal
+        <NoteReferenceModal
             isOpen={showCreateModal}
             onClose={() => setShowCreateModal(false)}
             onNoteSelected={handleNoteCreated}
             initialVariant={prefilledVariant}
+            class_id={class_id}
         />
-        
     </div>
 
     function onReady(quill: InstanceType<typeof Quill>) {

@@ -1,8 +1,9 @@
 "use client"
 import { useState, useEffect } from 'react'
-import { gql, useMutation, useQuery } from '@apollo/client'
+import { gql, useMutation, useLazyQuery } from '@apollo/client'
 import { Note } from '@/app/graphql/generated'
 import { VARIANT_NAMES } from '@/lib/models';
+import { ObjectId } from 'bson';
 
 // Type definition per Delta (per evitare import diretto)
 type DeltaType = unknown;
@@ -20,8 +21,8 @@ mutation NewNote($title: String!, $delta: JSON, $private: Boolean, $variant: Str
 }`
 
 const NotesQuery = gql`
-query Notes {
-  notes {
+query Notes($class_id: ObjectId) {
+  notes(class_id: $class_id) {
     _id
     title
     variant
@@ -37,11 +38,12 @@ interface NoteReferenceModalProps {
   onClose: () => void
   onNoteSelected: (noteId: string) => void
   initialVariant?: string
+  class_id?: ObjectId
 }
 
 type TabType = 'existing' | 'new'
 
-export default function NoteReferenceModal({ isOpen, onClose, onNoteSelected, initialVariant = 'default' }: NoteReferenceModalProps) {
+export default function NoteReferenceModal({ isOpen, onClose, onNoteSelected, initialVariant = 'default', class_id }: NoteReferenceModalProps) {
   console.log('🔧 NoteReferenceModal: Render con props:', { isOpen, onNoteSelected: typeof onNoteSelected, initialVariant })
   
   const [activeTab, setActiveTab] = useState<TabType>('existing')
@@ -66,8 +68,14 @@ export default function NoteReferenceModal({ isOpen, onClose, onNoteSelected, in
     }
   }, [isOpen, initialVariant])
   
- const [createNote, { error: createError }] = useMutation(NewNoteMutation)
-  const { data: notesData, loading: loadingNotes, error: notesError } = useQuery<{notes: Note[]}>(NotesQuery)
+  const [createNote, { error: createError }] = useMutation(NewNoteMutation)
+  const [getNotes, { data: notesData, loading: loadingNotes, error: notesError }] = useLazyQuery<{notes: Note[]}>(NotesQuery)
+
+  useEffect(() => {
+    if (isOpen) {
+      getNotes({ variables: { class_id } })
+    }
+  }, [isOpen, class_id, getNotes])
 
   const handleCreateNote = async () => {
     console.log('🔄 handleCreateNote: Inizio creazione nota')
@@ -142,7 +150,6 @@ export default function NoteReferenceModal({ isOpen, onClose, onNoteSelected, in
       <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
         <div className="p-6 border-b">
           <h2 className="text-xl font-bold">Inserisci Riferimento Nota</h2>
-          
           {/* Tab Navigation */}
           <div className="flex mt-4 border-b">
             <button

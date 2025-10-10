@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 
 import { Note } from '@/app/graphql/generated'
 import { VARIANT_NAMES } from '@/lib/models'
+import { ObjectId } from 'bson'
 
 const MyQuill = dynamic(() => import('@/lib/myquill/MyQuill'), { ssr: false });
 
@@ -179,6 +180,7 @@ export default function NoteForm({ note, isNew }: {
           <MyQuill
             readOnly={false}
             content={note.delta}
+            class_id={classId ? new ObjectId(classId) : undefined}
             onSave={handleSaveWithDelta}
             onCancel={() => router.push(isNew ? '/' : `/note/${note._id}`)}
             onDelete={handleDelete}
