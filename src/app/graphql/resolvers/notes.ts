@@ -1,7 +1,7 @@
 import { ObjectId } from 'mongodb'
 import { Context } from '../types'
-import { getNotesCollection, getUserClassRole, canUserAccessContent } from '@/lib/models'
-import { Note, QueryNotesArgs } from '../generated'
+import { getNotesCollection } from '@/lib/models'
+import { QueryNotesArgs } from '../generated'
 
 export const NOTES_LOOKUP_PIPELINE = [
   {
@@ -45,7 +45,7 @@ export const NOTES_LOOKUP_PIPELINE = [
   }
 ]
 
-export default async function notes(_parent: unknown, args: any, context: Context) {
+export default async function notes(_parent: unknown, args: QueryNotesArgs, context: Context) {
     const userId = context.user?._id
     
     // Costruiamo la pipeline
@@ -53,7 +53,7 @@ export default async function notes(_parent: unknown, args: any, context: Contex
     
     // Semplificato: usa solo il campo private per la visibilità
     let match: any;
-    const classId = args.class_id ? new ObjectId(args.class_id) : null;
+    const classId = args.class_id;
 
     if (classId) {
         if (!userId) throw new Error('Devi essere autenticato per accedere alle note di una classe');
@@ -73,20 +73,29 @@ export default async function notes(_parent: unknown, args: any, context: Contex
                 : null;
         }
         if (!userRole) throw new Error('Non hai i permessi per accedere a questa classe');
+        // Mostra tutte le note della classe se sei owner o teacher
+        // Se sei studente, mostra solo le note pubbliche della classe
         match = {
             class_id: classId,
             ...(userRole === 'student' ? { private: { $ne: true } } : {})
         };
     } else {
-        match = userId ? {
+      if (userId) {
+        // Mostra note pubbliche e le proprie note private
+        // non associate a nessuna classe
+        match = {
             $or: [
                 { private: { $ne: true }, class_id: null },
-                { author_id: new ObjectId(userId) }
+                { author_id: new ObjectId(userId), class_id: null }
             ]
-        } : {
+        }
+      } else {
+        // Utente anonimo: mostra solo note pubbliche non associate a nessuna classe
+        match = {
             private: { $ne: true },
             class_id: null
         };
+     }
     }
     pipeline.push({ $match: match })
     const filteredNotes = await context.db.collection('notes').find(match).toArray();

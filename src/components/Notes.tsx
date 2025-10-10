@@ -30,7 +30,9 @@ const notesQuery = gql`
         }
     }
 `
-export default function Notes({ class_id }: { class_id?: string }) {
+export default function Notes({ class_id, showAddButton }: { 
+        class_id?: string, 
+        showAddButton?: boolean }) {
     const router = useRouter()
     const searchParams = useSearchParams()
     
@@ -140,7 +142,7 @@ export default function Notes({ class_id }: { class_id?: string }) {
                         ? 'Note della classe' 
                         : 'Note'}
                 </h2>
-                {isAuthenticated && <PlusButton href="/note/__new__" title="Crea nuova nota" />}
+                {showAddButton && isAuthenticated && <PlusButton href={`/note/__new__${class_id ? `?class_id=${class_id}` : ''}`} title="Crea nuova nota" />}
             </div>
             <div className="flex items-center justify-between w-full gap-4">
                 <div className="flex gap-2">
@@ -186,7 +188,7 @@ export default function Notes({ class_id }: { class_id?: string }) {
 
         {loading && <Loading />}
         <Error error={error} />
-        { notes && notes.length === 0 &&
+        {!loading && notes && notes.length === 0 &&
             <div className="text-center text-gray-500">
                 Nessuna nota trovata.
             </div>

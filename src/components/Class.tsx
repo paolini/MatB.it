@@ -235,7 +235,7 @@ export function Class({ classId, currentUserId }: ClassProps) {
       {/* Tab Content */}
       <div className="mt-4">
         {activeTab === 'notes' && (
-          <Notes class_id={classId} />
+          <Notes class_id={classId} showAddButton={canManage} />
         )}
         {activeTab === 'tests' && (
           <div>

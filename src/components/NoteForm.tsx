@@ -2,10 +2,9 @@
 import { useState } from 'react'
 import dynamic from "next/dynamic"
 import { gql, useMutation, useQuery } from '@apollo/client'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 
 import { Note } from '@/app/graphql/generated'
-import { QuillDelta } from '@/lib/myquill/document'
 import { VARIANT_NAMES } from '@/lib/models'
 
 const MyQuill = dynamic(() => import('@/lib/myquill/MyQuill'), { ssr: false });
@@ -49,13 +48,16 @@ export default function NoteForm({ note, isNew }: {
   isNew?: boolean
 }) {
   const router = useRouter()
-  
+  const searchParams = useSearchParams()
+  const urlClassId = searchParams.get('class_id')
   // State locale
   const [title, setTitle] = useState(note.title)
   const [variant, setVariant] = useState(note.variant || 'default')
   const [isPrivate, setIsPrivate] = useState(note.private || false)
   const [hideTitle, setHideTitle] = useState(note.hide_title || false)
-  const [classId, setClassId] = useState(note.class_id ? String(note.class_id) : '')
+  const [classId, setClassId] = useState(
+    note.class_id ? String(note.class_id) : (urlClassId || '')
+  )
 
   // Recupera le classi dove l'utente è owner/teacher
   const { data: classesData, loading: loadingClasses } = useQuery(ClassesQuery)
@@ -163,6 +165,12 @@ export default function NoteForm({ note, isNew }: {
           />
           <span className="text-sm font-medium text-gray-700">Nascondi titolo</span>
         </label>
+      </div>
+      <div>
+        { isPrivate && classId &&   <span className="text-sm font-medium text-gray-700">questa nota è visibile solo agli insegnanti della classe</span>}
+        { isPrivate && !classId &&  <span className="text-sm font-medium text-gray-700">questa nota è visibile solo a te</span>}
+        { !isPrivate && classId &&  <span className="text-sm font-medium text-gray-700">questa nota è visibile a tutti gli studenti e insegnanti della classe</span>}
+        { !isPrivate && !classId && <span className="text-sm font-medium text-gray-700">questa nota è visibile a tutto il mondo</span>}
       </div>
 
       {/* Editor */}

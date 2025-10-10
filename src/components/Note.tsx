@@ -42,7 +42,6 @@ const NoteQuery = gql`
                 _id
                 name
                 academic_year}
-            # visibility removed
             tests {
                 _id
                 note_id
@@ -52,7 +51,6 @@ const NoteQuery = gql`
                 open_on
                 close_on
                 class_id
-                # visibility removed
             }
         }
     }
@@ -198,7 +196,8 @@ function NoteFooter({note}: {
     return <div>
         { note.author &&
             <p className="text-gray-500">
-                By {note.author.name}.
+                By {note.author.name}
+                {note.private && <span> (privata)</span>}
             </p>
         }
     </div>
