@@ -29,7 +29,7 @@ const updateSubmission = async function (
   const now = new Date()
   if (submission.test.open_on && submission.test.open_on>now) throw new Error('Test not yet open')
   if (submission.test.close_on && submission.test.close_on<now) throw new Error('Test is closed')
-  if (submission.completed_on) throw new Error('Submission already completed')
+  if (submission.completed_on && !(is_owner_of_test || is_teacher_of_class)) throw new Error('Submission already completed')
   
   const $set: {
     answers?: MongoAnswer[],
