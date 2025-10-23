@@ -18,7 +18,13 @@ const updateSubmission = async function (
   ]).toArray()
   if (submissions.length === 0) throw new Error('Submission not found')
   const submission = submissions[0]
-  if (!submission.author_id.equals(context.user._id)) throw new Error('Not authorized')
+  const is_author_of_submission = submission.author_id.equals(context.user._id)
+  const is_teacher_of_class = submission.test.class?.teachers
+    && submission.test.class?.teachers.some(teacher => teacher._id.equals(context.user?._id))
+  const is_owner_of_test = submission.test.author_id.equals(context.user._id)
+
+  const can_modify_submission = is_author_of_submission || is_teacher_of_class || is_owner_of_test
+  if (!can_modify_submission) throw new Error('Not authorized')
 
   const now = new Date()
   if (submission.test.open_on && submission.test.open_on>now) throw new Error('Test not yet open')
