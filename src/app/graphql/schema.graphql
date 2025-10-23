@@ -150,6 +150,7 @@ type Mutation {
   newTest(note_id: ObjectId!, title: String, private: Boolean, class_id: ObjectId): Boolean
   updateTest(_id: ObjectId!, title: String, open_on: Timestamp, close_on: Timestamp, private: Boolean,class_id: ObjectId): Test
   deleteTest(_id: ObjectId!): Boolean
+  recalculateTestScores(_id: ObjectId!): Int!
 
   newSubmission(test_id: ObjectId!): ObjectId!
   updateSubmission(_id: ObjectId!, answers: [AnswerItemInput!], completed: Boolean): Boolean

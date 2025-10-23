@@ -16,6 +16,7 @@ import deleteNote from './resolvers/deleteNote'
 import newTest from './resolvers/newTest'
 import updateTest from './resolvers/updateTest'
 import deleteTest from './resolvers/deleteTest'
+import recalculateTestScores from './resolvers/recalculateTestScores'
 import newSubmission from './resolvers/newSubmission'
 import updateSubmission from './resolvers/updateSubmission'
 import deleteSubmission from './resolvers/deleteSubmission'
@@ -79,6 +80,7 @@ export const resolvers: any = {
     newTest,
     updateTest,
     deleteTest,
+    recalculateTestScores,
 
     newSubmission,
     updateSubmission,
