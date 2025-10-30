@@ -82,26 +82,42 @@ export default function MyQuill({
     }, []);
 
     const handleNoteCreated = (noteId: string) => {
+        console.log('Inserting note reference for note ID:', noteId);
         
-        if (quillInstance.current) {
-            // Usa il range salvato, altrimenti prova a ottenere quello corrente, altrimenti usa la fine del testo
-            let range = savedRange.current || quillInstance.current.getSelection();
-            
-            if (!range) {
-                // Se non c'è nessun range, inserisci alla fine del testo
-                const length = quillInstance.current.getLength();
-                range = { index: length - 1, length: 0 };
+        // Chiudi il modal per primo per ripristinare il focus sull'editor
+        setShowCreateModal(false);
+        
+        // Usa setTimeout per dare tempo al modal di chiudersi e al focus di tornare all'editor
+        setTimeout(() => {
+            if (quillInstance.current) {
+                // Usa il range salvato, altrimenti prova a ottenere quello corrente, altrimenti usa la fine del testo
+                let range = savedRange.current || quillInstance.current.getSelection();
+                
+                if (!range) {
+                    // Se non c'è nessun range, inserisci alla fine del testo
+                    const length = quillInstance.current.getLength();
+                    range = { index: length - 1, length: 0 };
+                }
+                
+                console.log('Inserting embed at range:', range);
+                
+                // Inserisci il riferimento alla nota
+                quillInstance.current.insertEmbed(range.index, 'note-ref', { note_id: noteId });
+                
+                console.log('Embed inserted, setting selection');
+                
+                // Sposta il cursore dopo il riferimento inserito
+                quillInstance.current.setSelection(range.index + 1);
+                
+                // Pulisci il range salvato
+                savedRange.current = null;
+                
+                console.log('Selection set, operation completed');
+                
+                // Ripristina il focus sull'editor
+                quillInstance.current.focus();
             }
-            
-            quillInstance.current.insertEmbed(range.index, 'note-ref', { note_id: noteId });
-            quillInstance.current.setSelection(range.index + 1);
-            
-            // Pulisci il range salvato
-            savedRange.current = null;
-            
-            // Chiudi il modal dopo aver inserito la note-ref
-            setShowCreateModal(false);
-        }
+        }, 10);
     };
 
     return <div>

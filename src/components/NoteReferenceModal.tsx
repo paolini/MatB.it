@@ -123,12 +123,13 @@ export default function NoteReferenceModal({ isOpen, onClose, onNoteSelected, in
     console.log('🔗 handleSelectExistingNote: Selezione nota esistente con ID:', noteId)
     console.log('📞 handleSelectExistingNote: Chiamata onNoteSelected...')
     onNoteSelected(noteId)
-    console.log('🔒 handleSelectExistingNote: Chiamata handleClose...')
-    handleClose()
+    // Non chiamiamo handleClose() qui - la chiusura è gestita dal componente parent
+    // dopo che ha inserito il riferimento nell'editor
     console.log('✅ handleSelectExistingNote: Operazione completata')
   }
 
   const handleClose = () => {
+    console.log('🚪 handleClose: Chiusura modal e reset stato')
     setTitle('')
     setVariant(initialVariant)
     setIsPrivate(false)
