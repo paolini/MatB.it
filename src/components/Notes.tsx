@@ -30,7 +30,7 @@ const notesQuery = gql`
         }
     }
 `
-export default function Notes({ class_id, showAddButton }: { 
+export default function Notes({ class_id, showAddButton=true }: { 
         class_id?: string, 
         showAddButton?: boolean }) {
     const router = useRouter()
