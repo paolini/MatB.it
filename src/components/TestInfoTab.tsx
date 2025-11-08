@@ -198,6 +198,9 @@ export default function TestInfoTab({test, now, isOpen, profile, setShowShareMod
             { canEdit && showFixForm && (
                 <div className="bg-white p-6 rounded-lg border border-gray-200">
                     <h3 className="text-lg font-semibold mb-4">Correggi risposte per esercizio</h3>
+                    <p className="text-sm text-gray-600 mb-4">
+                        La correzione viene applicata solo alle submission già inviate. Le compilazioni ancora aperte non vengono modificate.
+                    </p>
                     <form className="space-y-4" onSubmit={handleFixSubmissions}>
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">

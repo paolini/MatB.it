@@ -47,6 +47,8 @@ const fixSubmissions = async function (
 
   // Apply the correction to every submission linked to the test
   for await (const submission of submissionsCursor) {
+    if (!submission.completed_on) continue
+
     const originalAnswers = submission.answers ?? []
     if (question_index >= originalAnswers.length) continue
 
