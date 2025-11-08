@@ -4,6 +4,7 @@ import { UserInputError, ForbiddenError, AuthenticationError } from 'apollo-serv
 import { Context } from '../types'
 import { Test } from '../generated'
 import { getTestsCollection, TEST_PIPELINE, verifyAccessToken } from '@/lib/models'
+import { toDisplayedIndex } from '@/lib/answer'
 
 export default async function test (_parent: unknown, {_id}: { _id: ObjectId }, context: Context): Promise<Test | null> {
     const user = context.user
@@ -87,6 +88,30 @@ export default async function test (_parent: unknown, {_id}: { _id: ObjectId }, 
         throw new UserInputError('Test not found')
     }
     const test = tests[0]
+
+    if (Array.isArray((test as any).submissions)) {
+        (test as any).submissions = (test as any).submissions.map((submission: any) => {
+            if (!Array.isArray(submission?.answers)) return submission
+            const formattedAnswers = submission.answers.map((answer: any) => {
+                if (!answer) return answer
+                if (!Array.isArray(answer.permutation)) {
+                    return {
+                        ...answer,
+                        answer: answer.answer ?? null,
+                    }
+                }
+                const displayed = toDisplayedIndex(answer.permutation, answer.answer)
+                return {
+                    ...answer,
+                    answer: displayed ?? null,
+                }
+            })
+            return {
+                ...submission,
+                answers: formattedAnswers,
+            }
+        })
+    }
 
     return test
 }

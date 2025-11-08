@@ -96,6 +96,7 @@ export type Mutation = {
   newSubmission: Scalars['ObjectId']['output'];
   newTest: Maybe<Scalars['Boolean']['output']>;
   recalculateTestScores: Scalars['Int']['output'];
+  fixSubmissions: Scalars['Int']['output'];
   removeStudentFromClass: Maybe<Scalars['Boolean']['output']>;
   removeTeacherFromClass: Maybe<Scalars['Boolean']['output']>;
   updateClass: Maybe<Class>;
@@ -156,6 +157,14 @@ export type MutationEnrollWithCodeArgs = {
 export type MutationGenerateEnrollmentCodeArgs = {
   class_id: Scalars['ObjectId']['input'];
   role: Scalars['String']['input'];
+};
+
+
+export type MutationFixSubmissionsArgs = {
+  new_answer: InputMaybe<Scalars['Int']['input']>;
+  old_answer: InputMaybe<Scalars['Int']['input']>;
+  question_index: Scalars['Int']['input'];
+  test_id: Scalars['ObjectId']['input'];
 };
 
 
@@ -581,6 +590,7 @@ export type MutationResolvers<ContextType = Context, ParentType extends Resolver
   deleteTest: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType, RequireFields<MutationDeleteTestArgs, '_id'>>;
   enrollWithCode: Resolver<ResolversTypes['ObjectId'], ParentType, ContextType, RequireFields<MutationEnrollWithCodeArgs, 'code'>>;
   generateEnrollmentCode: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType, RequireFields<MutationGenerateEnrollmentCodeArgs, 'class_id' | 'role'>>;
+  fixSubmissions: Resolver<ResolversTypes['Int'], ParentType, ContextType, RequireFields<MutationFixSubmissionsArgs, 'question_index' | 'test_id'>>;
   newAccessToken: Resolver<ResolversTypes['AccessToken'], ParentType, ContextType, RequireFields<MutationNewAccessTokenArgs, 'permission' | 'resource_id'>>;
   newClass: Resolver<ResolversTypes['ObjectId'], ParentType, ContextType, RequireFields<MutationNewClassArgs, 'name'>>;
   newNote: Resolver<ResolversTypes['ObjectId'], ParentType, ContextType, MutationNewNoteArgs>;

@@ -20,6 +20,7 @@ import recalculateTestScores from './resolvers/recalculateTestScores'
 import newSubmission from './resolvers/newSubmission'
 import updateSubmission from './resolvers/updateSubmission'
 import deleteSubmission from './resolvers/deleteSubmission'
+import fixSubmissions from './resolvers/fixSubmissions'
 
 import accessTokens from './resolvers/accessTokens'
 import accessToken from './resolvers/accessToken' 
@@ -81,6 +82,7 @@ export const resolvers: any = {
     updateTest,
     deleteTest,
     recalculateTestScores,
+  fixSubmissions,
 
     newSubmission,
     updateSubmission,

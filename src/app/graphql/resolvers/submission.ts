@@ -6,6 +6,7 @@ import { Submission } from '../generated'
 import { getNotesCollection, getSubmissionsCollection, SUBMISSION_PIPELINE, verifyAccessToken } from '@/lib/models'
 import { document_from_note, Document, Paragraph, NoteRef, Node, NoteData, QuillDelta } from '@/lib/myquill/document'
 import { MongoSubmission, MongoAnswer } from '@/lib/models'
+import { toDisplayedIndex } from '@/lib/answer'
 
 const submission = async function (_parent: unknown, {_id}: { _id: ObjectId }, context: Context): Promise<Submission | null> {
     const user = context.user
@@ -70,24 +71,24 @@ const submission = async function (_parent: unknown, {_id}: { _id: ObjectId }, c
 
     return {
         ...submission,
-        answers: answers.map((a:MongoAnswer) => {
-            if (a.permutation) {
-                const inv = inverse_permutation(a.permutation)
+        answers: answers.map((a: MongoAnswer) => {
+            if (Array.isArray(a.permutation)) {
+                const displayedAnswer = toDisplayedIndex(a.permutation, a.answer) ?? null
+                const displayedCorrect = show_correct_answers
+                    ? toDisplayedIndex(a.permutation, 0) ?? null
+                    : null
                 return {
                     note_id: a.note_id,
-                    answer: a.answer,
-                    correct_answer: show_correct_answers
-                        ? inv[0] // assuming the first permuted option is the correct one
-                        : null,
-                    permutation: null, // segreto!
-                } 
-            } else {
-                return {
-                    note_id: a.note_id,
-                    answer: a.answer || null,
-                    correct_answer: null,
+                    answer: displayedAnswer,
+                    correct_answer: displayedCorrect,
                     permutation: null,
                 }
+            }
+            return {
+                note_id: a.note_id,
+                answer: a.answer ?? null,
+                correct_answer: null,
+                permutation: null,
             }
         }),
         document,
@@ -131,9 +132,11 @@ function shuffle_and_insert_answers(document: Document, answers: MongoAnswer[]) 
                             throw new Error(`invalid permutation in question ${note_id}`)
                         }
                         node.lines = answer.permutation.map(i => node.lines[i])
-                        if (answer.answer) {
-                            const inv = inverse_permutation(answer.permutation)
-                            node.selected = inv[answer.answer]
+                        if (answer.answer != null) {
+                            const displayedIndex = toDisplayedIndex(answer.permutation, answer.answer)
+                            if (displayedIndex != null) {
+                                node.selected = displayedIndex
+                            }
                         }
                     }
                 })
@@ -165,12 +168,4 @@ function shuffle(array: number[]) {
       array[randomIndex], array[currentIndex]];
   }
   return array
-}
-
-function inverse_permutation(array: number[]) {
-  const inv = new Array(array.length)
-  for (let i = 0; i < array.length; i++) {
-    inv[array[i]] = i
-  }
-  return inv
 }
