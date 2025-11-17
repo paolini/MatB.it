@@ -4,6 +4,7 @@ import { Resolvers, TestResolvers } from './generated'
 
 import notes from './resolvers/notes'
 import note from './resolvers/note'
+import { noteVersion, parentVersions } from './resolvers/noteVersion'
 import tests from './resolvers/tests'
 import test from './resolvers/test'
 import submission from './resolvers/submission'
@@ -57,6 +58,8 @@ export const resolvers: any = {
 
     notes,
     note,
+    noteVersion,
+    parentVersions,
 
     test,
     tests,

@@ -272,11 +272,23 @@ export type Note = {
   created_on: Scalars['Timestamp']['output'];
   delta: Maybe<Scalars['JSON']['output']>;
   hide_title: Scalars['Boolean']['output'];
+  note_version_id: Scalars['ObjectId']['output'];
   private: Scalars['Boolean']['output'];
   tests: Maybe<Array<Test>>;
   title: Scalars['String']['output'];
   updated_on: Scalars['Timestamp']['output'];
   variant: Maybe<Scalars['String']['output']>;
+};
+
+export type NoteVersion = {
+  __typename?: 'NoteVersion';
+  _id: Scalars['ObjectId']['output'];
+  author_id: Scalars['ObjectId']['output'];
+  created_on: Scalars['Timestamp']['output'];
+  message: Maybe<Scalars['String']['output']>;
+  parent_version_id: Maybe<Scalars['ObjectId']['output']>;
+  second_parent_version_id: Maybe<Scalars['ObjectId']['output']>;
+  title: Scalars['String']['output'];
 };
 
 export type Profile = {
@@ -295,7 +307,9 @@ export type Query = {
   classes: Array<Class>;
   hello: Scalars['String']['output'];
   note: Maybe<Note>;
+  noteVersion: Maybe<NoteVersion>;
   notes: Array<Note>;
+  parentVersions: Array<NoteVersion>;
   profile: Maybe<Profile>;
   submission: Maybe<Submission>;
   test: Maybe<Test>;
@@ -323,6 +337,11 @@ export type QueryNoteArgs = {
 };
 
 
+export type QueryNoteVersionArgs = {
+  _id: Scalars['ObjectId']['input'];
+};
+
+
 export type QueryNotesArgs = {
   class_id: InputMaybe<Scalars['ObjectId']['input']>;
   limit: InputMaybe<Scalars['Int']['input']>;
@@ -331,6 +350,11 @@ export type QueryNotesArgs = {
   skip: InputMaybe<Scalars['Int']['input']>;
   title: InputMaybe<Scalars['String']['input']>;
   variant: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryParentVersionsArgs = {
+  _id: Scalars['ObjectId']['input'];
 };
 
 
@@ -491,6 +515,7 @@ export type ResolversTypes = ResolversObject<{
   JSON: ResolverTypeWrapper<Scalars['JSON']['output']>;
   Mutation: ResolverTypeWrapper<{}>;
   Note: ResolverTypeWrapper<Note>;
+  NoteVersion: ResolverTypeWrapper<NoteVersion>;
   ObjectId: ResolverTypeWrapper<Scalars['ObjectId']['output']>;
   Profile: ResolverTypeWrapper<Profile>;
   Query: ResolverTypeWrapper<{}>;
@@ -517,6 +542,7 @@ export type ResolversParentTypes = ResolversObject<{
   JSON: Scalars['JSON']['output'];
   Mutation: {};
   Note: Note;
+  NoteVersion: NoteVersion;
   ObjectId: Scalars['ObjectId']['output'];
   Profile: Profile;
   Query: {};
@@ -621,11 +647,23 @@ export type NoteResolvers<ContextType = Context, ParentType extends ResolversPar
   created_on: Resolver<ResolversTypes['Timestamp'], ParentType, ContextType>;
   delta: Resolver<Maybe<ResolversTypes['JSON']>, ParentType, ContextType>;
   hide_title: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  note_version_id: Resolver<ResolversTypes['ObjectId'], ParentType, ContextType>;
   private: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   tests: Resolver<Maybe<Array<ResolversTypes['Test']>>, ParentType, ContextType>;
   title: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   updated_on: Resolver<ResolversTypes['Timestamp'], ParentType, ContextType>;
   variant: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+}>;
+
+export type NoteVersionResolvers<ContextType = Context, ParentType extends ResolversParentTypes['NoteVersion'] = ResolversParentTypes['NoteVersion']> = ResolversObject<{
+  _id: Resolver<ResolversTypes['ObjectId'], ParentType, ContextType>;
+  author_id: Resolver<ResolversTypes['ObjectId'], ParentType, ContextType>;
+  created_on: Resolver<ResolversTypes['Timestamp'], ParentType, ContextType>;
+  message: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  parent_version_id: Resolver<Maybe<ResolversTypes['ObjectId']>, ParentType, ContextType>;
+  second_parent_version_id: Resolver<Maybe<ResolversTypes['ObjectId']>, ParentType, ContextType>;
+  title: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
@@ -648,7 +686,9 @@ export type QueryResolvers<ContextType = Context, ParentType extends ResolversPa
   classes: Resolver<Array<ResolversTypes['Class']>, ParentType, ContextType>;
   hello: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   note: Resolver<Maybe<ResolversTypes['Note']>, ParentType, ContextType, RequireFields<QueryNoteArgs, '_id'>>;
+  noteVersion: Resolver<Maybe<ResolversTypes['NoteVersion']>, ParentType, ContextType, RequireFields<QueryNoteVersionArgs, '_id'>>;
   notes: Resolver<Array<ResolversTypes['Note']>, ParentType, ContextType, QueryNotesArgs>;
+  parentVersions: Resolver<Array<ResolversTypes['NoteVersion']>, ParentType, ContextType, RequireFields<QueryParentVersionsArgs, '_id'>>;
   profile: Resolver<Maybe<ResolversTypes['Profile']>, ParentType, ContextType>;
   submission: Resolver<Maybe<ResolversTypes['Submission']>, ParentType, ContextType, RequireFields<QuerySubmissionArgs, '_id'>>;
   test: Resolver<Maybe<ResolversTypes['Test']>, ParentType, ContextType, RequireFields<QueryTestArgs, '_id'>>;
@@ -724,6 +764,7 @@ export type Resolvers<ContextType = Context> = ResolversObject<{
   JSON: GraphQLScalarType;
   Mutation: MutationResolvers<ContextType>;
   Note: NoteResolvers<ContextType>;
+  NoteVersion: NoteVersionResolvers<ContextType>;
   ObjectId: GraphQLScalarType;
   Profile: ProfileResolvers<ContextType>;
   Query: QueryResolvers<ContextType>;

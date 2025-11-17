@@ -47,6 +47,17 @@ type Note {
   created_on: Timestamp!
   updated_on: Timestamp!
   tests: [Test!]
+  note_version_id: ObjectId!
+}
+
+type NoteVersion {
+  _id: ObjectId!
+  title: String!
+  created_on: Timestamp!
+  author_id: ObjectId!
+  parent_version_id: ObjectId
+  second_parent_version_id: ObjectId
+  message: String
 }
 
 type Test {
@@ -140,6 +151,8 @@ type Query {
   accessTokens(resource_id: ObjectId!): [AccessToken!]!
   class(_id: ObjectId!): Class
   classes: [Class!]!
+  noteVersion(_id: ObjectId!): NoteVersion
+  parentVersions(_id: ObjectId!): [NoteVersion!]!
 }
 
 type Mutation {

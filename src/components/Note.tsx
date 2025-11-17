@@ -12,6 +12,8 @@ import NoteContent from '@/components/NoteContent'
 import NoteForm from '@/components/NoteForm'
 import ShareModal from '@/components/ShareModal'
 import { ObjectId } from 'bson';
+import NoteVersionTree from './NoteVersionTree';
+import { parseJsonBody } from '@apollo/client/link/http/parseAndCheckHttpResponse';
 
 const ProfileQuery = gql`
     query Profile {
@@ -52,6 +54,7 @@ const NoteQuery = gql`
                 close_on
                 class_id
             }
+            note_version_id
         }
     }
 `
@@ -76,6 +79,7 @@ function emptyNote(profile: Profile): Note {
             image: profile.image
         },
         author_id: profile._id,
+        note_version_id: new ObjectId('000000000000000000000000'),
     }
 }
 
@@ -112,6 +116,7 @@ function NoteView({note, profile}: {
     const [deleteNote, { loading: deleting, error: deleteError }] = useMutation(DeleteNoteMutation, {
         refetchQueries: ["Note"],
     })
+    const [showVersionTree, setShowVersionTree] = useState(false)
 
     return <div>
         <div className={`ql-variant-container ql-var-${note.variant || 'default'}`}>
@@ -131,7 +136,6 @@ function NoteView({note, profile}: {
             <div className="delta">
                 <NoteContent note={note} />
             </div>
-            {/* visibility UI removed */}
         </div>
         <TestList tests={note.tests} />
         <NoteFooter note={note} />
@@ -174,6 +178,21 @@ function NoteView({note, profile}: {
             isOpen={showShareModal}
             onClose={() => setShowShareModal(false)}
         />
+
+        {!showVersionTree && (
+        <button
+            className="mt-4 px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition-colors"
+            onClick={() => setShowVersionTree(true)}
+        >
+            Mostra storico versioni
+        </button>
+        )}
+        {showVersionTree && 
+            /* Storico versioni della nota */
+            <div className="mt-4">
+                <NoteVersionTree note_version_id={note.note_version_id.toString()} />
+            </div>
+        }
     </div>
 }
 
@@ -203,6 +222,7 @@ function NoteView({note, profile}: {
             // {error && <Error error={error} />}
         )
     }
+
 const CREATE_NOTE_MUTATION = gql`
     mutation NewNote($title: String, $delta: JSON, $variant: String, $private: Boolean, $hide_title: Boolean, $class_id: ObjectId) {
         newNote(title: $title, delta: $delta, variant: $variant, private: $private, hide_title: $hide_title, class_id: $class_id)
