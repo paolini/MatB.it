@@ -12,6 +12,7 @@ import testStats from './resolvers/testStats'
 import newNote from './resolvers/newNote'
 import updateNote from './resolvers/updateNote'
 import deleteNote from './resolvers/deleteNote'
+import cloneNote from './resolvers/cloneNote'
 
 import newTest from './resolvers/newTest'
 import updateTest from './resolvers/updateTest'
@@ -76,13 +77,14 @@ export const resolvers: any = {
   Mutation: {
     newNote,
     updateNote,
-    deleteNote,    
-    
+    deleteNote,
+    cloneNote,
+
     newTest,
     updateTest,
     deleteTest,
     recalculateTestScores,
-  fixSubmissions,
+    fixSubmissions,
 
     newSubmission,
     updateSubmission,
@@ -94,7 +96,7 @@ export const resolvers: any = {
     newClass,
     updateClass,
     deleteClass,
-    
+
     addTeacherToClass,
     removeTeacherFromClass,
     addStudentToClass,

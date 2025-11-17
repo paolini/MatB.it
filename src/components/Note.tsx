@@ -136,37 +136,37 @@ function NoteView({note, profile}: {
         <TestList tests={note.tests} />
         <NoteFooter note={note} />
         <div className="flex gap-2">
-        {note?.author?._id === profile?._id  && 
-            <a className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors" href={`?edit`}>
-                Edit
-            </a>
-        }
-        {note?.author?._id === profile?._id  && 
-            <button 
-                onClick={() => setShowShareModal(true)}
-                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
-            >
-                Condividi
-            </button>
-        }
-        {note?.author?._id === profile?._id  && 
-            <button
-                onClick={async () => {
-                    if (window.confirm('Sei sicuro di voler eliminare questa nota?')) {
-                        await deleteNote({ variables: { _id: note._id } })
-                        window.location.href = '/';
-                    }
-                }}
-                className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
-                disabled={deleting}
-            >
-                {deleting ? 'Eliminazione...' : 'Elimina'}
-            </button>
-        }
-        {deleteError && <Error error={deleteError} />}
-        {note?.variant === 'test' && (
-            <CreateTestButton note={note} />
-        )}
+            {note?.author?._id === profile?._id ? (
+                <>
+                    <a className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors" href={`?edit`}>
+                        Edit
+                    </a>
+                    <button 
+                        onClick={() => setShowShareModal(true)}
+                        className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+                    >
+                        Condividi
+                    </button>
+                    <button
+                        onClick={async () => {
+                            if (window.confirm('Sei sicuro di voler eliminare questa nota?')) {
+                                await deleteNote({ variables: { _id: note._id } })
+                                window.location.href = '/';
+                            }
+                        }}
+                        className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
+                        disabled={deleting}
+                    >
+                        {deleting ? 'Eliminazione...' : 'Elimina'}
+                    </button>
+                </>
+            ) : (
+                profile?._id && <CloneNoteButton note={note} />
+            )}
+            {deleteError && <Error error={deleteError} />}
+            {note?.variant === 'test' && (
+                <CreateTestButton note={note} />
+            )}
         </div>
         
         <ShareModal 
@@ -177,6 +177,32 @@ function NoteView({note, profile}: {
     </div>
 }
 
+    // Pulsante Clona
+    function CloneNoteButton({note}: {note: Note}) {
+        const CLONE_NOTE_MUTATION = gql`
+            mutation CloneNote($note_id: ObjectId!) {
+                cloneNote(note_id: $note_id)
+            }
+        `
+        const [cloneNote, { loading, error }] = useMutation(CLONE_NOTE_MUTATION)
+        const router = useRouter()
+        return (
+            <button
+                className="px-4 py-2 bg-purple-500 text-white rounded hover:bg-purple-600 transition-colors"
+                disabled={loading}
+                onClick={async () => {
+                    const res = await cloneNote({ variables: { note_id: note._id } })
+                    if (res?.data?.cloneNote) {
+                        router.push(`/note/${res.data.cloneNote}`)
+                    }
+                }}
+            >
+                {loading ? "Clonazione..." : "Clona"}
+            </button>
+            // Mostra errori se presenti
+            // {error && <Error error={error} />}
+        )
+    }
 const CREATE_NOTE_MUTATION = gql`
     mutation NewNote($title: String, $delta: JSON, $variant: String, $private: Boolean, $hide_title: Boolean, $class_id: ObjectId) {
         newNote(title: $title, delta: $delta, variant: $variant, private: $private, hide_title: $hide_title, class_id: $class_id)

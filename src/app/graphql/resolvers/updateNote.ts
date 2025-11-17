@@ -54,6 +54,32 @@ const updateNote = async function (
     
     if (Object.keys(update).length === 0) throw new Error('No fields to update')
     
+    // Aggiorna i contributors
+    const now = new Date()
+    const userId = new ObjectId(context.user._id)
+    let contributors = Array.isArray(note.contributors) ? [...note.contributors] : []
+    let found = false
+    contributors = contributors.map(c => {
+        if (c.user_id.equals(userId)) {
+            found = true
+            return {
+                ...c,
+                contribution_count: (c.contribution_count || 0) + 1,
+                last_contribution: now
+            }
+        }
+        return c
+    })
+    if (!found) {
+        contributors.push({
+            user_id: userId,
+            contribution_count: 1,
+            first_contribution: now,
+            last_contribution: now
+        })
+    }
+    update.contributors = contributors
+
     await collection.updateOne({ _id: new ObjectId(_id) }, { $set: update })
     
     // restituisci la nota aggiornata

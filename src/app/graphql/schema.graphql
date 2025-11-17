@@ -172,4 +172,5 @@ type Mutation {
   generateEnrollmentCode(class_id: ObjectId!, role: String!): String
   deleteEnrollmentCode(class_id: ObjectId!, role: String!): Boolean
   enrollWithCode(code: String!): ObjectId!
+  cloneNote(note_id: ObjectId!): ObjectId!
 }
