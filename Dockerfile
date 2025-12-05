@@ -28,14 +28,18 @@ WORKDIR /app
 ENV NODE_ENV=production
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
+# Copia anche node_modules per tool CLI
+COPY --from=builder --chown=nextjs:nodejs /app/node_modules ./node_modules
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 #COPY --from=builder --chown=nextjs:nodejs /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 COPY --from=builder --chown=nextjs:nodejs /app/entrypoint.sh ./entrypoint.sh
 COPY --from=builder --chown=nextjs:nodejs /app/migrations ./migrations
 COPY --from=builder --chown=nextjs:nodejs /app/migrate-mongo-config.js ./migrate-mongo-config.js
+# Copia solo migrate-mongo per tool CLI
+COPY --from=builder --chown=nextjs:nodejs /app/node_modules/migrate-mongo ./node_modules/migrate-mongo
 # Install migrate-mongo globally
-RUN npm install -g migrate-mongo
+# RUN npm install -g migrate-mongo@11.0.0
 RUN chmod +x ./entrypoint.sh
 USER nextjs
 EXPOSE 3000
