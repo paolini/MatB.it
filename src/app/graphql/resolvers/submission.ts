@@ -128,10 +128,9 @@ function shuffle_and_insert_answers(document: Document, answers: MongoAnswer[]) 
                     if (node.type === 'list' && node.attribute === 'choice') {
                         const n = node.lines.length
                         const answer = get_choice_answer(n, note_id)
-                        if (!(answer.permutation && answer.permutation.length === node.lines.length)) {
-                            throw new Error(`invalid permutation in question ${note_id}`)
+                        if (answer.permutation) {
+                            node.lines = answer.permutation.map(i => node.lines[i])
                         }
-                        node.lines = answer.permutation.map(i => node.lines[i])
                         if (answer.answer != null) {
                             const displayedIndex = toDisplayedIndex(answer.permutation, answer.answer)
                             if (displayedIndex != null) {
