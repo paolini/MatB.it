@@ -18,6 +18,12 @@ const FixSubmissionsMutation = gql`
     }
 `
 
+const ReopenAllSubmissionsMutation = gql`
+    mutation ReopenAllSubmissions($_id: ObjectId!) {
+        reopenAllSubmissions(_id: $_id)
+    }
+`
+
 export default function TestInfoTab({test, now, isOpen, profile, setShowShareModal, showShareModal}: {
     test: Test,
     now: Date,
@@ -57,6 +63,20 @@ export default function TestInfoTab({test, now, isOpen, profile, setShowShareMod
             },
             onError: (error) => {
                 alert(`Errore nell'aggiornamento delle risposte: ${error.message}`)
+            }
+        }
+    )
+
+    const [reopenAllSubmissions, { loading: isReopening }] = useMutation(
+        ReopenAllSubmissionsMutation,
+        {
+            refetchQueries: ['Test'],
+            onCompleted: (data) => {
+                const count = data.reopenAllSubmissions
+                alert(`Tutte le submission chiuse sono state riaperte con successo! ${count} submission${count !== 1 ? 's' : ''} aggiornate.`)
+            },
+            onError: (error) => {
+                alert(`Errore durante la riapertura: ${error.message}`)
             }
         }
     )
@@ -108,6 +128,12 @@ export default function TestInfoTab({test, now, isOpen, profile, setShowShareMod
                 new_answer: normalizedNew,
             }
         })
+    }
+    
+    const handleReopenAllSubmissions = async () => {
+        if (confirm('Sei sicuro di voler riaprire tutte le submission chiuse? Gli studenti potranno modificare e reinviare le loro risposte.')) {
+            await reopenAllSubmissions({ variables: { _id: test._id } })
+        }
     }
     
     return (
@@ -191,6 +217,16 @@ export default function TestInfoTab({test, now, isOpen, profile, setShowShareMod
                         title="Correggi in blocco le risposte date a un esercizio"
                     >
                         {showFixForm ? 'Annulla correzione' : '🛠️ Correggi risposte'}
+                    </button>
+                )}
+                { canEdit && test.submissions && test.submissions.length > 0 && (
+                    <button 
+                        onClick={handleReopenAllSubmissions}
+                        className={SAVE_BUTTON_CLASS}
+                        disabled={isReopening}
+                        title="Riapri tutte le submission chiuse per permettere agli studenti di modificare le risposte"
+                    >
+                        {isReopening ? 'Riapertura in corso...' : '🔓 Riapri tutte le consegne'}
                     </button>
                 )}
             </div>

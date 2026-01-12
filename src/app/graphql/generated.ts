@@ -100,6 +100,7 @@ export type Mutation = {
   recalculateTestScores: Scalars['Int']['output'];
   removeStudentFromClass: Maybe<Scalars['Boolean']['output']>;
   removeTeacherFromClass: Maybe<Scalars['Boolean']['output']>;
+  reopenAllSubmissions: Scalars['Int']['output'];
   updateClass: Maybe<Class>;
   updateNote: Maybe<Note>;
   updateSubmission: Maybe<Scalars['Boolean']['output']>;
@@ -224,6 +225,11 @@ export type MutationRemoveStudentFromClassArgs = {
 export type MutationRemoveTeacherFromClassArgs = {
   class_id: Scalars['ObjectId']['input'];
   user_id: Scalars['ObjectId']['input'];
+};
+
+
+export type MutationReopenAllSubmissionsArgs = {
+  _id: Scalars['ObjectId']['input'];
 };
 
 
@@ -632,6 +638,7 @@ export type MutationResolvers<ContextType = Context, ParentType extends Resolver
   recalculateTestScores: Resolver<ResolversTypes['Int'], ParentType, ContextType, RequireFields<MutationRecalculateTestScoresArgs, '_id'>>;
   removeStudentFromClass: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType, RequireFields<MutationRemoveStudentFromClassArgs, 'class_id' | 'user_id'>>;
   removeTeacherFromClass: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType, RequireFields<MutationRemoveTeacherFromClassArgs, 'class_id' | 'user_id'>>;
+  reopenAllSubmissions: Resolver<ResolversTypes['Int'], ParentType, ContextType, RequireFields<MutationReopenAllSubmissionsArgs, '_id'>>;
   updateClass: Resolver<Maybe<ResolversTypes['Class']>, ParentType, ContextType, RequireFields<MutationUpdateClassArgs, '_id'>>;
   updateNote: Resolver<Maybe<ResolversTypes['Note']>, ParentType, ContextType, RequireFields<MutationUpdateNoteArgs, '_id'>>;
   updateSubmission: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType, RequireFields<MutationUpdateSubmissionArgs, '_id'>>;
