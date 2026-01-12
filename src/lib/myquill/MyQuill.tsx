@@ -2,45 +2,20 @@
 
 import { QuillEditor, Quill, Range } from './myquill.js'
 import Delta from 'quill-delta-es'
-import 'katex/dist/katex.min.css';
-import './delta-variants.css';
-import { useRef, useEffect, useState } from 'react';
-import NoteReferenceModal from '@/components/NoteReferenceModal';
+import 'katex/dist/katex.min.css'
+import './delta-variants.css'
+import { useRef, useEffect, useState, useCallback, MutableRefObject } from 'react'
+import NoteReferenceModal from '@/components/NoteReferenceModal'
 import { Error as ErrorElement, ErrorType, BUTTON_CLASS, CANCEL_BUTTON_CLASS, DELETE_BUTTON_CLASS, SAVE_BUTTON_CLASS } from '@/components/utils'
-import { ObjectId } from 'bson';
+import { ObjectId } from 'bson'
 
-const config = {
-    theme: "snow",
-    modules: {
-        toolbar: [
-            [{ 'header': [1, 2, false] }],
-            ['bold', 'italic', 'underline'],
-            ['code-block'],
-            ['formula'],
-            ['note-ref'],
-            [{ 'environment': ['theorem', 'lemma', 'proof', 'remark', 'exercise', 'test' ] }],
-            [{ 'list': 'ordered' }, { 'list': 'bullet' }, { 'list': 'choice' }],
-            ['link', 'image'],
-            ['clean'],
-        ],
-        formulaEditor: true,
-    },
-}
+// ============================================================================
+// Types
+// ============================================================================
 
-const readonlyConfig = {
-}
+type QuillInstance = InstanceType<typeof Quill>
 
-export default function MyQuill({
-    readOnly, 
-    content, 
-    class_id,
-    onSave, 
-    onCancel, 
-    onDelete,
-    isSaving,
-    saveError,
-    deleteError
-}: {
+interface MyQuillProps {
     readOnly?: boolean
     content?: Delta
     class_id?: ObjectId
@@ -50,101 +25,231 @@ export default function MyQuill({
     isSaving?: boolean
     saveError?: ErrorType
     deleteError?: ErrorType
-}) {
-    const quillInstance = useRef<InstanceType<typeof Quill> | null>(null)
-    const savedRange = useRef<Range | null>(null) // Salva il range prima di aprire il modal
-    const [showDelta, setShowDelta] = useState(false)
-    const [showCreateModal, setShowCreateModal] = useState(false)
-    const [prefilledVariant, setPrefilledVariant] = useState<string>('default')
+}
 
-    // Cleanup dell'editor delle formule al dismount
+interface EditorToolbarProps {
+    quillRef: MutableRefObject<QuillInstance | null>
+    onSave?: (delta: Delta) => void
+    onCancel?: () => void
+    onDelete?: () => void
+    isSaving?: boolean
+    saveError?: ErrorType
+    deleteError?: ErrorType
+}
+
+interface DeltaPreviewProps {
+    quillRef: MutableRefObject<QuillInstance | null>
+    content?: Delta
+}
+
+interface DeleteButtonProps {
+    onDelete?: () => void
+    disabled?: boolean
+}
+
+interface ConfirmDeleteProps {
+    onDelete: () => void
+    onClose: () => void
+}
+
+// ============================================================================
+// Configuration
+// ============================================================================
+
+const EDITOR_CONFIG = {
+    theme: "snow",
+    modules: {
+        toolbar: [
+            [{ 'header': [1, 2, false] }],
+            ['bold', 'italic', 'underline'],
+            ['code-block'],
+            ['formula'],
+            ['note-ref'],
+            [{ 'environment': ['theorem', 'lemma', 'proof', 'remark', 'exercise', 'test'] }],
+            [{ 'list': 'ordered' }, { 'list': 'bullet' }, { 'list': 'choice' }],
+            ['link', 'image'],
+            ['clean'],
+        ],
+        formulaEditor: true,
+    },
+} as const
+
+const READONLY_CONFIG = {} as const
+
+const ENVIRONMENT_SELECT_DELAY = 100
+
+// ============================================================================
+// Hooks
+// ============================================================================
+
+function useKatex() {
     useEffect(() => {
-        // Carica KaTeX se non è già disponibile
         const loadKaTeX = async () => {
             if (typeof window !== 'undefined' && !window.katex) {
                 try {
-                    const katex = await import('katex');
-                    (window as unknown as { katex: unknown }).katex = katex.default;
+                    const katex = await import('katex')
+                    ;(window as unknown as { katex: unknown }).katex = katex.default
                 } catch (error) {
-                    console.error('Failed to load KaTeX:', error);
+                    console.error('Failed to load KaTeX:', error)
                 }
             }
-        };
-        
-        loadKaTeX();
-        
+        }
+
+        loadKaTeX()
+
         return () => {
-            const formulaEditor = document.getElementById('matbit-formula-editor');
-            if (formulaEditor) {
-                formulaEditor.remove();
-            }
-        };
-    }, []);
+            const formulaEditor = document.getElementById('matbit-formula-editor')
+            formulaEditor?.remove()
+        }
+    }, [])
+}
 
-    const handleNoteCreated = (noteId: string) => {
-        console.log('Inserting note reference for note ID:', noteId);
-        
-        // Chiudi il modal per primo per ripristinare il focus sull'editor
-        setShowCreateModal(false);
-        
-        // Usa setTimeout per dare tempo al modal di chiudersi e al focus di tornare all'editor
+function useNoteReference(
+    quillRef: MutableRefObject<QuillInstance | null>,
+    savedRangeRef: MutableRefObject<Range | null>
+) {
+    const [showModal, setShowModal] = useState(false)
+    const [prefilledVariant, setPrefilledVariant] = useState('default')
+
+    const openModal = useCallback((variant: string = 'default') => {
+        const currentRange = quillRef.current?.getSelection() ?? null
+        savedRangeRef.current = currentRange
+        setPrefilledVariant(variant)
+        setShowModal(true)
+    }, [quillRef, savedRangeRef])
+
+    const closeModal = useCallback(() => {
+        setShowModal(false)
+    }, [])
+
+    const insertNoteReference = useCallback((noteId: string) => {
+        setShowModal(false)
+
         setTimeout(() => {
-            if (quillInstance.current) {
-                // Usa il range salvato, altrimenti prova a ottenere quello corrente, altrimenti usa la fine del testo
-                let range = savedRange.current || quillInstance.current.getSelection();
-                
-                if (!range) {
-                    // Se non c'è nessun range, inserisci alla fine del testo
-                    const length = quillInstance.current.getLength();
-                    range = { index: length - 1, length: 0 };
-                }
-                
-                console.log('Inserting embed at range:', range);
-                
-                // Inserisci il riferimento alla nota
-                quillInstance.current.insertEmbed(range.index, 'note-ref', { note_id: noteId });
-                
-                console.log('Embed inserted, setting selection');
-                
-                // Sposta il cursore dopo il riferimento inserito
-                quillInstance.current.setSelection(range.index + 1);
-                
-                // Pulisci il range salvato
-                savedRange.current = null;
-                
-                console.log('Selection set, operation completed');
-                
-                // Ripristina il focus sull'editor
-                quillInstance.current.focus();
-            }
-        }, 10);
-    };
+            const quill = quillRef.current
+            if (!quill) return
 
-    return <div>
-        <QuillEditor
-            readOnly={readOnly}
-            config={readOnly ? readonlyConfig : config}
-            defaultValue={content || new Delta()}
-            onReady={onReady}
-        />
-        {!readOnly && (
+            let range = savedRangeRef.current || quill.getSelection()
+
+            if (!range) {
+                const length = quill.getLength()
+                range = { index: length - 1, length: 0 }
+            }
+
+            quill.insertEmbed(range.index, 'note-ref', { note_id: noteId })
+            quill.setSelection(range.index + 1)
+            savedRangeRef.current = null
+            quill.focus()
+        }, 10)
+    }, [quillRef, savedRangeRef])
+
+    return {
+        showModal,
+        prefilledVariant,
+        openModal,
+        closeModal,
+        insertNoteReference,
+    }
+}
+
+// ============================================================================
+// Helper Functions
+// ============================================================================
+
+function setupFormulaMatcher(quill: QuillInstance) {
+    quill.clipboard.addMatcher('span', function (node, delta): Delta {
+        if (node instanceof HTMLElement && node.classList.contains('ql-formula')) {
+            const value = node.getAttribute('data-value') || node.textContent
+            const displaystyle = node.classList.contains('tex-displaystyle')
+            return new Delta([
+                { insert: { formula: value }, attributes: displaystyle ? { displaystyle: true } : {} }
+            ])
+        }
+        return delta
+    })
+}
+
+function setupToolbarHandlers(
+    quill: QuillInstance,
+    savedRangeRef: MutableRefObject<Range | null>,
+    openNoteModal: (variant?: string) => void
+) {
+    const toolbar = quill.getModule('toolbar') as { 
+        addHandler: (name: string, handler: () => void) => void 
+        container?: HTMLElement 
+    }
+
+    // Note reference button handler
+    toolbar.addHandler('note-ref', () => {
+        openNoteModal('default')
+    })
+
+    // Multiple choice button handler
+    toolbar.addHandler('mc-choice', () => {
+        const range = quill.getSelection()
+        if (range) {
+            quill.formatLine(range.index, range.length, { list: 'choice' })
+        }
+    })
+
+    // Environment select handler
+    setTimeout(() => {
+        const selectElement = toolbar.container?.querySelector('select.ql-environment') as HTMLSelectElement | null
+
+        if (selectElement) {
+            selectElement.addEventListener('mousedown', () => {
+                savedRangeRef.current = quill.getSelection()
+            })
+
+            selectElement.addEventListener('change', (event) => {
+                const target = event.target as HTMLSelectElement
+                const value = target.value
+
+                if (value) {
+                    openNoteModal(value)
+                    target.value = ''
+                }
+            })
+        }
+    }, ENVIRONMENT_SELECT_DELAY)
+}
+
+// ============================================================================
+// Sub-Components
+// ============================================================================
+
+function EditorToolbar({
+    quillRef,
+    onSave,
+    onCancel,
+    onDelete,
+    isSaving,
+    saveError,
+    deleteError,
+}: EditorToolbarProps) {
+    const [showDelta, setShowDelta] = useState(false)
+
+    const handleSave = useCallback(() => {
+        if (quillRef.current && onSave) {
+            const delta = quillRef.current.getContents()
+            onSave(delta)
+        }
+    }, [quillRef, onSave])
+
+    return (
+        <>
             <div className="mt-2 p-2 flex gap-2 items-center flex-wrap">
-                { onSave && 
+                {onSave && (
                     <button
                         className={SAVE_BUTTON_CLASS}
-                        onClick={() => {
-                            if (quillInstance.current) {
-                                const delta = quillInstance.current.getContents()
-                                onSave(delta)
-                            }
-                        }}
+                        onClick={handleSave}
                         disabled={isSaving}
                     >
                         {isSaving ? 'Salva...' : 'Salva'}
                     </button>
-                }
-                
-                { onCancel &&
+                )}
+
+                {onCancel && (
                     <button
                         className={CANCEL_BUTTON_CLASS}
                         onClick={onCancel}
@@ -152,150 +257,158 @@ export default function MyQuill({
                     >
                         Annulla
                     </button>
-                }
+                )}
 
                 <DeleteButton onDelete={onDelete} disabled={isSaving} />
-                <button className={BUTTON_CLASS} onClick={() => setShowDelta(!showDelta)}>
+                
+                <button 
+                    className={BUTTON_CLASS} 
+                    onClick={() => setShowDelta(prev => !prev)}
+                >
                     {showDelta ? 'Nascondi' : 'Mostra'} Delta
                 </button>
-                
+
                 <ErrorElement error={saveError} />
                 <ErrorElement error={deleteError} />
             </div>
-        )}
-        {!readOnly && showDelta && (
-            <div className="mt-4 p-4 bg-gray-100 rounded">
-                <h3 className="text-lg font-semibold mb-2">Contenuto Delta:</h3>
-                <pre className="bg-white p-3 rounded border overflow-auto text-sm">
-                    {JSON.stringify(
-                        quillInstance.current?.getContents() || content || new Delta(), 
-                        null, 
-                        2
-                    )}
-                </pre>
-            </div>
-        )}
-        
-        {/* Modal per inserire riferimento nota */}
-        <NoteReferenceModal
-            isOpen={showCreateModal}
-            onClose={() => setShowCreateModal(false)}
-            onNoteSelected={handleNoteCreated}
-            initialVariant={prefilledVariant}
-            class_id={class_id}
-        />
-    </div>
 
-    function onReady(quill: InstanceType<typeof Quill>) {
-        quillInstance.current = quill
-
-        // Matcher per supportare copia/incolla delle formule
-        quill.clipboard.addMatcher('span', function(node, delta): Delta {
-            if (node instanceof HTMLElement && node.classList.contains('ql-formula')) {
-                const value = node.getAttribute('data-value') || node.textContent;
-                const displaystyle = node.classList.contains('tex-displaystyle');
-                return new Delta([
-                    { insert: { formula: value }, attributes: displaystyle ? { displaystyle: true } : {} }
-                ]);
-            }
-            return delta;
-        });
-
-        // Aggiungi handler per il pulsante note-ref e MC
-        if (!readOnly) {
-            const toolbar = quill.getModule('toolbar') as { addHandler: (name: string, handler: () => void) => void };
-            toolbar.addHandler('note-ref', () => {
-                const currentRange = quill.getSelection();
-                savedRange.current = currentRange;
-                setPrefilledVariant('default');
-                setShowCreateModal(true);
-            });
-
-            // Handler per il pulsante MC (multiple choice)
-            toolbar.addHandler('mc-choice', () => {
-                const range = quill.getSelection();
-                if (!range) return;
-                // Applica il formato list: 'choice' alla selezione corrente
-                quill.formatLine(range.index, range.length, { list: 'choice' });
-            });
-            
-            // Aggiungi event listener per la select environment
-            setTimeout(() => {
-                const toolbarModule: { container?: HTMLElement } = quill.getModule('toolbar') as { container?: HTMLElement };
-                const selectElement = toolbarModule.container?.querySelector('select.ql-environment') as HTMLSelectElement;
-                
-                if (selectElement) {
-                    
-                    // Salva il range PRIMA che la select venga cliccata (quando perde il focus)
-                    selectElement.addEventListener('mousedown', () => {
-                        const currentRange = quill.getSelection();
-                        savedRange.current = currentRange;
-                    });
-                    
-                    selectElement.addEventListener('change', (event) => {
-                        const target = event.target as HTMLSelectElement;
-                        const value = target.value;
-                        
-                        if (value) {
-                            // Apri il modal con la variant precompilata
-                            setPrefilledVariant(value);
-                            setShowCreateModal(true);
-                            
-                            // Reset della select
-                            target.value = '';
-                        }
-                    });
-                }
-            }, 100); // Piccolo delay per assicurarsi che la toolbar sia renderizzata
-        }
-    }
+            {showDelta && <DeltaPreview quillRef={quillRef} />}
+        </>
+    )
 }
 
-function DeleteButton({onDelete,disabled}:{
-    onDelete?: () => void
-    disabled?: boolean
-}) {
-    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+function DeltaPreview({ quillRef, content }: DeltaPreviewProps) {
+    const deltaContent = quillRef.current?.getContents() || content || new Delta()
+
+    return (
+        <div className="mt-4 p-4 bg-gray-100 rounded">
+            <h3 className="text-lg font-semibold mb-2">Contenuto Delta:</h3>
+            <pre className="bg-white p-3 rounded border overflow-auto text-sm">
+                {JSON.stringify(deltaContent, null, 2)}
+            </pre>
+        </div>
+    )
+}
+
+function DeleteButton({ onDelete, disabled }: DeleteButtonProps) {
+    const [showConfirm, setShowConfirm] = useState(false)
+
     if (!onDelete) return null
-    return  <>
-        <button
-            className={DELETE_BUTTON_CLASS}
-            onClick={() => setShowDeleteConfirm(true)}
-            disabled={disabled}
+
+    return (
+        <>
+            <button
+                className={DELETE_BUTTON_CLASS}
+                onClick={() => setShowConfirm(true)}
+                disabled={disabled}
             >
-            Cancella nota
-        </button>
-        {/* Modal di conferma cancellazione */}
-        {showDeleteConfirm &&
-            <ConfirmDelete onDelete={onDelete} close={() => setShowDeleteConfirm(false)} />
-        }
-    </>
+                Cancella nota
+            </button>
+
+            {showConfirm && (
+                <ConfirmDeleteModal
+                    onDelete={onDelete}
+                    onClose={() => setShowConfirm(false)}
+                />
+            )}
+        </>
+    )
 }
 
-function ConfirmDelete({onDelete,close}:{
-    onDelete?: () => void
-    close?: () => void
-}) {
-    return <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 z-50">
-        <div className="bg-white p-6 rounded shadow-lg flex flex-col items-center">
-            <p className="mb-4">Sei sicuro di voler cancellare questa nota?</p>
-            <div className="flex gap-2">
-                <button 
-                    className="px-4 py-2 bg-gray-300 text-gray-800 rounded hover:bg-gray-400" 
-                    onClick={() => close?.()}
-                >
-                    Annulla
-                </button>
-                <button 
-                    className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600" 
-                    onClick={() => {
-                        close?.()
-                        onDelete?.()
-                    }}
-                >
-                    Conferma cancellazione
-                </button>
+function ConfirmDeleteModal({ onDelete, onClose }: ConfirmDeleteProps) {
+    const handleConfirm = useCallback(() => {
+        onClose()
+        onDelete()
+    }, [onDelete, onClose])
+
+    return (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 z-50">
+            <div className="bg-white p-6 rounded shadow-lg flex flex-col items-center">
+                <p className="mb-4">Sei sicuro di voler cancellare questa nota?</p>
+                <div className="flex gap-2">
+                    <button
+                        className="px-4 py-2 bg-gray-300 text-gray-800 rounded hover:bg-gray-400"
+                        onClick={onClose}
+                    >
+                        Annulla
+                    </button>
+                    <button
+                        className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+                        onClick={handleConfirm}
+                    >
+                        Conferma cancellazione
+                    </button>
+                </div>
             </div>
         </div>
-    </div>
+    )
+}
+
+// ============================================================================
+// Main Component
+// ============================================================================
+
+export default function MyQuill({
+    readOnly,
+    content,
+    class_id,
+    onSave,
+    onCancel,
+    onDelete,
+    isSaving,
+    saveError,
+    deleteError,
+}: MyQuillProps) {
+    const quillRef = useRef<QuillInstance | null>(null)
+    const savedRangeRef = useRef<Range | null>(null)
+
+    useKatex()
+
+    const {
+        showModal,
+        prefilledVariant,
+        openModal,
+        closeModal,
+        insertNoteReference,
+    } = useNoteReference(quillRef, savedRangeRef)
+
+    const handleQuillReady = useCallback((quill: QuillInstance) => {
+        quillRef.current = quill
+        setupFormulaMatcher(quill)
+
+        if (!readOnly) {
+            setupToolbarHandlers(quill, savedRangeRef, openModal)
+        }
+    }, [readOnly, openModal])
+
+    return (
+        <div>
+            <QuillEditor
+                readOnly={readOnly}
+                config={readOnly ? READONLY_CONFIG : EDITOR_CONFIG}
+                defaultValue={content || new Delta()}
+                onReady={handleQuillReady}
+            />
+
+            {!readOnly && (
+                <EditorToolbar
+                    quillRef={quillRef}
+                    onSave={onSave}
+                    onCancel={onCancel}
+                    onDelete={onDelete}
+                    isSaving={isSaving}
+                    saveError={saveError}
+                    deleteError={deleteError}
+                />
+            )}
+
+            <NoteReferenceModal
+                isOpen={showModal}
+                onClose={closeModal}
+                onNoteSelected={insertNoteReference}
+                initialVariant={prefilledVariant}
+                class_id={class_id}
+            />
+        </div>
+    )
 }
