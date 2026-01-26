@@ -113,6 +113,47 @@ function NoteView({note, profile}: {
     profile: Profile,
 }) {
     const [showShareModal, setShowShareModal] = useState(false)
+    const [isDownloading, setIsDownloading] = useState(false)
+
+    const handleDownload = async (format: 'latex' | 'markdown') => {
+        setIsDownloading(true)
+        try {
+            const { document_from_note } = await import('@/lib/myquill/document')
+            const { documentToLatex, documentToMarkdown } = await import('@/lib/export')
+            
+            const doc = await document_from_note(note as any)
+            
+            let content = ''
+            let extension = ''
+            let mimeType = ''
+            
+            if (format === 'latex') {
+                content = documentToLatex(doc)
+                extension = 'tex'
+                mimeType = 'application/x-latex'
+            } else {
+                content = documentToMarkdown(doc)
+                extension = 'md'
+                mimeType = 'text/markdown'
+            }
+            
+            const blob = new Blob([content], { type: mimeType })
+            const url = URL.createObjectURL(blob)
+            const a = document.createElement('a')
+            a.href = url
+            a.download = `${(note.title || 'note').replace(/[^a-z0-9]/gi, '_').toLowerCase()}.${extension}`
+            document.body.appendChild(a)
+            a.click()
+            document.body.removeChild(a)
+            URL.revokeObjectURL(url)
+        } catch (e) {
+            console.error('Download failed', e)
+            alert('Errore durante il download')
+        } finally {
+            setIsDownloading(false)
+        }
+    }
+
     const [deleteNote, { loading: deleting, error: deleteError }] = useMutation(DeleteNoteMutation, {
         refetchQueries: ["Note"],
     })
@@ -139,7 +180,23 @@ function NoteView({note, profile}: {
         </div>
         <TestList tests={note.tests} />
         <NoteFooter note={note} />
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
+            <button 
+                onClick={() => handleDownload('latex')}
+                disabled={isDownloading}
+                className="px-3 py-2 bg-gray-100 text-gray-700 rounded hover:bg-gray-200 transition-colors border border-gray-300 text-sm"
+                title="Scarica in LaTeX"
+            >
+                LaTeX
+            </button>
+            <button 
+                onClick={() => handleDownload('markdown')}
+                disabled={isDownloading}
+                className="px-3 py-2 bg-gray-100 text-gray-700 rounded hover:bg-gray-200 transition-colors border border-gray-300 text-sm"
+                title="Scarica in Markdown"
+            >
+                MD
+            </button>
             {note?.author?._id === profile?._id ? (
                 <>
                     <a className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors" href={`?edit`}>
