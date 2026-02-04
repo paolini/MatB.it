@@ -17,7 +17,7 @@
   },
   "dependencies": {
     "@apollo/client": "^3.13.8",
-    "@apollo/server": "^4.12.2",
+    "@apollo/server": "^4.13.0",
     "@as-integrations/next": "^3.2.0",
     "@auth/mongodb-adapter": "^3.9.1",
     "@graphql-tools/load-files": "^7.0.1",
