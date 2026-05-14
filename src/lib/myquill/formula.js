@@ -159,6 +159,8 @@ export class MyFormula extends Embed {
 export class FormulaEditorModule {
   constructor(quill) {
     this.quill = quill;
+    this.currentBlot = null;
+    this.editorCleanup = null; // Store cleanup function for current editor session
     this.quill.root.addEventListener('click', this.handleClick.bind(this));
 
     // Shortcut: apri editor formula quando viene inserito il carattere $ (input event, non keydown)
@@ -212,7 +214,21 @@ export class FormulaEditorModule {
     }
   }
 
+  cleanupCurrentEditor() {
+    // Clean up previous editor session before opening a new one
+    if (this.editorCleanup) {
+      this.editorCleanup();
+      this.editorCleanup = null;
+    }
+    this.currentBlot = null;
+  }
+
   showFormulaEditor(blot) {
+    // Clean up any existing editor session first
+    this.cleanupCurrentEditor();
+    
+    this.currentBlot = blot;
+    
     let editor = document.getElementById('matbit-formula-editor');
     // Crea il widget se non esiste
     if (!editor) {
@@ -224,8 +240,6 @@ export class FormulaEditorModule {
       editor.style.border = '1px solid #ccc';
       editor.style.padding = '8px';
       editor.style.zIndex = '1000';
-      // Forza la rimozione del contenuto precedente per evitare residui
-      while (editor.firstChild) editor.removeChild(editor.firstChild);
       editor.innerHTML = `
         <input type="text" id="matbit-formula-input" style="width: 300px;">
         <label style="margin-left:8px;">
@@ -234,56 +248,43 @@ export class FormulaEditorModule {
         <button id="matbit-formula-save" style="margin-left:8px;">Salva</button>
       `;
       document.body.appendChild(editor);
-    } else {
-      // Se il widget esiste già, aggiorna il testo del pulsante per sicurezza
-      const button = editor.querySelector('#matbit-formula-save');
-      if (button) button.textContent = 'Salva';
     }
   
     const input = editor.querySelector('#matbit-formula-input');
     const button = editor.querySelector('#matbit-formula-save');
     const displayCheckbox = editor.querySelector('#matbit-formula-display');
 
-    function positionEditor() {
-      const rect = blot.domNode.getBoundingClientRect();
+    const positionEditor = () => {
+      // Use currentBlot to always reference the correct blot
+      if (!this.currentBlot || !this.currentBlot.domNode) return;
+      const rect = this.currentBlot.domNode.getBoundingClientRect();
       editor.style.top = `${window.scrollY + rect.bottom}px`;
       editor.style.left = `${window.scrollX + rect.left}px`;
-    }
+    };
 
     positionEditor();
     editor.style.display = 'block';
 
-    // Focus automatico sull'input formula dopo apertura/riutilizzo popup
-    setTimeout(() => {
-      input.focus();
-      input.select();
-    }, 0);
-
-    input.value = blot.domNode.getAttribute('data-value');
+    // Set initial values
+    input.value = blot.domNode.getAttribute('data-value') || '';
     displayCheckbox.checked = blot.domNode.classList.contains('tex-displaystyle');
 
-    // Focus automatico sull'input formula editor
+    // Focus automatico sull'input formula dopo apertura
     setTimeout(() => {
       input.focus();
       input.select();
     }, 0);
-
-    // Shortcut: chiudi editor formula con $ nell'input
-    const closeOnDollar = (e) => {
-      if (e.key === '$') {
-        e.preventDefault();
-        saveHandler(e); // Salva e chiudi
-      }
-    };
-    input.addEventListener('keydown', closeOnDollar);
 
     const quill = this.quill;
 
     const update = () => {
+      if (!this.currentBlot) return;
+      
       // indice della posizione di inizio del blot
-      const index = quill.getIndex(blot);
+      const index = quill.getIndex(this.currentBlot);
       const formulaValue = input.value;
       const displaystyle = displayCheckbox.checked;
+      
       if (displaystyle) {
         quill.updateContents([
           { retain: index },
@@ -297,45 +298,59 @@ export class FormulaEditorModule {
           { insert: { formula: formulaValue } }
         ], 'user');
       }
-      // restituisce il blot a sinistra dell'indice
-      // per questo serve il +1:
-      blot = quill.getLeaf(index+1)[0];
-      positionEditor(); // riposiziona dopo ogni update
+      
+      // Update currentBlot reference after the update
+      this.currentBlot = quill.getLeaf(index + 1)[0];
+      positionEditor();
     };
 
-    // Preview live mentre si scrive
+    const closeOnDollar = (e) => {
+      if (e.key === '$') {
+        e.preventDefault();
+        saveHandler();
+      }
+    };
+
     const liveUpdate = () => {
       update();
     };
 
-    input.removeEventListener('input', liveUpdate); // per evitare duplicazioni
-    input.addEventListener('input', liveUpdate);
-    displayCheckbox.removeEventListener('change', liveUpdate);
-    displayCheckbox.addEventListener('change', liveUpdate);
-
-    // Riposiziona anche su scroll e resize
-    window.addEventListener('scroll', positionEditor);
-    window.addEventListener('resize', positionEditor);
-
     const saveHandler = () => {
+      // Store the blot reference before cleanup
+      const finalBlot = this.currentBlot;
+      
       editor.style.display = 'none';
-      input.removeEventListener('keydown', closeOnDollar);
-      button.removeEventListener('click', saveHandler);
-      input.removeEventListener('input', liveUpdate);
-      displayCheckbox.removeEventListener('change', liveUpdate);
-      window.removeEventListener('scroll', positionEditor);
-      window.removeEventListener('resize', positionEditor);
+      
+      // Clean up all listeners
+      this.cleanupCurrentEditor();
       
       // Posiziona il cursore dopo la formula
-      const index = quill.getIndex(blot);
-      quill.setSelection(index + 1, 0, 'silent');
+      if (finalBlot) {
+        const index = quill.getIndex(finalBlot);
+        quill.setSelection(index + 1, 0, 'silent');
+      }
       
       // Riporta il focus all'editor Quill
       this.quill.focus();
     };
 
-    button.removeEventListener('click', saveHandler);
+    // Add event listeners
+    input.addEventListener('keydown', closeOnDollar);
+    input.addEventListener('input', liveUpdate);
+    displayCheckbox.addEventListener('change', liveUpdate);
+    window.addEventListener('scroll', positionEditor);
+    window.addEventListener('resize', positionEditor);
     button.addEventListener('click', saveHandler);
+
+    // Store cleanup function to remove all listeners when switching formulas
+    this.editorCleanup = () => {
+      input.removeEventListener('keydown', closeOnDollar);
+      input.removeEventListener('input', liveUpdate);
+      displayCheckbox.removeEventListener('change', liveUpdate);
+      window.removeEventListener('scroll', positionEditor);
+      window.removeEventListener('resize', positionEditor);
+      button.removeEventListener('click', saveHandler);
+    };
   }
     
 }
