@@ -12,11 +12,7 @@ const nextConfig: NextConfig = {
   env: {
     NEXT_PUBLIC_VERSION: version,
   },
-  eslint: {
-    // Warning: This allows production builds to successfully complete even if
-    // your project has ESLint errors.
-    ignoreDuringBuilds: true,
-  },
+  // eslint configuration removed — Next.js no longer supports `eslint` here.
 };
 
 export default nextConfig;
