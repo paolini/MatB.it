@@ -40,9 +40,9 @@ jobs:
         docker push paolini/matbit
         docker push paolini/matbit:${{ steps.vars.outputs.version }}
 
-    - name: Deploy to production server
-      run: |
-        set -e
-        echo "Deploying version ${{ steps.vars.outputs.version }} to production..."
-        ssh -o "StrictHostKeyChecking no" root@contabo3.matb.it "cd docker/matbit && docker-compose pull && docker-compose up -d"
-        echo "Deployment completed successfully!"
+#    - name: Deploy to production server
+#      run: |
+#        set -e
+#        echo "Deploying version ${{ steps.vars.outputs.version }} to production..."
+#        ssh -o "StrictHostKeyChecking no" root@contabo3.matb.it "cd docker/matbit && docker-compose pull && docker-compose up -d"
+#        echo "Deployment completed successfully!"
