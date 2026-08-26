@@ -84,8 +84,7 @@ export default async function SignInPage({ searchParams }: Props) {
             google: Boolean(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET),
             unipi: Boolean(
               process.env.WSO2_CLIENT_ID &&
-                process.env.WSO2_CLIENT_SECRET &&
-                process.env.WSO2_DISCOVERY_URL,
+                process.env.WSO2_CLIENT_SECRET,
             ),
           }}
         />

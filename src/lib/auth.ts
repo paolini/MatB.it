@@ -9,8 +9,7 @@ const db = client.db();
 
 const wso2Configured = Boolean(
   process.env.WSO2_CLIENT_ID &&
-    process.env.WSO2_CLIENT_SECRET &&
-    process.env.WSO2_DISCOVERY_URL,
+    process.env.WSO2_CLIENT_SECRET,
 );
 
 const emailConfigured = Boolean(
@@ -59,6 +58,42 @@ async function sendMagicLink(email: string, url: string) {
     html: `<p>Hai richiesto di accedere a MatBit.</p><p><a href="${url}">Accedi a MatBit</a></p><p>Se non hai richiesto questo accesso, puoi ignorare questa email.</p>`,
     text: `Hai richiesto di accedere a MatBit. Apri questo link per accedere: ${url}`,
   });
+}
+
+async function getUnipiUserInfo(accessToken: string) {
+  const response = await fetch(
+    process.env.WSO2_USERINFO_URL ?? "https://iam.unipi.it/oauth2/userinfo",
+    { headers: { Authorization: `Bearer ${accessToken}` } },
+  );
+
+  if (!response.ok) {
+    console.error("Impossibile ottenere il profilo WSO2 Unipi", {
+      status: response.status,
+      statusText: response.statusText,
+    });
+    return null;
+  }
+
+  const profile = await response.json() as Record<string, unknown>;
+  const id = profile.sub ?? profile["http://wso2.org/claims/unipiUser"];
+  const email = profile.email ?? profile["http://wso2.org/claims/emailaddress"];
+  const fullName = profile.name ?? profile["http://wso2.org/claims/fullname"];
+  const name = fullName ?? [
+    profile.given_name ?? profile["http://wso2.org/claims/givenname"],
+    profile.family_name ?? profile["http://wso2.org/claims/lastname"],
+  ].filter((value): value is string => typeof value === "string").join(" ");
+
+  if (typeof id !== "string" || typeof email !== "string") {
+    console.error("Il profilo WSO2 Unipi non contiene subject o email utilizzabili");
+    return null;
+  }
+
+  return {
+    id,
+    email,
+    name: typeof name === "string" && name ? name : email,
+    emailVerified: true,
+  };
 }
 
 export const auth = betterAuth({
@@ -130,9 +165,13 @@ export const auth = betterAuth({
               providerId: "unipi",
               clientId: process.env.WSO2_CLIENT_ID!,
               clientSecret: process.env.WSO2_CLIENT_SECRET!,
-              discoveryUrl: process.env.WSO2_DISCOVERY_URL!,
+              authorizationUrl: process.env.WSO2_AUTHORIZE_URL ?? "https://iam.unipi.it/oauth2/authorize",
+              tokenUrl: process.env.WSO2_TOKEN_URL ?? "https://iam.unipi.it/oauth2/token",
+              userInfoUrl: process.env.WSO2_USERINFO_URL ?? "https://iam.unipi.it/oauth2/userinfo",
+              endSessionEndpoint: process.env.WSO2_LOGOUT_URL ?? "https://iam.unipi.it/oidc/logout",
+              accountIssuer: "https://iam.unipi.it",
               scopes: ["openid", "email", "profile"],
-              requireIdTokenVerification: true,
+              getUserInfo: async ({ accessToken }) => accessToken ? getUnipiUserInfo(accessToken) : null,
             },
           ],
         }),
