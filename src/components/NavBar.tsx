@@ -1,12 +1,13 @@
 import React from "react";
-import { useSession, signIn, signOut } from "next-auth/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { VERSION } from "../version";
-import type { Session } from "next-auth";
+import { authClient } from "@/lib/auth-client";
+
+type Session = typeof authClient.$Infer.Session;
 
 export default function NavBar() {
-  const { data: session } = useSession();
+  const { data: session } = authClient.useSession();
   const pathname = usePathname();
   
   return (
@@ -64,12 +65,12 @@ export default function NavBar() {
 
 function LoginButton() {
   return (
-    <button
-      className="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700 transition"
-      onClick={() => signIn()}
+    <Link
+      href="/auth/signin"
+      className="inline-block px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700 transition"
     >
       Login
-    </button>
+    </Link>
   );
 }
 
@@ -117,7 +118,7 @@ function ProfileMenuComponent({ session }: { session: Session }) {
           <div className="px-4 py-2 text-gray-700 border-b">{session.user?.name || session.user?.email}</div>
           <button
             className="w-full text-left px-4 py-2 text-red-600 hover:bg-gray-100"
-            onClick={() => signOut()}
+            onClick={() => authClient.signOut({ callbackURL: "/" })}
           >
             Logout
           </button>

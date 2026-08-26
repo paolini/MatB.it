@@ -1,6 +1,7 @@
-import { getServerSession } from "next-auth/next";
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import SignInForm from "@/components/SignInForm";
+import { auth } from "@/lib/auth";
 
 type Props = {
   searchParams: Promise<{ error?: string; callbackUrl?: string }>;
@@ -8,7 +9,7 @@ type Props = {
 
 export default async function SignInPage({ searchParams }: Props) {
   // Redirect if already signed in
-  const session = await getServerSession();
+  const session = await auth.api.getSession({ headers: await headers() });
   if (session) {
     redirect("/");
   }
@@ -72,7 +73,22 @@ export default async function SignInPage({ searchParams }: Props) {
           </div>
         )}
 
-        <SignInForm callbackUrl={resolvedSearchParams.callbackUrl} />
+        <SignInForm
+          callbackUrl={resolvedSearchParams.callbackUrl}
+          providers={{
+            email: Boolean(
+              process.env.EMAIL_FROM &&
+                (process.env.EMAIL_SERVER_HOST || process.env.RESEND_API_KEY),
+            ),
+            github: Boolean(process.env.GITHUB_ID && process.env.GITHUB_SECRET),
+            google: Boolean(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET),
+            unipi: Boolean(
+              process.env.WSO2_CLIENT_ID &&
+                process.env.WSO2_CLIENT_SECRET &&
+                process.env.WSO2_DISCOVERY_URL,
+            ),
+          }}
+        />
       </div>
     </div>
   );

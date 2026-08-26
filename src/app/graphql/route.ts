@@ -1,6 +1,5 @@
 import { ApolloServer } from '@apollo/server'
 import { startServerAndCreateNextHandler } from '@as-integrations/next'
-import { getToken } from "next-auth/jwt"
 import { ObjectId, WithId } from 'mongodb'
 import { NextApiRequest } from 'next'
 import { GraphQLRequestContext, GraphQLRequestContextWillSendResponse } from '@apollo/server';
@@ -10,6 +9,7 @@ import { Context } from './types'
 import { resolvers } from './resolvers'
 import { typeDefs } from './typedefs'
 import { MongoUser, logAction } from '@/lib/models'
+import { auth } from '@/lib/auth'
 
 // Plugin Apollo per logging
 const loggingPlugin = {
@@ -61,6 +61,18 @@ const server = new ApolloServer<Context>({
   plugins: [loggingPlugin],
 })
 
+function toHeaders(headers: NextApiRequest["headers"]) {
+  const result = new Headers()
+  for (const [name, value] of Object.entries(headers)) {
+    if (typeof value === "string") {
+      result.set(name, value)
+    } else if (Array.isArray(value)) {
+      result.set(name, value.join(", "))
+    }
+  }
+  return result
+}
+
 const handler = startServerAndCreateNextHandler<NextApiRequest,Context>(server, {
     context: async (req, res): Promise<Context> => { 
       const db = (await clientPromise).db()
@@ -72,30 +84,25 @@ const handler = startServerAndCreateNextHandler<NextApiRequest,Context>(server, 
       
       const ctx: Context = { req, res, db, user: null, accessToken }
       try {
-        const token = await getToken({ req })
-        if (!token || !token.sub) {
-          return ctx
-        }
-        
-        // Cerca l'utente tramite _id (preferibile) o email come fallback
-        const dbUser = await db.collection('users').findOne<WithId<MongoUser>>({ _id: new ObjectId(token.sub) })
-        if (dbUser && token.email) {
-          const legacyUser = await db.collection('users').findOne<WithId<MongoUser>>({ email: token.email + '_' })
-          if (legacyUser) {            
-            // i vecchi utenti non vengono più autenticati da next-auth perché
-            // non hanno un "account" associato.
-            // Ora che abbiamo il nuovo utente con collegato l'account, possiamo
-            // riappropriarci delle note del vecchio utente, se c'era.
+        const session = await auth.api.getSession({
+          headers: toHeaders(req.headers),
+        })
+        if (!session?.user.email) return ctx
 
-            // tutte le Note rimpiazza legacyUser._id con dbUser._id
-            // nel campo author_id:
+        const dbUser = await db.collection('users').findOne<WithId<MongoUser>>({
+          email: session.user.email,
+        })
+        if (dbUser) {
+          const legacyUser = await db.collection('users').findOne<WithId<MongoUser>>({
+            email: session.user.email + '_',
+          })
+          if (legacyUser) {
+            // Riassocia le note provenienti dal vecchio indirizzo email con underscore.
             await db.collection('notes').updateMany(
               { author_id: legacyUser._id },
               { $set: { author_id: dbUser._id  } }
             )
-            // e aggiorna l'utente dbUser con le informazioni del legacyUser
             if (legacyUser.pro && !dbUser?.pro) {
-              // se legacyUser era pro, rendi dbUser pro
               await db.collection('users').updateOne(
                 { _id: dbUser._id },
                 { $set: { pro: true } }
