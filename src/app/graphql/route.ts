@@ -11,6 +11,8 @@ import { typeDefs } from './typedefs'
 import { MongoUser, logAction } from '@/lib/models'
 import { auth } from '@/lib/auth'
 
+export const dynamic = "force-dynamic";
+
 // Plugin Apollo per logging
 const loggingPlugin = {
   async requestDidStart(requestContext: GraphQLRequestContext<Context>) {
