@@ -63,7 +63,9 @@ const server = new ApolloServer<Context>({
   plugins: [loggingPlugin],
 })
 
-function toHeaders(headers: NextApiRequest["headers"]) {
+function toHeaders(headers: NextApiRequest["headers"] | Headers) {
+  if (headers instanceof Headers) return headers;
+
   const result = new Headers()
   for (const [name, value] of Object.entries(headers)) {
     if (typeof value === "string") {
