@@ -96,9 +96,15 @@ async function getUnipiUserInfo(accessToken: string) {
   };
 }
 
+const isHttps = process.env.BETTER_AUTH_URL?.startsWith("https://") ?? false;
+
 export const auth = betterAuth({
   baseURL: process.env.BETTER_AUTH_URL,
   secret: process.env.BETTER_AUTH_SECRET,
+  trustHost: true,
+  advanced: {
+    useSecureCookies: isHttps,
+  },
   database: mongodbAdapter(db, { client }),
   user: {
     modelName: "auth_users",
