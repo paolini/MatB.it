@@ -1,4 +1,3 @@
-m
 ## Classi (Entità)
 
 Le **classi** sono entità che raccolgono note, test, studenti e docenti. Ogni classe ha:
