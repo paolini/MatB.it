@@ -58,6 +58,8 @@ const TestQuery = gql`
                 incompleted_submissions
                 min_submissions_for_stats
                 exercises {
+                    note_id
+                    title
                     correct_answers
                     total_answers
                     empty_answers

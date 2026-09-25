@@ -16,9 +16,9 @@ const config: CodegenConfig = {
         contextType: './types#Context', // Percorso al tipo del tuo context
         avoidOptionals: true, // questo forza l'uso di `T | null` invece di `T | null | undefined`
         scalars: {
-          // JSON: 'Record<string, unknown>',
           ObjectId: { input: 'ObjectId', output: 'ObjectId' },
-          // Timestamp: '{ input: string, output: Date }',
+          Timestamp: 'Date', // <-- Questa riga risolve tutti gli errori di data!
+          JSON: 'any',
         },
       },
     },

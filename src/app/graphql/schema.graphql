@@ -117,6 +117,8 @@ type ScoreDistributionEntry {
 }
 
 type ExerciseStats {
+    note_id: ObjectId!
+    title: String
     correct_answers: Int!
     total_answers: Int!
     empty_answers: Int!

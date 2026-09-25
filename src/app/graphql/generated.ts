@@ -3,11 +3,6 @@ import { Context } from './types';
 import { ObjectId } from "bson";
 export type Maybe<T> = T | null;
 export type InputMaybe<T> = Maybe<T>;
-export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
-export type MakeOptional<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]?: Maybe<T[SubKey]> };
-export type MakeMaybe<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]: Maybe<T[SubKey]> };
-export type MakeEmpty<T extends { [key: string]: unknown }, K extends keyof T> = { [_ in K]?: never };
-export type Incremental<T> = T | { [P in keyof T]?: P extends ' $fragmentName' | '__typename' ? T[P] : never };
 export type RequireFields<T, K extends keyof T> = Omit<T, K> & { [P in K]-?: NonNullable<T[P]> };
 /** All built-in and custom scalars, mapped to their actual values */
 export type Scalars = {
@@ -18,7 +13,7 @@ export type Scalars = {
   Float: { input: number; output: number; }
   JSON: { input: any; output: any; }
   ObjectId: { input: ObjectId; output: ObjectId; }
-  Timestamp: { input: any; output: any; }
+  Timestamp: { input: Date; output: Date; }
 };
 
 export type AccessToken = {
@@ -75,6 +70,8 @@ export type ExerciseStats = {
   correct_answers: Scalars['Int']['output'];
   correlation_to_total: Maybe<Scalars['Float']['output']>;
   empty_answers: Scalars['Int']['output'];
+  note_id: Scalars['ObjectId']['output'];
+  title: Maybe<Scalars['String']['output']>;
   total_answers: Scalars['Int']['output'];
 };
 
@@ -446,7 +443,7 @@ export type ResolverTypeWrapper<T> = Promise<T> | T;
 export type ResolverWithResolve<TResult, TParent, TContext, TArgs> = {
   resolve: ResolverFn<TResult, TParent, TContext, TArgs>;
 };
-export type Resolver<TResult, TParent = {}, TContext = {}, TArgs = {}> = ResolverFn<TResult, TParent, TContext, TArgs> | ResolverWithResolve<TResult, TParent, TContext, TArgs>;
+export type Resolver<TResult, TParent = Record<PropertyKey, never>, TContext = Record<PropertyKey, never>, TArgs = Record<PropertyKey, never>> = ResolverFn<TResult, TParent, TContext, TArgs> | ResolverWithResolve<TResult, TParent, TContext, TArgs>;
 
 export type ResolverFn<TResult, TParent, TContext, TArgs> = (
   parent: TParent,
@@ -483,27 +480,29 @@ export type SubscriptionObject<TResult, TKey extends string, TParent, TContext, 
   | SubscriptionSubscriberObject<TResult, TKey, TParent, TContext, TArgs>
   | SubscriptionResolverObject<TResult, TParent, TContext, TArgs>;
 
-export type SubscriptionResolver<TResult, TKey extends string, TParent = {}, TContext = {}, TArgs = {}> =
+export type SubscriptionResolver<TResult, TKey extends string, TParent = Record<PropertyKey, never>, TContext = Record<PropertyKey, never>, TArgs = Record<PropertyKey, never>> =
   | ((...args: any[]) => SubscriptionObject<TResult, TKey, TParent, TContext, TArgs>)
   | SubscriptionObject<TResult, TKey, TParent, TContext, TArgs>;
 
-export type TypeResolveFn<TTypes, TParent = {}, TContext = {}> = (
+export type TypeResolveFn<TTypes, TParent = Record<PropertyKey, never>, TContext = Record<PropertyKey, never>> = (
   parent: TParent,
   context: TContext,
   info: GraphQLResolveInfo
 ) => Maybe<TTypes> | Promise<Maybe<TTypes>>;
 
-export type IsTypeOfResolverFn<T = {}, TContext = {}> = (obj: T, context: TContext, info: GraphQLResolveInfo) => boolean | Promise<boolean>;
+export type IsTypeOfResolverFn<T = Record<PropertyKey, never>, TContext = Record<PropertyKey, never>> = (obj: T, context: TContext, info: GraphQLResolveInfo) => boolean | Promise<boolean>;
 
 export type NextResolverFn<T> = () => Promise<T>;
 
-export type DirectiveResolverFn<TResult = {}, TParent = {}, TContext = {}, TArgs = {}> = (
+export type DirectiveResolverFn<TResult = Record<PropertyKey, never>, TParent = Record<PropertyKey, never>, TContext = Record<PropertyKey, never>, TArgs = Record<PropertyKey, never>> = (
   next: NextResolverFn<TResult>,
   parent: TParent,
   args: TArgs,
   context: TContext,
   info: GraphQLResolveInfo
 ) => TResult | Promise<TResult>;
+
+
 
 
 
@@ -519,12 +518,12 @@ export type ResolversTypes = ResolversObject<{
   Float: ResolverTypeWrapper<Scalars['Float']['output']>;
   Int: ResolverTypeWrapper<Scalars['Int']['output']>;
   JSON: ResolverTypeWrapper<Scalars['JSON']['output']>;
-  Mutation: ResolverTypeWrapper<{}>;
+  Mutation: ResolverTypeWrapper<Record<PropertyKey, never>>;
   Note: ResolverTypeWrapper<Note>;
   NoteVersion: ResolverTypeWrapper<NoteVersion>;
   ObjectId: ResolverTypeWrapper<Scalars['ObjectId']['output']>;
   Profile: ResolverTypeWrapper<Profile>;
-  Query: ResolverTypeWrapper<{}>;
+  Query: ResolverTypeWrapper<Record<PropertyKey, never>>;
   ScoreDistributionEntry: ResolverTypeWrapper<ScoreDistributionEntry>;
   String: ResolverTypeWrapper<Scalars['String']['output']>;
   Submission: ResolverTypeWrapper<Submission>;
@@ -546,12 +545,12 @@ export type ResolversParentTypes = ResolversObject<{
   Float: Scalars['Float']['output'];
   Int: Scalars['Int']['output'];
   JSON: Scalars['JSON']['output'];
-  Mutation: {};
+  Mutation: Record<PropertyKey, never>;
   Note: Note;
   NoteVersion: NoteVersion;
   ObjectId: Scalars['ObjectId']['output'];
   Profile: Profile;
-  Query: {};
+  Query: Record<PropertyKey, never>;
   ScoreDistributionEntry: ScoreDistributionEntry;
   String: Scalars['String']['output'];
   Submission: Submission;
@@ -568,7 +567,6 @@ export type AccessTokenResolvers<ContextType = Context, ParentType extends Resol
   permission: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   resource_id: Resolver<ResolversTypes['ObjectId'], ParentType, ContextType>;
   secret: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
 export type AnswerItemResolvers<ContextType = Context, ParentType extends ResolversParentTypes['AnswerItem'] = ResolversParentTypes['AnswerItem']> = ResolversObject<{
@@ -576,7 +574,6 @@ export type AnswerItemResolvers<ContextType = Context, ParentType extends Resolv
   correct_answer: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   note_id: Resolver<ResolversTypes['ObjectId'], ParentType, ContextType>;
   permutation: Resolver<Maybe<Array<ResolversTypes['Int']>>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
 export type ClassResolvers<ContextType = Context, ParentType extends ResolversParentTypes['Class'] = ResolversParentTypes['Class']> = ResolversObject<{
@@ -594,14 +591,12 @@ export type ClassResolvers<ContextType = Context, ParentType extends ResolversPa
   teacher_enrollment_url: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   teachers: Resolver<Array<ResolversTypes['User']>, ParentType, ContextType>;
   tests: Resolver<Array<ResolversTypes['Test']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
 export type ClassSummaryResolvers<ContextType = Context, ParentType extends ResolversParentTypes['ClassSummary'] = ResolversParentTypes['ClassSummary']> = ResolversObject<{
   academic_year: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   description: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   name: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
 export type ExerciseStatsResolvers<ContextType = Context, ParentType extends ResolversParentTypes['ExerciseStats'] = ResolversParentTypes['ExerciseStats']> = ResolversObject<{
@@ -609,8 +604,9 @@ export type ExerciseStatsResolvers<ContextType = Context, ParentType extends Res
   correct_answers: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   correlation_to_total: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
   empty_answers: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  note_id: Resolver<ResolversTypes['ObjectId'], ParentType, ContextType>;
+  title: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   total_answers: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
 export interface JsonScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['JSON'], any> {
@@ -660,7 +656,6 @@ export type NoteResolvers<ContextType = Context, ParentType extends ResolversPar
   title: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   updated_on: Resolver<ResolversTypes['Timestamp'], ParentType, ContextType>;
   variant: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
 export type NoteVersionResolvers<ContextType = Context, ParentType extends ResolversParentTypes['NoteVersion'] = ResolversParentTypes['NoteVersion']> = ResolversObject<{
@@ -671,7 +666,6 @@ export type NoteVersionResolvers<ContextType = Context, ParentType extends Resol
   parent_version_id: Resolver<Maybe<ResolversTypes['ObjectId']>, ParentType, ContextType>;
   second_parent_version_id: Resolver<Maybe<ResolversTypes['ObjectId']>, ParentType, ContextType>;
   title: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
 export interface ObjectIdScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['ObjectId'], any> {
@@ -683,7 +677,6 @@ export type ProfileResolvers<ContextType = Context, ParentType extends Resolvers
   email: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   image: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   name: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
 export type QueryResolvers<ContextType = Context, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = ResolversObject<{
@@ -706,7 +699,6 @@ export type ScoreDistributionEntryResolvers<ContextType = Context, ParentType ex
   count: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   score_max: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
   score_min: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
 export type SubmissionResolvers<ContextType = Context, ParentType extends ResolversParentTypes['Submission'] = ResolversParentTypes['Submission']> = ResolversObject<{
@@ -720,7 +712,6 @@ export type SubmissionResolvers<ContextType = Context, ParentType extends Resolv
   started_on: Resolver<ResolversTypes['Timestamp'], ParentType, ContextType>;
   test: Resolver<ResolversTypes['Test'], ParentType, ContextType>;
   test_id: Resolver<ResolversTypes['ObjectId'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
 export type TestResolvers<ContextType = Context, ParentType extends ResolversParentTypes['Test'] = ResolversParentTypes['Test']> = ResolversObject<{
@@ -738,7 +729,6 @@ export type TestResolvers<ContextType = Context, ParentType extends ResolversPar
   stats: Resolver<ResolversTypes['TestStats'], ParentType, ContextType>;
   submissions: Resolver<Maybe<Array<ResolversTypes['Submission']>>, ParentType, ContextType>;
   title: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
 export type TestStatsResolvers<ContextType = Context, ParentType extends ResolversParentTypes['TestStats'] = ResolversParentTypes['TestStats']> = ResolversObject<{
@@ -747,7 +737,6 @@ export type TestStatsResolvers<ContextType = Context, ParentType extends Resolve
   incompleted_submissions: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   min_submissions_for_stats: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   score_distribution: Resolver<Array<ResolversTypes['ScoreDistributionEntry']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
 export interface TimestampScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['Timestamp'], any> {
@@ -759,7 +748,6 @@ export type UserResolvers<ContextType = Context, ParentType extends ResolversPar
   email: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   image: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   name: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
 export type Resolvers<ContextType = Context> = ResolversObject<{

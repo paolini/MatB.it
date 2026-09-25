@@ -16,7 +16,7 @@ export default function ExerciseStatsTable({exercises}: {exercises: any[]}) {
                 <tbody>
                     {exercises.map((exercise, index) => (
                         <tr key={index} className="hover:bg-gray-50">
-                            <td className="border border-gray-300 px-4 py-2 font-medium">Esercizio {index + 1}</td>
+                            <td className="border border-gray-300 px-4 py-2 font-medium"><a href={`/note/${exercise.note_id}`}>Es {index + 1}: {exercise.title}</a></td>
                             <td className="border border-gray-300 px-4 py-2 text-center">{exercise.total_answers}</td>
                             <td className="border border-gray-300 px-4 py-2 text-center text-green-600 font-semibold">{exercise.correct_answers}</td>
                             <td className="border border-gray-300 px-4 py-2 text-center text-red-600">{exercise.empty_answers}</td>

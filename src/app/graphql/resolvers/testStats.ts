@@ -1,17 +1,17 @@
 import { ObjectId } from 'mongodb'
 import { Context } from '../types'
 import { TestStats, ExerciseStats, Test, ScoreDistributionEntry } from '../generated'
-import { getSubmissionsCollection } from '@/lib/models'
+import { getSubmissionsCollection, getNotesCollection } from '@/lib/models'
 import { compute_answer_score } from '@/lib/answer'
 import { MongoAnswer } from '@/lib/models'
 
 export default async function testStats(parent: Test, _args: unknown, context: Context): Promise<TestStats> {
     const submissionsCollection = getSubmissionsCollection(context.db)
+    const notesCollection = getNotesCollection(context.db)
     
     // Recupera tutte le submissions completate per questo test
     const all_submissions = await submissionsCollection.find({
         test_id: parent._id,
-        // completed_on: { $ne: null }
     }).toArray()
     
     const submissions = all_submissions.filter(s => !!s.completed_on)
@@ -23,13 +23,27 @@ export default async function testStats(parent: Test, _args: unknown, context: C
     
     // Estrai tutti gli esercizi (note_id) e i punteggi dalle submissions esistenti
     const { exerciseIds, submissionScores } = extractExerciseIdsAndScores(submissions)
+
+    // Recupera i titoli di tutte le note/esercizi in una singola query
+    const titlesMap = new Map<string, string>()
+    if (generate_stats && exerciseIds.size > 0) {
+        const objectIds = Array.from(exerciseIds).map(id => new ObjectId(id))
+        const notes = await notesCollection.find(
+            { _id: { $in: objectIds } },
+            { projection: { _id: 1, title: 1 } }
+        ).toArray()
+
+        notes.forEach(note => {
+            titlesMap.set(note._id.toString(), note.title)
+        })
+    }
     
     // Calcola le statistiche per ogni esercizio
     const exercises: ExerciseStats[] = generate_stats 
-        ? computeAllExerciseStats(submissions, submissionScores, exerciseIds)
+        ? computeAllExerciseStats(submissions, submissionScores, exerciseIds, titlesMap)
         : [];
     
-    // Calcola la distribuzione dei punteggi usando i punteggi già memorizzati
+    // Calcola la distribuzione dei punteggi
     const score_distribution = generate_stats 
         ? computeScoreDistribution(submissionScores)
         : [];   
@@ -60,12 +74,14 @@ function extractExerciseIdsAndScores(submissions: Array<{ answers?: MongoAnswer[
 function computeAllExerciseStats(
     submissions: Array<{ answers?: MongoAnswer[]; score?: number }>,
     submissionScores: number[],
-    exerciseIds: Set<string>
+    exerciseIds: Set<string>,
+    titlesMap: Map<string, string>
 ): ExerciseStats[] {
     function computeExerciseStats(
         exerciseId: ObjectId,
         submissions: Array<{ answers?: MongoAnswer[]; score?: number }>,
-        submissionScores: number[]
+        submissionScores: number[],
+        title?: string
     ): ExerciseStats {
         let correct_answers = 0;
         let totalScore = 0;
@@ -118,6 +134,8 @@ function computeAllExerciseStats(
 
         return {
             __typename: 'ExerciseStats',
+            note_id: exerciseId,
+            title: title ?? null,
             correct_answers,
             total_answers,
             empty_answers,
@@ -125,10 +143,12 @@ function computeAllExerciseStats(
             correlation_to_total
         };
     }
+
     const exercises: ExerciseStats[] = [];
     for (const exerciseIdStr of exerciseIds) {
         const exerciseId = new ObjectId(exerciseIdStr);
-        exercises.push(computeExerciseStats(exerciseId, submissions, submissionScores));
+        const title = titlesMap.get(exerciseIdStr);
+        exercises.push(computeExerciseStats(exerciseId, submissions, submissionScores, title));
     }
     return exercises;
 }
@@ -142,7 +162,7 @@ function computeScoreDistribution(submissionScores: number[]): ScoreDistribution
         return scoreDistribution.get(key)!;
     }
     for (const totalScore of submissionScores) {
-        const key = Math.floor(totalScore+0.00001); // Aggiungi una piccola epsilon per gestire i casi come 2.9999999
+        const key = Math.floor(totalScore+0.00001);
         const range = getOrCreate(key);
         range.count++;
         range.min = Math.min(range.min, totalScore);
@@ -157,4 +177,3 @@ function computeScoreDistribution(submissionScores: number[]): ScoreDistribution
         }))
         .sort((a, b) => a.score_min - b.score_min);
 }
-

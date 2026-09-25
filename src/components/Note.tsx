@@ -60,6 +60,7 @@ const NoteQuery = gql`
 `
 
 function emptyNote(profile: Profile): Note {
+    const now = new Date()
     return {
         _id: new ObjectId('000000000000000000000000'),
         title: '',
@@ -67,8 +68,8 @@ function emptyNote(profile: Profile): Note {
         private: false,
         delta: null,
         variant: '',
-        created_on: null,
-        updated_on: null,
+        created_on: now,
+        updated_on: now,
         class_id: null,
         class: null,
         tests: [],
