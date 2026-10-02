@@ -2,20 +2,61 @@ import { ObjectId } from 'mongodb'
 
 import { Context } from '../types'
 import { getNotesCollection, NOTE_PIPELINE, getClassesCollection } from '@/lib/models'
-import { QuillDelta } from '@/lib/myquill/document'
+import { QuillDelta, DeltaOperation } from '@/lib/myquill/document'
+
+/**
+ * Propaga ricorsivamente il class_id a tutte le sotto-note citiate nei note-ref del Delta
+ */
+async function propagateClassToEmbedded(
+    db: any,
+    delta: QuillDelta | undefined,
+    targetClassId: ObjectId | null
+): Promise<void> {
+    if (!delta || !Array.isArray(delta.ops)) return
+
+    const notesCollection = getNotesCollection(db)
+
+    for (const op of delta.ops as DeltaOperation[]) {
+        if (op.insert && typeof op.insert === 'object' && 'note-ref' in op.insert) {
+            const noteRef = op.insert['note-ref']
+            const embeddedId = noteRef?.note_id
+
+            if (embeddedId && ObjectId.isValid(embeddedId)) {
+                const childObjectId = new ObjectId(embeddedId)
+                const childNote = await notesCollection.findOne({ _id: childObjectId })
+
+                if (childNote) {
+                    if (targetClassId === null) {
+                        await notesCollection.updateOne(
+                            { _id: childObjectId },
+                            { $unset: { class_id: "" } }
+                        )
+                    } else {
+                        await notesCollection.updateOne(
+                            { _id: childObjectId },
+                            { $set: { class_id: targetClassId } }
+                        )
+                    }
+
+                    // Propagazione ricorsiva ai sotto-livelli
+                    await propagateClassToEmbedded(db, childNote.delta, targetClassId)
+                }
+            }
+        }
+    }
+}
 
 const updateNote = async function (
-      _parent: unknown,
-      args: any, // Usando any per evitare problemi con i tipi generati
-      context: Context
-    ): Promise<any> {
+    _parent: unknown,
+    args: any,
+    context: Context
+): Promise<any> {
     const { _id, title, hide_title, delta, private: isPrivate, variant, class_id } = args
     const collection = getNotesCollection(context.db)
     const note = await collection.findOne({ _id: new ObjectId(_id) })
     if (!note) throw new Error('Note not found')
     
     if (!context.user) throw new Error('Not authenticated')
-    
     if (!note.author_id.equals(new ObjectId(context.user._id))) throw new Error('Not authorized')
     
     const update: any = {}
@@ -25,16 +66,16 @@ const updateNote = async function (
     if (typeof isPrivate === 'boolean') update.private = isPrivate
     if (typeof variant === 'string') update.variant = variant
     
-    // ✨ NUOVO: Gestione class_id
+    let targetClassIdForChildren: ObjectId | null | undefined = undefined
+
+    // Gestione class_id
     if (class_id !== undefined) {
         if (class_id === null) {
-            // Rimuovi dalla classe
             update.class_id = undefined
+            targetClassIdForChildren = null
         } else {
-            // Assegna a una classe
             const classId = new ObjectId(class_id)
             
-            // Verifica che la classe esista e che l'utente abbia i permessi
             const classDoc = await getClassesCollection(context.db).findOne({ _id: classId })
             if (!classDoc) {
                 throw new Error('Classe non trovata')
@@ -49,6 +90,7 @@ const updateNote = async function (
             }
             
             update.class_id = classId
+            targetClassIdForChildren = classId
         }
     }
     
@@ -82,7 +124,12 @@ const updateNote = async function (
 
     await collection.updateOne({ _id: new ObjectId(_id) }, { $set: update })
     
-    // restituisci la nota aggiornata
+    // Se il class_id è stato aggiornato, propaga il valore a tutte le sotto-note
+    if (targetClassIdForChildren !== undefined) {
+        const deltaToUse = (delta as QuillDelta) || note.delta
+        await propagateClassToEmbedded(context.db, deltaToUse, targetClassIdForChildren)
+    }
+
     const notes = await collection.aggregate<any>([
         { $match: { _id: new ObjectId(_id) } },
         ...NOTE_PIPELINE
