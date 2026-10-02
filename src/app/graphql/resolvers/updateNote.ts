@@ -5,12 +5,15 @@ import { getNotesCollection, NOTE_PIPELINE, getClassesCollection } from '@/lib/m
 import { QuillDelta, DeltaOperation } from '@/lib/myquill/document'
 
 /**
- * Propaga ricorsivamente il class_id a tutte le sotto-note citiate nei note-ref del Delta
+ * Propaga ricorsivamente il class_id alle sotto-note citate nei note-ref del Delta
+ * SOLO SE la sotto-nota condivideva la stessa classe precedente della nota padre.
  */
 async function propagateClassToEmbedded(
     db: any,
     delta: QuillDelta | undefined,
-    targetClassId: ObjectId | null
+    oldClassIdStr: string | null,
+    targetClassId: ObjectId | null,
+    visited = new Set<string>()
 ): Promise<void> {
     if (!delta || !Array.isArray(delta.ops)) return
 
@@ -22,24 +25,33 @@ async function propagateClassToEmbedded(
             const embeddedId = noteRef?.note_id
 
             if (embeddedId && ObjectId.isValid(embeddedId)) {
+                // Previene riferimenti circolari / ricorsione infinita
+                if (visited.has(embeddedId)) continue
+                visited.add(embeddedId)
+
                 const childObjectId = new ObjectId(embeddedId)
                 const childNote = await notesCollection.findOne({ _id: childObjectId })
 
                 if (childNote) {
-                    if (targetClassId === null) {
-                        await notesCollection.updateOne(
-                            { _id: childObjectId },
-                            { $unset: { class_id: "" } }
-                        )
-                    } else {
+                    const childClassStr = childNote.class_id ? childNote.class_id.toString() : null
+
+                    // SINCRONIZZAZIONE CONDIZIONALE:
+                    // Aggiorna solo le sotto-note che appartenevano alla vecchia classe del padre
+                    if (childClassStr === oldClassIdStr) {
                         await notesCollection.updateOne(
                             { _id: childObjectId },
                             { $set: { class_id: targetClassId } }
                         )
-                    }
 
-                    // Propagazione ricorsiva ai sotto-livelli
-                    await propagateClassToEmbedded(db, childNote.delta, targetClassId)
+                        // Propagazione ricorsiva ai sotto-livelli
+                        await propagateClassToEmbedded(
+                            db,
+                            childNote.delta,
+                            oldClassIdStr,
+                            targetClassId,
+                            visited
+                        )
+                    }
                 }
             }
         }
@@ -66,12 +78,14 @@ const updateNote = async function (
     if (typeof isPrivate === 'boolean') update.private = isPrivate
     if (typeof variant === 'string') update.variant = variant
     
+    // Salva la classe attuale prima dell'aggiornamento per il confronto condizionale
+    const oldClassIdStr = note.class_id ? note.class_id.toString() : null
     let targetClassIdForChildren: ObjectId | null | undefined = undefined
 
     // Gestione class_id
     if (class_id !== undefined) {
         if (class_id === null) {
-            update.class_id = undefined
+            update.class_id = null
             targetClassIdForChildren = null
         } else {
             const classId = new ObjectId(class_id)
@@ -124,10 +138,10 @@ const updateNote = async function (
 
     await collection.updateOne({ _id: new ObjectId(_id) }, { $set: update })
     
-    // Se il class_id è stato aggiornato, propaga il valore a tutte le sotto-note
-    if (targetClassIdForChildren !== undefined) {
+    // Se il class_id è cambiato, avvia la propagazione condizionale
+    if (targetClassIdForChildren !== undefined && oldClassIdStr !== (targetClassIdForChildren ? targetClassIdForChildren.toString() : null)) {
         const deltaToUse = (delta as QuillDelta) || note.delta
-        await propagateClassToEmbedded(context.db, deltaToUse, targetClassIdForChildren)
+        await propagateClassToEmbedded(context.db, deltaToUse, oldClassIdStr, targetClassIdForChildren)
     }
 
     const notes = await collection.aggregate<any>([

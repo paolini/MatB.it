@@ -119,7 +119,7 @@ const cloneNote = async function (
             note_version_id: originalNote.note_version_id,
             contributors,
             private: originalNote.private,
-            class_id: null,
+            class_id: originalNote.class_id ?? null,
             created_on: now
         }
 
