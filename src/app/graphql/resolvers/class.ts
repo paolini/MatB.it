@@ -4,7 +4,7 @@ import { getClassesCollection, getUserClassRole, CLASS_PIPELINE, getAccessTokens
 import { NOTE_PIPELINE, TEST_PIPELINE } from '@/lib/models'
 
 export default async function classResolver(_parent: unknown, args: { _id: ObjectId }, context: Context) {
-    console.log('classResolver args._id:', args._id, 'typeof:', typeof args._id, 'instanceof ObjectId:', args._id instanceof ObjectId)
+    // console.log('classResolver args._id:', args._id, 'typeof:', typeof args._id, 'instanceof ObjectId:', args._id instanceof ObjectId)
     const { _id } = args
     const { user, db } = context
     console.log('user._id:', user?._id, 'typeof:', typeof user?._id, 'instanceof ObjectId:', user?._id instanceof ObjectId)

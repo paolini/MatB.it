@@ -47,7 +47,7 @@ const submission = async function (_parent: unknown, {_id}: { _id: ObjectId }, c
     hasAccess = hasAccess || test.author_id.equals(user?._id)
 
     // i teacher della classe possono vedere tutte le submission di tutti
-    console.log('DEBUG class.teachers:', test?.class?.teachers)
+    // console.log('DEBUG class.teachers:', test?.class?.teachers)
     hasAccess = hasAccess || !!test?.class?.teachers?.some(t => t._id.equals(context.user?._id));
 
     if (!hasAccess) {
