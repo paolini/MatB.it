@@ -9,8 +9,8 @@ import { ObjectId } from 'bson';
 type DeltaType = unknown;
 
 const NewNoteMutation = gql`
-mutation NewNote($title: String!, $delta: JSON, $private: Boolean, $variant: String) {
-  newNote(title: $title, delta: $delta, private: $private, variant: $variant)
+mutation NewNote($title: String!, $delta: JSON, $private: Boolean, $variant: String, $class_id: ObjectId) {
+  newNote(title: $title, delta: $delta, private: $private, variant: $variant, class_id: $class_id)
 }`
 
 const NotesQuery = gql`
@@ -85,7 +85,8 @@ export default function NoteReferenceModal({ isOpen, onClose, onNoteSelected, in
           title: title.trim(),
           delta,
           private: isPrivate,
-          variant
+          variant,
+          class_id: class_id || null
         }
       })
       const noteId = result.data?.newNote
