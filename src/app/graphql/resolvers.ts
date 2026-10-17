@@ -4,6 +4,7 @@ import { Resolvers, TestResolvers } from './generated'
 
 import notes from './resolvers/notes'
 import note from './resolvers/note'
+import noteBacklinks from './resolvers/noteBacklinks'
 import { noteVersion, parentVersions } from './resolvers/noteVersion'
 import tests from './resolvers/tests'
 import test from './resolvers/test'
@@ -59,6 +60,7 @@ export const resolvers: any = {
 
     notes,
     note,
+    noteBacklinks,
     noteVersion,
     parentVersions,
 

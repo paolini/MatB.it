@@ -144,6 +144,7 @@ type AccessToken {
 type Query {
   hello: String!
   note(_id: ObjectId!): Note
+  noteBacklinks(_id: ObjectId!): [Note!]!
   notes(mine: Boolean, private: Boolean, title: String, variant: String, class_id: ObjectId, limit: Int, skip: Int): [Note!]!
   profile: Profile
   test(_id: ObjectId!): Test

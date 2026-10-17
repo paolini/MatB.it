@@ -310,6 +310,7 @@ export type Query = {
   classes: Array<Class>;
   hello: Scalars['String']['output'];
   note: Maybe<Note>;
+  noteBacklinks: Array<Note>;
   noteVersion: Maybe<NoteVersion>;
   notes: Array<Note>;
   parentVersions: Array<NoteVersion>;
@@ -336,6 +337,11 @@ export type QueryClassArgs = {
 
 
 export type QueryNoteArgs = {
+  _id: Scalars['ObjectId']['input'];
+};
+
+
+export type QueryNoteBacklinksArgs = {
   _id: Scalars['ObjectId']['input'];
 };
 
@@ -686,6 +692,7 @@ export type QueryResolvers<ContextType = Context, ParentType extends ResolversPa
   classes: Resolver<Array<ResolversTypes['Class']>, ParentType, ContextType>;
   hello: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   note: Resolver<Maybe<ResolversTypes['Note']>, ParentType, ContextType, RequireFields<QueryNoteArgs, '_id'>>;
+  noteBacklinks: Resolver<Array<ResolversTypes['Note']>, ParentType, ContextType, RequireFields<QueryNoteBacklinksArgs, '_id'>>;
   noteVersion: Resolver<Maybe<ResolversTypes['NoteVersion']>, ParentType, ContextType, RequireFields<QueryNoteVersionArgs, '_id'>>;
   notes: Resolver<Array<ResolversTypes['Note']>, ParentType, ContextType, QueryNotesArgs>;
   parentVersions: Resolver<Array<ResolversTypes['NoteVersion']>, ParentType, ContextType, RequireFields<QueryParentVersionsArgs, '_id'>>;

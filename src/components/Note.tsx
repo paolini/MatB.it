@@ -26,6 +26,10 @@ const ProfileQuery = gql`
 
 const NoteQuery = gql`
     query Note($_id: ObjectId!) {
+        noteBacklinks(_id: $_id) {
+            _id
+            title
+        }
         note(_id: $_id) {
             _id
             title
@@ -88,7 +92,7 @@ export default function NoteWrapper({ _id }: { _id: string }) {
     const searchParams = useSearchParams();
     const editMode = searchParams.get('edit') !== null;
     const isNew = _id === '__new__';
-    const { loading, error, data } = useQuery<{ note: Note, profile: Profile }>(
+    const { loading, error, data } = useQuery<{ note: Note, noteBacklinks: Pick<Note, '_id' | 'title'>[] }>(
         NoteQuery, { variables: { _id }, skip: isNew })
     const { loading: profileLoading, error: profileError, data: profileData } = useQuery<{ profile: Profile }>(
         ProfileQuery)
@@ -100,7 +104,7 @@ export default function NoteWrapper({ _id }: { _id: string }) {
     const note = data?.note || emptyNote(profile);
 
     if (editMode || isNew) return <NoteEdit note={note} isNew={isNew} />
-    else return <NoteView note={note} profile={profile} />
+    else return <NoteView note={note} profile={profile} backlinks={data?.noteBacklinks || []} />
 }
 
 const DeleteNoteMutation = gql`
@@ -109,9 +113,10 @@ const DeleteNoteMutation = gql`
     }
 `
 
-function NoteView({note, profile}: {
+function NoteView({note, profile, backlinks}: {
     note: Note,
     profile: Profile,
+    backlinks: Pick<Note, '_id' | 'title'>[],
 }) {
     const [showShareModal, setShowShareModal] = useState(false)
     const [isDownloading, setIsDownloading] = useState(false)
@@ -252,6 +257,20 @@ function NoteView({note, profile}: {
                 <NoteVersionTree note_version_id={note.note_version_id.toString()} />
             </div>
         }
+        {backlinks.length > 0 && (
+            <section className="mt-6 border-t border-gray-200 pt-4" aria-labelledby="note-backlinks-title">
+                <h2 id="note-backlinks-title" className="text-lg font-semibold">Note che fanno riferimento a questa</h2>
+                <ul className="mt-2 list-disc pl-5 space-y-1">
+                    {backlinks.map(backlink => (
+                        <li key={backlink._id.toString()}>
+                            <a href={`/note/${backlink._id}`} className="text-blue-600 hover:underline">
+                                {backlink.title || 'Nota senza titolo'}
+                            </a>
+                        </li>
+                    ))}
+                </ul>
+            </section>
+        )}
     </div>
 }
 
