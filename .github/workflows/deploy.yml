@@ -1,24 +1,153 @@
-name: Deploy to dockerhub
+# CONFIGURAZIONE DEL DEPLOY AUTOMATICO
+#
+# Il workflow pubblica paolini/matbit:latest e il tag della versione, poi apre
+# una connessione SSH che esegue uno script fisso sul server. La chiave della
+# CI non permette una shell libera: il comando forzato è in authorized_keys.
+# La configurazione seguente è stata predisposta per hostinger5.matb.it.
+# Su un altro server adattare hostname, percorso e nome del servizio.
+#
+# 1. Prerequisiti sul SERVER, nella sessione root:
+#
+#    cd /root/docker/matbit
+#    docker compose version
+#    docker compose config --services
+#    docker compose config --images
+#
+#    Sono necessari Docker Compose con supporto a --wait, sudo e flock.
+#    Il servizio matbit deve usare image: paolini/matbit:latest.
+#    MongoDB e i suoi volumi restano gestiti dal Compose esistente.
+#    Perché --wait verifichi la salute applicativa, matbit deve avere un
+#    healthcheck; senza healthcheck Compose verifica soltanto che sia avviato.
+#
+# 2. Installare sul SERVER lo script versionato scripts/deploy.sh.
+#
+#    Procurarsi un checkout fidato del repository, separato dalla directory
+#    di produzione. Controllare la revisione e il contenuto dello script.
+#    Poi, come root (sostituire /percorso/checkout con il percorso effettivo):
+#
+#    install -o root -g root -m 700 /percorso/checkout/scripts/deploy.sh /root/docker/matbit/deploy.sh
+#
+#    Ripetere esplicitamente l'installazione quando lo script viene modificato.
+#    Il workflow non aggiorna questa copia e matbit-deploy non deve poterla
+#    sostituire. La revisione del repository non sostituisce il Compose o .env
+#    già configurati sul server. Il percorso SSH/sudo rimane deploy.sh.
+#
+#    Script, directory di deploy, file Compose e .env devono essere controllati
+#    da root e non modificabili dall'utente matbit-deploy. Lo script aggiorna
+#    solo matbit, senza ricreare MongoDB. Non esegue migrazioni né rollback
+#    automatici e usa latest: non riceve una versione arbitraria dal client.
+#
+# 3. Sul SERVER creare un utente dedicato, solo se non esiste già:
+#
+#    useradd --create-home --shell /bin/sh matbit-deploy
+#    chown root:root /home/matbit-deploy
+#    chmod 755 /home/matbit-deploy
+#    install -d -o root -g root -m 755 /home/matbit-deploy/.ssh
+#
+#    Non aggiungerlo ai gruppi docker o sudo e non assegnargli una password.
+#    La shell /bin/sh serve a eseguire il comando forzato: usare nologin
+#    impedirebbe anche l'esecuzione del deploy.
+#
+# 4. Sul SERVER consentire soltanto lo script tramite sudo:
+#
+#    printf '%s\n' 'matbit-deploy ALL=(root) NOPASSWD: /root/docker/matbit/deploy.sh ""' > /etc/sudoers.d/matbit-deploy
+#    chmod 440 /etc/sudoers.d/matbit-deploy
+#    visudo -cf /etc/sudoers.d/matbit-deploy
+#
+#    Il controllo deve dare "parsed OK". Le virgolette vuote limitano la
+#    regola all'esecuzione senza argomenti; anche lo script rifiuta argomenti.
+#
+# 5. Sul COMPUTER LOCALE generare una nuova chiave dedicata:
+#
+#    ssh-keygen -t ed25519 -f ~/.ssh/matbit-deploy -C github-matbit-deploy
+#
+#    Lasciare vuota la passphrase per l'uso non interattivo della CI.
+#    Non sovrascrivere una chiave già esistente. Il file senza estensione è
+#    PRIVATO: non inserirlo nel repository, nei log o nelle issue.
+#    Il file ~/.ssh/matbit-deploy.pub è pubblico.
+#
+# 6. Sul SERVER inserire la chiave PUBBLICA locale in authorized_keys,
+#    su un'unica riga con queste opzioni (sostituire AAAA...):
+#
+#    restrict,command="/usr/bin/sudo -n /root/docker/matbit/deploy.sh" ssh-ed25519 AAAA... github-matbit-deploy
+#
+#    Percorso: /home/matbit-deploy/.ssh/authorized_keys
+#    Se contiene già altre chiavi, modificarlo senza sovrascriverle.
+#    Proteggere poi il file:
+#
+#    chown root:root /home/matbit-deploy/.ssh/authorized_keys
+#    chmod 644 /home/matbit-deploy/.ssh/authorized_keys
+#
+#    restrict disabilita PTY, forwarding e ~/.ssh/rc; command forza lo script
+#    anche se il client richiede un altro comando. Non serve riavviare SSH.
+#
+# 7. Verificare dal COMPUTER LOCALE:
+#
+#    ssh -T -o IdentitiesOnly=yes -i ~/.ssh/matbit-deploy matbit-deploy@hostinger5.matb.it
+#
+#    ATTENZIONE: questa prova esegue davvero il deploy di latest.
+#    Controllare l'identità del server prima di accettare una nuova host key.
+#    La connessione deve terminare con successo e il container risultare sano.
+#
+# 8. Recuperare la host key PUBBLICA dalla sessione root sul SERVER:
+#
+#    cat /etc/ssh/ssh_host_ed25519_key.pub
+#    ssh-keygen -lf /etc/ssh/ssh_host_ed25519_key.pub
+#
+#    Non usare la host key del computer locale. Formare la riga known_hosts:
+#
+#    hostinger5.matb.it ssh-ed25519 AAAA_CHIAVE_PUBBLICA_DEL_SERVER
+#
+#    Non disabilitare StrictHostKeyChecking e non affidarsi a un semplice
+#    ssh-keyscan non verificato. Se la chiave cambia, verificarla sul server
+#    prima di aggiornare il secret. Questa configurazione usa la porta 22.
+#
+# 9. Sul COMPUTER LOCALE, con gh autenticato, configurare l'ambiente production:
+#
+#    gh secret set MATBIT_DEPLOY_SSH_KEY --repo paolini/MatB.it --env production < ~/.ssh/matbit-deploy
+#    gh variable set MATBIT_DEPLOY_HOST --repo paolini/MatB.it --env production --body 'hostinger5.matb.it'
+#    printf '%s\n' 'hostinger5.matb.it ssh-ed25519 AAAA_CHIAVE_PUBBLICA_DEL_SERVER' | gh secret set MATBIT_DEPLOY_KNOWN_HOSTS --repo paolini/MatB.it --env production
+#
+#    Sostituire il placeholder della host key con quella verificata al punto 8.
+#    Il secret DOCKERHUB_TOKEN deve già consentire il push su paolini/matbit.
+#    Le regole dell'ambiente production possono richiedere approvazione prima
+#    dell'avvio del job. Il vecchio secret SSH_PRIVATE_KEY non è usato qui.
+#
+# 10. Dopo un push a main verificare l'Action e la versione su https://matb.it.
+#
+#    La concorrenza del workflow serializza build e deploy; flock protegge
+#    anche dagli avvii manuali sovrapposti. Un errore SSH, pull o healthcheck
+#    fa fallire l'Action. Non è implementata una verifica HTTPS della versione:
+#    il successo di --wait riguarda lo stato del container sul server.
+#
+# Rotazione: generare una nuova coppia, aggiungere la pubblica con le stesse
+# restrizioni, aggiornare MATBIT_DEPLOY_SSH_KEY e verificare il deploy prima
+# di rimuovere la vecchia riga. Per revocare la chiave rimuovere la sua riga
+# da authorized_keys sul server: cancellare il solo secret GitHub non revoca
+# eventuali copie della privata.
+#
+name: Deploy to production
 
 on:
   push:
     branches:
       - main
 
+concurrency:
+  group: matbit-production
+  cancel-in-progress: false
+
 jobs:
   deploy:
     name: Deploy
     runs-on: ubuntu-latest
-    environment: production
+    environment:
+      name: production
+      url: https://matb.it
 
     steps:
     - name: Checkout
       uses: actions/checkout@v5
-
-    - name: Setup ssh key 
-      uses: webfactory/ssh-agent@v0.10.0
-      with:
-        ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
     - name: Get version from package.json
       id: vars
@@ -40,9 +169,32 @@ jobs:
         docker push paolini/matbit
         docker push paolini/matbit:${{ steps.vars.outputs.version }}
 
-#    - name: Deploy to production server
-#      run: |
-#        set -e
-#        echo "Deploying version ${{ steps.vars.outputs.version }} to production..."
-#        ssh -o "StrictHostKeyChecking no" root@contabo3.matb.it "cd docker/matbit && docker-compose pull && docker-compose up -d"
-#        echo "Deployment completed successfully!"
+    - name: Deploy to production server
+      timeout-minutes: 10
+      env:
+        DEPLOY_HOST: ${{ vars.MATBIT_DEPLOY_HOST }}
+        DEPLOY_SSH_KEY: ${{ secrets.MATBIT_DEPLOY_SSH_KEY }}
+        DEPLOY_KNOWN_HOSTS: ${{ secrets.MATBIT_DEPLOY_KNOWN_HOSTS }}
+      run: |
+        set -euo pipefail
+        : "${DEPLOY_HOST:?Missing MATBIT_DEPLOY_HOST}"
+        : "${DEPLOY_SSH_KEY:?Missing MATBIT_DEPLOY_SSH_KEY}"
+        : "${DEPLOY_KNOWN_HOSTS:?Missing MATBIT_DEPLOY_KNOWN_HOSTS}"
+
+        umask 077
+        ssh_dir=$(mktemp -d "$RUNNER_TEMP/matbit-deploy.XXXXXX")
+        trap 'rm -rf -- "$ssh_dir"' EXIT
+        printf '%s\n' "$DEPLOY_SSH_KEY" > "$ssh_dir/key"
+        printf '%s\n' "$DEPLOY_KNOWN_HOSTS" > "$ssh_dir/known_hosts"
+
+        ssh -F /dev/null -T \
+          -i "$ssh_dir/key" \
+          -o IdentitiesOnly=yes \
+          -o IdentityAgent=none \
+          -o BatchMode=yes \
+          -o StrictHostKeyChecking=yes \
+          -o "UserKnownHostsFile=$ssh_dir/known_hosts" \
+          -o ConnectTimeout=15 \
+          -o ServerAliveInterval=15 \
+          -o ServerAliveCountMax=3 \
+          "matbit-deploy@$DEPLOY_HOST"
