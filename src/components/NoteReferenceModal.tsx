@@ -39,7 +39,7 @@ type TabType = 'existing' | 'new'
 export default function NoteReferenceModal({ isOpen, onClose, onNoteSelected, initialVariant = 'default', class_id }: NoteReferenceModalProps) {
   console.log('🔧 NoteReferenceModal: Render con props:', { isOpen, onNoteSelected: typeof onNoteSelected, initialVariant })
   
-  const [activeTab, setActiveTab] = useState<TabType>('existing')
+  const [activeTab, setActiveTab] = useState<TabType>(initialVariant === 'default' ? 'existing' : 'new')
   
   // Stato per creazione nuova nota
   const [title, setTitle] = useState('')
@@ -49,19 +49,21 @@ export default function NoteReferenceModal({ isOpen, onClose, onNoteSelected, in
   
   // Stato per ricerca note esistenti
   const [searchTerm, setSearchTerm] = useState('')
+  const [creationError, setCreationError] = useState<string | null>(null)
 
-  // Aggiorna variant quando initialVariant cambia
+  // Every opening starts a new insertion, regardless of how the last one ended.
   useEffect(() => {
     if (isOpen) {
+      setTitle('')
       setVariant(initialVariant)
-      // Se la variant è diversa da 'default', vai direttamente al tab "new"
-      if (initialVariant !== 'default') {
-        setActiveTab('new')
-      }
+      setIsPrivate(false)
+      setDelta(null)
+      setSearchTerm('')
+      setCreationError(null)
+      setActiveTab(initialVariant === 'default' ? 'existing' : 'new')
     }
   }, [isOpen, initialVariant])
   
-  const [creationError, setCreationError] = useState<string | null>(null)
   const [createNote, { loading: creatingNote }] = useMutation<{ newNote: string }>(NewNoteMutation)
   const [getNotes, { data: notesData, loading: loadingNotes, error: notesError }] = useLazyQuery<{notes: Note[]}>(NotesQuery)
 
@@ -107,14 +109,6 @@ export default function NoteReferenceModal({ isOpen, onClose, onNoteSelected, in
   }
 
   const handleClose = () => {
-    console.log('🚪 handleClose: Chiusura modal e reset stato')
-    setCreationError(null)
-    setTitle('')
-    setVariant(initialVariant)
-    setIsPrivate(false)
-    setDelta(null)
-    setSearchTerm('')
-    setActiveTab('existing')
     onClose()
   }
 

@@ -125,4 +125,15 @@ describe('Note reference modal reopening (issue #98)', () => {
         expect(container.querySelector<HTMLInputElement>('input[type="checkbox"]')!.checked).toBe(false)
         expect(container.querySelector('select')!.value).toBe('theorem')
     })
+
+    it('clears validation errors when the parent hides and reopens the modal', async () => {
+        await render(true, 'lemma')
+        await click('Crea e Seleziona')
+        expect(container.textContent).toContain('Il titolo è obbligatorio')
+        expect(selected).not.toHaveBeenCalled()
+        await render(false, 'lemma')
+        await render(true, 'lemma')
+        expect(container.textContent).not.toContain('Il titolo è obbligatorio')
+        expect(input('Titolo della nota').value).toBe('')
+    })
 })
