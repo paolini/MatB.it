@@ -1,4 +1,4 @@
-import { UserInputError } from 'apollo-server-errors';
+import { GraphQLError } from 'graphql'
 import { Context } from '../types';
 import { AccessToken, QueryAccessTokenArgs } from '../generated';
 import { getAccessTokensCollection, getClassesCollection } from '@/lib/models';
@@ -7,7 +7,7 @@ export default async function accessToken(_parent: unknown, {secret}: QueryAcces
   const tokensCollection = getAccessTokensCollection(context.db);
   const token = await tokensCollection.findOne({ secret });
   if (!token) {
-    throw new UserInputError('AccessToken not found');
+    throw new GraphQLError('AccessToken not found', { extensions: { code: 'BAD_USER_INPUT' } });
   }
   let classSummary = null;
   if (["teacher_enrollment", "student_enrollment"].includes(token.permission)) {

@@ -1,5 +1,5 @@
 import { ObjectId } from 'mongodb'
-import { UserInputError, ForbiddenError, AuthenticationError } from 'apollo-server-errors'
+import { GraphQLError } from 'graphql'
 
 import { Context } from '../types'
 import { Submission } from '../generated'
@@ -18,7 +18,7 @@ const submission = async function (_parent: unknown, {_id}: { _id: ObjectId }, c
         ...SUBMISSION_PIPELINE,
     ]).toArray()
 
-    if (items.length === 0) throw new UserInputError('Submission not found')
+    if (items.length === 0) throw new GraphQLError('Submission not found', { extensions: { code: 'BAD_USER_INPUT' } })
     const submission = items[0]
     const test = submission.test
 
@@ -37,7 +37,7 @@ const submission = async function (_parent: unknown, {_id}: { _id: ObjectId }, c
     
     // Se non ha accesso tramite token, verifica se è utente autenticato
     if (!hasAccess && !user) {
-        throw new AuthenticationError('Not authenticated')
+        throw new GraphQLError('Not authenticated', { extensions: { code: 'UNAUTHENTICATED' } })
     }
 
     // l'autore della submission può vedere la propria submission
@@ -51,11 +51,11 @@ const submission = async function (_parent: unknown, {_id}: { _id: ObjectId }, c
     hasAccess = hasAccess || !!test?.class?.teachers?.some(t => t._id.equals(context.user?._id));
 
     if (!hasAccess) {
-        throw new ForbiddenError('Not authorized to view this submission');
+        throw new GraphQLError('Not authorized to view this submission', { extensions: { code: 'FORBIDDEN' } });
     }
 
     const note = await note_loader(test.note_id.toString())
-    if (!note) throw new UserInputError('Note not found')
+    if (!note) throw new GraphQLError('Note not found', { extensions: { code: 'BAD_USER_INPUT' } })
 
     const options = {
         note_loader,

@@ -1,5 +1,5 @@
 import { ObjectId } from 'mongodb'
-import { UserInputError, ForbiddenError, AuthenticationError } from 'apollo-server-errors'
+import { GraphQLError } from 'graphql'
 
 import { Context } from '../types'
 import { Test } from '../generated'
@@ -85,7 +85,7 @@ export default async function test (_parent: unknown, {_id}: { _id: ObjectId }, 
     ]).toArray()
 
     if (tests.length === 0) {
-        throw new UserInputError('Test not found')
+        throw new GraphQLError('Test not found', { extensions: { code: 'BAD_USER_INPUT' } })
     }
     const test = tests[0]
 

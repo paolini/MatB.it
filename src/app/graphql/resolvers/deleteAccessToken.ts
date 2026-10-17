@@ -1,5 +1,5 @@
 import { ObjectId } from 'mongodb'
-import { AuthenticationError, ForbiddenError } from 'apollo-server-errors'
+import { GraphQLError } from 'graphql'
 
 import { Context } from '../types'
 import { MutationDeleteAccessTokenArgs } from '../generated'
@@ -7,7 +7,7 @@ import { getAccessTokensCollection, getNotesCollection, getTestsCollection } fro
 
 export default async function deleteAccessToken (_parent: unknown, args: MutationDeleteAccessTokenArgs, context: Context): Promise<boolean> {
     if (!context.user) {
-        throw new AuthenticationError('Must be authenticated')
+        throw new GraphQLError('Must be authenticated', { extensions: { code: 'UNAUTHENTICATED' } })
     }
     
     const { _id } = args
@@ -17,7 +17,7 @@ export default async function deleteAccessToken (_parent: unknown, args: Mutatio
     const token = await tokensCollection.findOne({ _id })
     
     if (!token) {
-        throw new ForbiddenError('Token not found')
+        throw new GraphQLError('Token not found', { extensions: { code: 'FORBIDDEN' } })
     }
     
     // Verifica che l'utente sia l'autore della risorsa associata al token
@@ -31,7 +31,7 @@ export default async function deleteAccessToken (_parent: unknown, args: Mutatio
         const test = await testsCollection.findOne({ _id: token.resource_id, author_id: context.user._id })
         
         if (!test) {
-            throw new ForbiddenError('You can only delete tokens for resources you own')
+            throw new GraphQLError('You can only delete tokens for resources you own', { extensions: { code: 'FORBIDDEN' } })
         }
     }
     

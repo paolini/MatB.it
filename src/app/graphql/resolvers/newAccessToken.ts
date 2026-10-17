@@ -1,5 +1,5 @@
 import { ObjectId } from 'mongodb'
-import { AuthenticationError, ForbiddenError, UserInputError } from 'apollo-server-errors'
+import { GraphQLError } from 'graphql'
 
 import { Context } from '../types'
 import { MutationNewAccessTokenArgs } from '../generated'
@@ -7,14 +7,14 @@ import { getAccessTokensCollection, getNotesCollection, getTestsCollection, gene
 
 export default async function newAccessToken (_parent: unknown, args: MutationNewAccessTokenArgs, context: Context): Promise<MongoAccessToken> {
     if (!context.user) {
-        throw new AuthenticationError('Must be authenticated')
+        throw new GraphQLError('Must be authenticated', { extensions: { code: 'UNAUTHENTICATED' } })
     }
     
     const { resource_id, permission } = args
     
     // Valida il permesso
     if (permission !== 'read' && permission !== 'write') {
-        throw new UserInputError('Permission must be "read" or "write"')
+        throw new GraphQLError('Permission must be "read" or "write"', { extensions: { code: 'BAD_USER_INPUT' } })
     }
     
     // Verifica che l'utente sia l'autore della risorsa
@@ -28,7 +28,7 @@ export default async function newAccessToken (_parent: unknown, args: MutationNe
         const test = await testsCollection.findOne({ _id: resource_id, author_id: context.user._id })
         
         if (!test) {
-            throw new ForbiddenError('You can only create tokens for resources you own')
+            throw new GraphQLError('You can only create tokens for resources you own', { extensions: { code: 'FORBIDDEN' } })
         }
     }
     

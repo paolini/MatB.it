@@ -1,6 +1,6 @@
 {
   "name": "matbit",
-  "version": "1.5.8",
+  "version": "1.5.9",
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
@@ -23,7 +23,6 @@
     "@graphql-tools/load-files": "^7.0.1",
     "@graphql-tools/merge": "^9.1.1",
     "@tailwindcss/postcss": "^4",
-    "apollo-server-errors": "^3.3.1",
     "better-auth": "^1.7.1",
     "bson": "6.10.4",
     "graphql": "^16.11.0",
@@ -45,9 +44,7 @@
     "@eslint/eslintrc": "^3.3.1",
     "@graphql-codegen/cli": "^7.0.0",
     "@graphql-codegen/typescript-resolvers": "^6.0.1",
-    "@types/graphql": "^14.2.3",
     "@types/jest": "^30.0.0",
-    "@types/mongodb": "^4.0.6",
     "@types/node": "^20",
     "@types/nodemailer": "^8.0.1",
     "@types/react": "^19",

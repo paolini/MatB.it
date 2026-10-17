@@ -1,4 +1,4 @@
-import { UserInputError, ForbiddenError, AuthenticationError } from 'apollo-server-errors'
+import { GraphQLError } from 'graphql'
 
 import { Context } from '../types'
 import { getSubmissionsCollection, getDeletedSubmissionsCollection, SUBMISSION_PIPELINE } from '@/lib/models'
@@ -17,10 +17,10 @@ const deleteSubmission = async function (
         ...SUBMISSION_PIPELINE,
     ]).toArray()
     
-    if (items.length == 0) throw new UserInputError('Item not found')
+    if (items.length == 0) throw new GraphQLError('Item not found', { extensions: { code: 'BAD_USER_INPUT' } })
     const item = items[0]
-    if (!context.user) throw new AuthenticationError('Not authenticated')
-    if (!item.test.author_id.equals(context.user._id)) throw new ForbiddenError('Not authorized')
+    if (!context.user) throw new GraphQLError('Not authenticated', { extensions: { code: 'UNAUTHENTICATED' } })
+    if (!item.test.author_id.equals(context.user._id)) throw new GraphQLError('Not authorized', { extensions: { code: 'FORBIDDEN' } })
     
     // Sposta la submission nella collection deletedSubmissions
     const deletedItem = {
