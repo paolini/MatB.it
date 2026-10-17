@@ -30,6 +30,47 @@ beforeEach(async () => {
 });
 
 describe('Notes GraphQL', () => {
+  describe('reference modal class inheritance (issue #96)', () => {
+    function modalMutation() {
+      const source = fs.readFileSync(path.resolve(process.cwd(), 'src/components/NoteReferenceModal.tsx'), 'utf8');
+      const match = source.match(/const NewNoteMutation = gql`([\s\S]*?)`/);
+      if (!match) throw new Error('NewNoteMutation not found in NoteReferenceModal');
+      return match[1];
+    }
+
+    it.each([false, true])('keeps the editor class when creating a note with private=%s', async (isPrivate) => {
+      const result = await server.executeOperation({
+        query: modalMutation(),
+        variables: {
+          title: 'Nota referenziata della classe', delta: { ops: [] },
+          private: isPrivate, variant: 'lemma', class_id: classId.toHexString(),
+        },
+      }, { contextValue: { db, user: { _id: teacherId } } });
+      if (!('singleResult' in result.body)) throw new Error('Expected single result');
+      expect(result.body.singleResult.errors).toBeUndefined();
+      const id = result.body.singleResult.data?.newNote as string;
+      const created = await db.collection('notes').findOne({ _id: new ObjectId(id) });
+      expect(created?.class_id?.toHexString()).toBe(classId.toHexString());
+      expect(created?.private).toBe(isPrivate);
+      expect(created?.author_id.toHexString()).toBe(teacherId.toHexString());
+    });
+
+    it('rejects creation in a class by a student instead of creating a note outside the class', async () => {
+      const countBefore = await db.collection('notes').countDocuments();
+      const versionsBefore = await db.collection('note_versions').countDocuments();
+      const result = await server.executeOperation({
+        query: modalMutation(),
+        variables: {
+          title: 'Nota non consentita', private: false, variant: 'lemma', class_id: classId.toHexString(),
+        },
+      }, { contextValue: { db, user: { _id: studentId } } });
+      if (!('singleResult' in result.body)) throw new Error('Expected single result');
+      expect(result.body.singleResult.errors?.[0].message).toBe('Solo il proprietario o un insegnante possono creare note in questa classe');
+      expect(await db.collection('notes').countDocuments()).toBe(countBefore);
+      expect(await db.collection('note_versions').countDocuments()).toBe(versionsBefore);
+    });
+  });
+
   it('creates a note with the reference modal mutation and returns its scalar ID (issue #93)', async () => {
     const source = fs.readFileSync(path.resolve(process.cwd(), 'src/components/NoteReferenceModal.tsx'), 'utf8');
     const match = source.match(/const NewNoteMutation = gql`([\s\S]*?)`/);
