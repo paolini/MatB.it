@@ -4,6 +4,8 @@ import { resolvers } from '../resolvers';
 import { ObjectId } from 'mongodb';
 import { setupTestDb, seedTestData, userId, classId, teacherId, studentId } from './testUtils';
 import { mockNotes } from './mocks';
+import fs from 'node:fs';
+import path from 'node:path';
 
 let mongoServer: any;
 let client: any;
@@ -28,6 +30,29 @@ beforeEach(async () => {
 });
 
 describe('Notes GraphQL', () => {
+  it('creates a note with the reference modal mutation and returns its scalar ID (issue #93)', async () => {
+    const source = fs.readFileSync(path.resolve(process.cwd(), 'src/components/NoteReferenceModal.tsx'), 'utf8');
+    const match = source.match(/const NewNoteMutation = gql`([\s\S]*?)`/);
+    if (!match) throw new Error('NewNoteMutation not found in NoteReferenceModal');
+    const countBefore = await db.collection('notes').countDocuments();
+    const delta = { ops: [] };
+    const result = await server.executeOperation({
+      query: match[1],
+      variables: { title: 'Nuova nota referenziata', delta, private: true, variant: 'lemma' },
+    }, { contextValue: { db, user: { _id: userId } } });
+    if (!('singleResult' in result.body)) throw new Error('Expected single result');
+    expect(result.body.singleResult.errors).toBeUndefined();
+    const id = result.body.singleResult.data?.newNote;
+    expect(typeof id).toBe('string');
+    expect(ObjectId.isValid(id as string)).toBe(true);
+    expect(await db.collection('notes').countDocuments()).toBe(countBefore + 1);
+    const created = await db.collection('notes').findOne({ _id: new ObjectId(id as string) });
+    expect(created).toMatchObject({
+      title: 'Nuova nota referenziata', delta, private: true, variant: 'lemma', author_id: userId,
+    });
+    expect(await db.collection('note_versions').findOne({ _id: created.note_version_id })).not.toBeNull();
+  });
+
   describe('noteBacklinks', () => {
     const targetId = new ObjectId();
     const reference = { insert: { 'note-ref': { note_id: targetId.toHexString() } } };

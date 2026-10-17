@@ -10,14 +10,7 @@ type DeltaType = unknown;
 
 const NewNoteMutation = gql`
 mutation NewNote($title: String!, $delta: JSON, $private: Boolean, $variant: String) {
-  newNote(title: $title, delta: $delta, private: $private, variant: $variant) {
-    _id
-    title
-    delta
-    variant
-    private
-    author { _id name }
-  }
+  newNote(title: $title, delta: $delta, private: $private, variant: $variant)
 }`
 
 const NotesQuery = gql`
@@ -68,7 +61,8 @@ export default function NoteReferenceModal({ isOpen, onClose, onNoteSelected, in
     }
   }, [isOpen, initialVariant])
   
-  const [createNote, { error: createError }] = useMutation(NewNoteMutation)
+  const [creationError, setCreationError] = useState<string | null>(null)
+  const [createNote, { loading: creatingNote }] = useMutation<{ newNote: string }>(NewNoteMutation)
   const [getNotes, { data: notesData, loading: loadingNotes, error: notesError }] = useLazyQuery<{notes: Note[]}>(NotesQuery)
 
   useEffect(() => {
@@ -78,16 +72,14 @@ export default function NoteReferenceModal({ isOpen, onClose, onNoteSelected, in
   }, [isOpen, class_id, getNotes])
 
   const handleCreateNote = async () => {
-    console.log('🔄 handleCreateNote: Inizio creazione nota')
-    console.log('📝 handleCreateNote: Dati nota:', { title: title.trim(), variant, isPrivate, delta })
-    
+    if (creatingNote) return
+    setCreationError(null)
     if (!title.trim()) {
-      console.log('❌ handleCreateNote: Titolo mancante')
-      throw new Error('Il titolo è obbligatorio')
+      setCreationError('Il titolo è obbligatorio')
+      return
     }
 
     try {
-      console.log('🚀 handleCreateNote: Chiamata GraphQL createNote...')
       const result = await createNote({
         variables: {
           title: title.trim(),
@@ -96,26 +88,11 @@ export default function NoteReferenceModal({ isOpen, onClose, onNoteSelected, in
           variant
         }
       })
-
-      console.log('✅ handleCreateNote: Risposta GraphQL:', result)
-
-      if (result.data?.newNote) {
-        const noteId = result.data.newNote._id
-        console.log('🎯 handleCreateNote: ID nota creata:', noteId)
-        console.log('📞 handleCreateNote: Chiamata onNoteSelected con ID:', noteId)
-        
-        onNoteSelected(noteId)
-        // Non chiamiamo handleClose() qui - sarà gestito dal componente parent
-        
-        console.log('✨ handleCreateNote: Operazione completata, ritorno ID:', noteId)
-        return noteId
-      } else {
-        console.log('❌ handleCreateNote: Nessun dato nella risposta')
-        throw new Error('Errore nella creazione della nota')
-      }
+      const noteId = result.data?.newNote
+      if (!noteId) throw new Error('Errore nella creazione della nota')
+      onNoteSelected(noteId)
     } catch (err) {
-      console.error('💥 handleCreateNote: Errore:', err)
-      throw err
+      setCreationError(err instanceof Error ? err.message : 'Errore nella creazione della nota')
     }
   }
 
@@ -130,6 +107,7 @@ export default function NoteReferenceModal({ isOpen, onClose, onNoteSelected, in
 
   const handleClose = () => {
     console.log('🚪 handleClose: Chiusura modal e reset stato')
+    setCreationError(null)
     setTitle('')
     setVariant(initialVariant)
     setIsPrivate(false)
@@ -271,9 +249,10 @@ export default function NoteReferenceModal({ isOpen, onClose, onNoteSelected, in
               <div className="flex gap-3">
                 <button
                   onClick={handleCreateNote}
+                  disabled={creatingNote}
                   className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
                 >
-                  Crea e Seleziona
+                  {creatingNote ? 'Creazione...' : 'Crea e Seleziona'}
                 </button>
                 <button
                   onClick={handleClose}
@@ -283,9 +262,9 @@ export default function NoteReferenceModal({ isOpen, onClose, onNoteSelected, in
                 </button>
               </div>
               
-              {createError && (
+              {creationError && (
                 <div className="text-red-600 text-sm mt-4">
-                  Errore: {createError.message}
+                  Errore: {creationError}
                 </div>
               )}
             </div>
