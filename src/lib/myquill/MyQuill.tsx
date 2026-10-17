@@ -4,7 +4,8 @@ import { QuillEditor, Quill, Range } from './myquill.js'
 import Delta from 'quill-delta-es'
 import 'katex/dist/katex.min.css'
 import './delta-variants.css'
-import { useRef, useEffect, useState, useCallback, MutableRefObject } from 'react'
+import { useRef, useEffect, useState, useCallback, useMemo, MutableRefObject } from 'react'
+import { getNoteReferenceRange, noteReferenceToolbarHandlers } from './noteReferenceSelection'
 import NoteReferenceModal from '@/components/NoteReferenceModal'
 import { Error as ErrorElement, ErrorType, BUTTON_CLASS, CANCEL_BUTTON_CLASS, DELETE_BUTTON_CLASS, SAVE_BUTTON_CLASS } from '@/components/utils'
 import { ObjectId } from 'bson'
@@ -76,8 +77,6 @@ const EDITOR_CONFIG = {
 
 const READONLY_CONFIG = {} as const
 
-const ENVIRONMENT_SELECT_DELAY = 100
-
 // ============================================================================
 // Hooks
 // ============================================================================
@@ -112,15 +111,19 @@ function useNoteReference(
     const [prefilledVariant, setPrefilledVariant] = useState('default')
 
     const openModal = useCallback((variant: string = 'default') => {
-        const currentRange = quillRef.current?.getSelection() ?? null
-        savedRangeRef.current = currentRange
+        savedRangeRef.current = getNoteReferenceRange(quillRef.current, savedRangeRef.current)
         setPrefilledVariant(variant)
         setShowModal(true)
     }, [quillRef, savedRangeRef])
 
     const closeModal = useCallback(() => {
         setShowModal(false)
-    }, [])
+        if (savedRangeRef.current) {
+            const { index, length } = savedRangeRef.current
+            quillRef.current?.setSelection(index, length)
+        }
+        savedRangeRef.current = null
+    }, [quillRef, savedRangeRef])
 
     const insertNoteReference = useCallback((noteId: string) => {
         setShowModal(false)
@@ -169,20 +172,10 @@ function setupFormulaMatcher(quill: QuillInstance) {
     })
 }
 
-function setupToolbarHandlers(
-    quill: QuillInstance,
-    savedRangeRef: MutableRefObject<Range | null>,
-    openNoteModal: (variant?: string) => void
-) {
+function setupToolbarHandlers(quill: QuillInstance) {
     const toolbar = quill.getModule('toolbar') as { 
         addHandler: (name: string, handler: () => void) => void 
-        container?: HTMLElement 
     }
-
-    // Note reference button handler
-    toolbar.addHandler('note-ref', () => {
-        openNoteModal('default')
-    })
 
     // Multiple choice button handler
     toolbar.addHandler('mc-choice', () => {
@@ -191,27 +184,6 @@ function setupToolbarHandlers(
             quill.formatLine(range.index, range.length, { list: 'choice' })
         }
     })
-
-    // Environment select handler
-    setTimeout(() => {
-        const selectElement = toolbar.container?.querySelector('select.ql-environment') as HTMLSelectElement | null
-
-        if (selectElement) {
-            selectElement.addEventListener('mousedown', () => {
-                savedRangeRef.current = quill.getSelection()
-            })
-
-            selectElement.addEventListener('change', (event) => {
-                const target = event.target as HTMLSelectElement
-                const value = target.value
-
-                if (value) {
-                    openNoteModal(value)
-                    target.value = ''
-                }
-            })
-        }
-    }, ENVIRONMENT_SELECT_DELAY)
 }
 
 // ============================================================================
@@ -372,20 +344,33 @@ export default function MyQuill({
         insertNoteReference,
     } = useNoteReference(quillRef, savedRangeRef)
 
+    // Register before Quill builds the toolbar: an unknown environment format
+    // otherwise gets no handler (and no focus/selection restoration).
+    const editorConfig = useMemo(() => ({
+        ...EDITOR_CONFIG,
+        modules: {
+            ...EDITOR_CONFIG.modules,
+            toolbar: {
+                container: EDITOR_CONFIG.modules.toolbar,
+                handlers: noteReferenceToolbarHandlers(openModal),
+            },
+        },
+    }), [openModal])
+
     const handleQuillReady = useCallback((quill: QuillInstance) => {
         quillRef.current = quill
         setupFormulaMatcher(quill)
 
         if (!readOnly) {
-            setupToolbarHandlers(quill, savedRangeRef, openModal)
+            setupToolbarHandlers(quill)
         }
-    }, [readOnly, openModal])
+    }, [readOnly])
 
     return (
         <div>
             <QuillEditor
                 readOnly={readOnly}
-                config={readOnly ? READONLY_CONFIG : EDITOR_CONFIG}
+                config={readOnly ? READONLY_CONFIG : editorConfig}
                 defaultValue={content || new Delta()}
                 onReady={handleQuillReady}
             />
