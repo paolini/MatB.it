@@ -184,7 +184,6 @@ function NoteView({note, profile, backlinks}: {
                 <NoteContent note={note} />
             </div>
         </div>
-        <TestList tests={note.tests} />
         <NoteFooter note={note} />
         <div className="flex gap-2 flex-wrap">
             <button 
@@ -257,6 +256,7 @@ function NoteView({note, profile, backlinks}: {
                 <NoteVersionTree note_version_id={note.note_version_id.toString()} />
             </div>
         }
+        <TestList tests={note.tests} />
         {backlinks.length > 0 && (
             <section className="mt-6 border-t border-gray-200 pt-4" aria-labelledby="note-backlinks-title">
                 <h2 id="note-backlinks-title" className="text-lg font-semibold">Note che fanno riferimento a questa</h2>
