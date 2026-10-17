@@ -448,9 +448,10 @@ export class NoteRefBlot extends EmbedBlot {
     
     if (!noteId) return null;
     
-    const result = { "note-ref": { note_id: noteId } };
+    // Quill's clipboard matcher adds the blot name around this payload.
+    const result = { note_id: noteId };
     if (customTitle) {
-      result["note-ref"].title = customTitle;
+      result.title = customTitle;
     }
     
     return result;
@@ -458,7 +459,7 @@ export class NoteRefBlot extends EmbedBlot {
 
   // Metodo di istanza per ottenere il valore del blot
   value() {
-    return NoteRefBlot.value(this.domNode);
+    return { "note-ref": NoteRefBlot.value(this.domNode) };
   }
 
   // Gestisce i click sui note references
