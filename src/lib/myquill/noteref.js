@@ -284,7 +284,7 @@ export class NoteRefBlot extends EmbedBlot {
             text-decoration: underline;
             padding: 4px 0;
             word-break: break-word;
-          ">${note.title}</div>
+          "></div>
         </div>
 
         <div id="custom-title-container" style="margin-bottom: 16px;">
@@ -302,7 +302,7 @@ export class NoteRefBlot extends EmbedBlot {
               font-size: 14px;
               box-sizing: border-box;
               margin-bottom: 8px;
-            " value="${originalCustomTitle || ''}">
+            ">
           </div>
         </div>
         
@@ -346,6 +346,10 @@ export class NoteRefBlot extends EmbedBlot {
     const customTitleInput = panel.querySelector('#custom-title-input');
     const saveBtn = panel.querySelector('#save-btn');
     const closeBtn = panel.querySelector('#close-btn');
+
+    // Titles are user content: keep them out of the HTML template.
+    originalTitleLink.textContent = note.title || '';
+    customTitleInput.value = originalCustomTitle || '';
     
     // Funzione per aggiornare la visualizzazione in base allo stato
     const updateDisplay = () => {
