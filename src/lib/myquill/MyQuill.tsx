@@ -81,21 +81,8 @@ const READONLY_CONFIG = {} as const
 // Hooks
 // ============================================================================
 
-function useKatex() {
+function useFormulaEditorCleanup() {
     useEffect(() => {
-        const loadKaTeX = async () => {
-            if (typeof window !== 'undefined' && !window.katex) {
-                try {
-                    const katex = await import('katex')
-                    ;(window as unknown as { katex: unknown }).katex = katex.default
-                } catch (error) {
-                    console.error('Failed to load KaTeX:', error)
-                }
-            }
-        }
-
-        loadKaTeX()
-
         return () => {
             const formulaEditor = document.getElementById('matbit-formula-editor')
             formulaEditor?.remove()
@@ -334,7 +321,7 @@ export default function MyQuill({
     const quillRef = useRef<QuillInstance | null>(null)
     const savedRangeRef = useRef<Range | null>(null)
 
-    useKatex()
+    useFormulaEditorCleanup()
 
     const {
         showModal,

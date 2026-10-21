@@ -1,5 +1,6 @@
 "use client"
 import React, { createContext, useContext as useReactContext, useState } from 'react'
+import katex from 'katex'
 import 'katex/dist/katex.min.css'
 
 import { NoteEmbedAsync, DocumentEmbed } from './NoteEmbed'
@@ -213,7 +214,7 @@ function NodeElement({node,ordinal}:{node: Node,ordinal:Ordinal}) {
 
 function FormulaElement({formula}:{formula:Formula}) {
     try {
-    const html = window.katex.renderToString(formula.value, {
+    const html = katex.renderToString(formula.value, {
       throwOnError: false,
       errorColor: '#f00',
       displayMode: formula.displaystyle,

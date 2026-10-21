@@ -1,5 +1,6 @@
 import { TextBlot, EmbedBlot } from 'parchment';
 import MyQuill from 'quill-next';
+import katex from 'katex';
 
 export { Delta } from 'quill-next'
 
@@ -103,23 +104,15 @@ export class MyFormula extends Embed {
     const value = node.getAttribute('data-value');
     const displaystyle = node.classList.contains('tex-displaystyle');
 
-
-    // Verifica che KaTeX sia disponibile
-    if (typeof window !== 'undefined' && window.katex && window.katex.render) {
-      try {
-        window.katex.render(value, node, {
-          throwOnError: false,
-          errorColor: '#f00',
-          displayMode: displaystyle,
-        });
-      } catch (error) {
-        console.error('Error rendering formula:', error);
-        node.textContent = `[Formula: ${value}]`;
-      }
-    } else {
-      // Fallback se KaTeX non è disponibile
+    try {
+      katex.render(value, node, {
+        throwOnError: false,
+        errorColor: '#f00',
+        displayMode: displaystyle,
+      });
+    } catch (error) {
+      console.error('Error rendering formula:', error);
       node.textContent = `[Formula: ${value}]`;
-      console.warn('KaTeX not available, using fallback rendering');
     }
   }
 
