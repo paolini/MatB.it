@@ -175,7 +175,6 @@ export const auth = betterAuth({
               tokenUrl: process.env.WSO2_TOKEN_URL ?? "https://iam.unipi.it/oauth2/token",
               userInfoUrl: process.env.WSO2_USERINFO_URL ?? "https://iam.unipi.it/oauth2/userinfo",
               endSessionEndpoint: process.env.WSO2_LOGOUT_URL ?? "https://iam.unipi.it/oidc/logout",
-              accountIssuer: "https://iam.unipi.it",
               scopes: ["openid", "email", "profile"],
               getUserInfo: async ({ accessToken }) => accessToken ? getUnipiUserInfo(accessToken) : null,
             },
