@@ -23,7 +23,7 @@
     "@graphql-tools/load-files": "^7.0.1",
     "@graphql-tools/merge": "^9.2.8",
     "@tailwindcss/postcss": "^4",
-    "better-auth": "^1.7.1",
+    "better-auth": "^1.7.15",
     "bson": "6.10.4",
     "graphql": "^16.11.0",
     "katex": "^0.18.2",
