@@ -9,11 +9,12 @@ const CREATE_CLASS = gql`
 `
 
 const UPDATE_CLASS = gql`
-  mutation UpdateClass($id: ObjectId!, $name: String, $description: String, $active: Boolean) {
-    updateClass(_id: $id, name: $name, description: $description, active: $active) {
+  mutation UpdateClass($id: ObjectId!, $name: String, $description: String, $academicYear: String, $active: Boolean) {
+    updateClass(_id: $id, name: $name, description: $description, academic_year: $academicYear, active: $active) {
       _id
       name
       description
+      academic_year
       active
     }
   }
@@ -124,8 +125,9 @@ export function ClassForm({ initialData, isEditing = false }: ClassFormProps) {
         await updateClass({
           variables: {
             id: initialData._id,
-            name: formData.name.trim() || undefined,
-            description: formData.description.trim() || undefined,
+            name: formData.name.trim(),
+            description: formData.description.trim(),
+            academicYear: formData.academic_year.trim(),
             active: formData.active
           }
         })
@@ -199,28 +201,24 @@ export function ClassForm({ initialData, isEditing = false }: ClassFormProps) {
           </p>
         </div>
 
-        {!isEditing && (
-          <>
-            {/* Anno Accademico */}
-            <div>
-              <label htmlFor="academic_year" className="block text-sm font-medium text-gray-700 mb-1">
-                Anno Accademico
-              </label>
-              <input
-                type="text"
-                id="academic_year"
-                value={formData.academic_year}
-                onChange={(e) => handleInputChange('academic_year', e.target.value)}
-                placeholder="es. 2023/2024"
-                className={`w-full p-3 border rounded-md ${
-                  errors.academic_year ? 'border-red-300' : 'border-gray-300'
-                } focus:ring-blue-500 focus:border-blue-500`}
-                disabled={isSubmitting}
-              />
-              {errors.academic_year && <p className="mt-1 text-sm text-red-600">{errors.academic_year}</p>}
-            </div>
-          </>
-        )}
+        {/* Anno Accademico */}
+        <div>
+          <label htmlFor="academic_year" className="block text-sm font-medium text-gray-700 mb-1">
+            Anno Accademico
+          </label>
+          <input
+            type="text"
+            id="academic_year"
+            value={formData.academic_year}
+            onChange={(e) => handleInputChange('academic_year', e.target.value)}
+            placeholder="es. 2023/2024"
+            className={`w-full p-3 border rounded-md ${
+              errors.academic_year ? 'border-red-300' : 'border-gray-300'
+            } focus:ring-blue-500 focus:border-blue-500`}
+            disabled={isSubmitting}
+          />
+          {errors.academic_year && <p className="mt-1 text-sm text-red-600">{errors.academic_year}</p>}
+        </div>
 
         {/* Attivo (solo in modalità editing) */}
         {isEditing && (

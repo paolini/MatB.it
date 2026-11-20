@@ -232,6 +232,7 @@ export type MutationReopenAllSubmissionsArgs = {
 
 export type MutationUpdateClassArgs = {
   _id: Scalars['ObjectId']['input'];
+  academic_year: InputMaybe<Scalars['String']['input']>;
   active: InputMaybe<Scalars['Boolean']['input']>;
   description: InputMaybe<Scalars['String']['input']>;
   name: InputMaybe<Scalars['String']['input']>;

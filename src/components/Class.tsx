@@ -187,6 +187,18 @@ export function Class({ classId, currentUserId }: ClassProps) {
       <div className="mb-6">
         <div className="flex items-center gap-3 mb-2">
           <h1 className="text-3xl font-bold">{classData.name}</h1>
+          {isOwner && (
+            <Link
+              href={`/class/${classId}/edit`}
+              title="Modifica dati classe"
+              aria-label="Modifica dati classe"
+              className="p-1 rounded text-gray-400 hover:text-blue-600 hover:bg-gray-100"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5">
+                <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+              </svg>
+            </Link>
+          )}
           {!classData.active && (
             <Badge variant="secondary">Archiviata</Badge>
           )}
@@ -199,9 +211,6 @@ export function Class({ classId, currentUserId }: ClassProps) {
         <div className="flex gap-4 text-sm text-gray-500">
           {classData.academic_year && (
             <span>Anno Accademico: {classData.academic_year}</span>
-          )}
-          {classData.description && (
-            <span>{classData.description}</span>
           )}
         </div>
       </div>
@@ -279,7 +288,7 @@ export function Class({ classId, currentUserId }: ClassProps) {
           <ClassStudents students={classData.students} canManage={canManage} handleRemoveMember={handleRemoveMember} />
         )}
         {activeTab === 'manage' && canManage && (
-          <div className="border-t pt-6 space-y-8">
+          <div className="pt-2 space-y-8">
             <div>
               <h3 className="text-lg font-semibold mb-3">Aggiungi Membri</h3>
               <div className="flex gap-4 items-end">
