@@ -8,11 +8,12 @@ export default async function updateClassResolver(
         _id: ObjectId
         name?: string
         description?: string
+        academic_year?: string
         active?: boolean
     }, 
     context: Context
 ) {
-    const { _id, name, description, active } = args
+    const { _id, name, description, academic_year, active } = args
     const { user, db } = context
 
     if (!user) {
@@ -34,6 +35,7 @@ export default async function updateClassResolver(
 
     // Prepara l'update
     const updateFields: any = {}
+    const unsetFields: Record<string, ''> = {}
 
     if (name !== undefined) {
         if (!name || name.trim().length === 0) {
@@ -60,22 +62,37 @@ export default async function updateClassResolver(
         updateFields.name = name.trim()
     }
 
-    if (description !== undefined) {
-        updateFields.description = description?.trim() || undefined
+    if (description !== undefined && description !== null) {
+        if (description.trim().length > 500) {
+            throw new Error('La descrizione non può superare i 500 caratteri')
+        }
+        if (description.trim()) updateFields.description = description.trim()
+        else unsetFields.description = ''
     }
 
-    if (active !== undefined) {
+    if (academic_year !== undefined && academic_year !== null) {
+        if (academic_year.trim().length > 20) {
+            throw new Error('L\'anno accademico non può superare i 20 caratteri')
+        }
+        if (academic_year.trim()) updateFields.academic_year = academic_year.trim()
+        else unsetFields.academic_year = ''
+    }
+
+    if (active !== undefined && active !== null) {
         updateFields.active = active
     }
 
-    if (Object.keys(updateFields).length === 0) {
+    if (Object.keys(updateFields).length === 0 && Object.keys(unsetFields).length === 0) {
         throw new Error('Nessun campo da aggiornare')
     }
 
     // Aggiorna la classe
+    const update: any = {}
+    if (Object.keys(updateFields).length > 0) update.$set = updateFields
+    if (Object.keys(unsetFields).length > 0) update.$unset = unsetFields
     await getClassesCollection(db).updateOne(
         { _id: new ObjectId(_id) },
-        { $set: updateFields }
+        update
     )
 
     // Restituisci la classe aggiornata con la pipeline

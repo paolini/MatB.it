@@ -178,7 +178,7 @@ type Mutation {
   deleteAccessToken(_id: ObjectId!): Boolean
 
   newClass(name: String!, description: String, academic_year: String): ObjectId!
-  updateClass(_id: ObjectId!, name: String, description: String, active: Boolean): Class
+  updateClass(_id: ObjectId!, name: String, description: String, academic_year: String, active: Boolean): Class
   deleteClass(_id: ObjectId!): Boolean
   
   addTeacherToClass(class_id: ObjectId!, user_id: ObjectId!): Boolean
