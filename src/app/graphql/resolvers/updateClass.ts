@@ -44,21 +44,6 @@ export default async function updateClassResolver(
         if (name.trim().length > 100) {
             throw new Error('Il nome della classe non può superare i 100 caratteri')
         }
-        
-        // Verifica che non esista già un'altra classe con lo stesso nome
-        if (name.trim() !== existingClass.name) {
-            const duplicateClass = await getClassesCollection(db).findOne({
-                owner_id: new ObjectId(user._id),
-                name: name.trim(),
-                active: true,
-                _id: { $ne: new ObjectId(_id) }
-            })
-
-            if (duplicateClass) {
-                throw new Error('Hai già una classe attiva con questo nome')
-            }
-        }
-
         updateFields.name = name.trim()
     }
 
